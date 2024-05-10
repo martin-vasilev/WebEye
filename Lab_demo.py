@@ -7,16 +7,18 @@ Created on Fri May 10 12:58:33 2024
 
 import pylink
 import os
-import platform
-import random
+#import platform
+#import random
 import time
 import sys
 from psychopy import visual, core, event, monitors, gui
 from EyeLinkCoreGraphicsPsychoPy import EyeLinkCoreGraphicsPsychoPy
 from string import ascii_letters, digits
+from selenium import webdriver
 
 
 # SETTINGS:
+study_url= 'https://www.labvanced.com/player.html?id=18546'
 dummy_mode= True # run Eyelink in dummy mode    
 full_screen= False # open in full screen mode  
 monitor_physical_width= 53.0 # width in cm
@@ -26,7 +28,16 @@ background_color = (1, 1, 1) # white
 
 
 #################################
-###   1) SET UP EDF FILENAME:   #
+###   1) OPEN ONLINE STUDY:     #
+#################################
+driver = webdriver.Edge() # using Edge as Chrome doesn't work with the website on my laptop..
+driver.maximize_window() # go full screen
+driver.get(study_url) # open url window
+
+
+
+#################################
+###   2) SET UP EDF FILENAME:   #
 #################################
     
 edf_fname = 'TEST'
@@ -86,7 +97,7 @@ if not os.path.exists(session_folder):
     
     
 #######################################
-###   2) SET UP TRACKER CONNECTION:   #
+###   3) SET UP TRACKER CONNECTION:   #
 #######################################
 
 # Connect to the EyeLink Host PC
@@ -128,7 +139,7 @@ el_tracker.sendCommand("add_file_preamble_text '%s'" % preamble_text)
 
 
 #######################################
-###   3) CONFIGURE TRACKER:           #
+###   4) CONFIGURE TRACKER:           #
 #######################################
 
 # Put the tracker in offline mode before we change tracking parameters
@@ -174,7 +185,7 @@ el_tracker.sendCommand("button_function 5 'accept_target_fixation'")
 
 
 #######################################
-###   4) STUDY AND WINDOW SET-UP:     #
+###   5) STUDY AND WINDOW SET-UP:     #
 #######################################
 
 # Set up a graphics environment for calibration
