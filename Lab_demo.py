@@ -21,7 +21,7 @@ dummy_mode= True # run Eyelink in dummy mode
 full_screen= False # open in full screen mode  
 monitor_physical_width= 53.0 # width in cm
 monitor_physical_distance= 70 # distance in cm
-foreground_color = (-1, -1, -1) # black; in PsychoPy, (-1, -1, -1)=black, (1, 1, 1)=white, (0, 0, 0)=mid-gray
+foreground_color = (-1, -1, -1) # black
 background_color = (1, 1, 1) # white  
 
 
@@ -206,6 +206,20 @@ print(genv)  # print out the version number of the CoreGraphics library
 
 # Set background and foreground colors for the calibration target
 # in PsychoPy, (-1, -1, -1)=black, (1, 1, 1)=white, (0, 0, 0)=mid-gray
-
 genv.setCalibrationColors(foreground_color, background_color)
+
+# Set up the calibration target:
+genv.setTargetType('circle')
+
+# Configure the size of the calibration target (in pixels)
+# this option applies only to "circle" and "spiral" targets
+genv.setTargetSize(24)
+
+# Beeps to play during calibration, validation and drift correction:
+genv.setCalibrationSounds('', '', '')
+
+# Request Pylink to use the PsychoPy window we opened above for calibration
+pylink.openGraphicsEx(genv)
+
+
 
