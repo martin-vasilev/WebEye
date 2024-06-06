@@ -1,0 +1,15 @@
+Rec_Session_Id,Trial_Nr,Trial_Id,Block_Name,Block_Nr,Task_Name,Task_Nr,accuracy,Condition_Id,Frequency,gaze_box,gaze_box_object,trial_end,trial_start
+1083833,1,1,block_1,1,wait,1,"",1,"","","","",""
+1083833,1,18,block_1,1,sentence,3,"",2,low,"","",1717674243545,1717674239477
+1083833,2,13,block_1,1,sentence,3,"",2,low,"","",1717674250172,1717674246110
+1083833,3,7,block_1,1,sentence,3,"",1,high,"","",1717674258055,1717674253726
+1083833,4,6,block_1,1,sentence,3,"",1,high,"","",1717674266203,1717674261326
+1083833,5,11,block_1,1,sentence,3,"",2,low,"","",1717674273701,1717674268692
+1083833,6,8,block_1,1,sentence,3,"",1,high,"","",1717674302162,1717674296142
+1083833,7,19,block_1,1,sentence,3,"",2,low,"","",1717674308884,1717674304476
+1083833,8,12,block_1,1,sentence,3,"",2,low,"","",1717674316190,1717674312307
+1083833,9,5,block_1,1,sentence,3,"",1,high,"","",1717674329014,1717674322661
+1083833,10,2,block_1,1,sentence,3,"",1,high,"","",1717674336762,1717674333056
+1083833,11,20,block_1,1,sentence,3,"",2,low,"","","",""
+1083833,12,1,block_1,1,sentence,3,"",1,high,"","","",""
+1083833,13,4,block_1,1,sentence,3,"",1,high,"","","",""

@@ -6,33 +6,94 @@ Created on Fri May 10 12:58:33 2024
 """
 
 import pylink
+import datetime
 import os
 #import platform
 #import random
 import time
 import sys
-from psychopy import visual, core, event, monitors, gui
+from psychopy import visual, core, monitors, gui, event
 from EyeLinkCoreGraphicsPsychoPy import EyeLinkCoreGraphicsPsychoPy
 from string import ascii_letters, digits
 from selenium import webdriver
 
 
+def el_window_routine(el_tracker, EyeLinkCoreGraphicsPsychoPy,
+                      monitor_physical_width= 53.0, 
+                      monitor_physical_distance=53.0, 
+                      foreground_color= (-1, -1, -1),
+                      background_color= (1, 1, 1),
+                      full_screen= True):
+
+    # opens up a psychopy window and adds eyelink routine    
+        
+    import pylink
+    from psychopy import visual, monitors
+    
+    
+    # Set up a graphics environment for calibration
+    #
+    # Open a window, be sure to specify monitor parameters
+    mon = monitors.Monitor('myMonitor', width=monitor_physical_width, distance= monitor_physical_distance)
+    win = visual.Window(fullscr= full_screen,
+                        monitor= mon,
+                        winType='pyglet',
+                        units='pix')
+    
+    # get the native screen resolution used by PsychoPy
+    scn_width, scn_height = win.size
+    
+    # Pass the display pixel coordinates (left, top, right, bottom) to the tracker
+    # see the EyeLink Installation Guide, "Customizing Screen Settings"
+    el_coords = "screen_pixel_coords = 0 0 %d %d" % (scn_width - 1, scn_height - 1)
+    el_tracker.sendCommand(el_coords)
+    
+    # Write a DISPLAY_COORDS message to the EDF file
+    # Data Viewer needs this piece of info for proper visualization, see Data
+    # Viewer User Manual, "Protocol for EyeLink Data to Viewer Integration"
+    dv_coords = "DISPLAY_COORDS  0 0 %d %d" % (scn_width - 1, scn_height - 1)
+    el_tracker.sendMessage(dv_coords)
+    
+    # Configure a graphics environment (genv) for tracker calibration
+    genv = EyeLinkCoreGraphicsPsychoPy(el_tracker, win)
+    print(genv)  # print out the version number of the CoreGraphics library
+    
+    # Set background and foreground colors for the calibration target
+    # in PsychoPy, (-1, -1, -1)=black, (1, 1, 1)=white, (0, 0, 0)=mid-gray
+    genv.setCalibrationColors(foreground_color, background_color)
+    
+    # Set up the calibration target:
+    genv.setTargetType('circle')
+    
+    # Configure the size of the calibration target (in pixels)
+    # this option applies only to "circle" and "spiral" targets
+    genv.setTargetSize(24)
+    
+    # Beeps to play during calibration, validation and drift correction:
+    genv.setCalibrationSounds('', '', '')
+    
+    # Request Pylink to use the PsychoPy window we opened above for calibration
+    pylink.openGraphicsEx(genv)
+    
+    return win
+
+
 # SETTINGS:
-study_url= 'https://www.labvanced.com/player.html?id=18546'
-dummy_mode= True # run Eyelink in dummy mode    
-full_screen= False # open in full screen mode  
+dummy_mode= False # run Eyelink in dummy mode    
+full_screen= True # open in full screen mode  
 monitor_physical_width= 53.0 # width in cm
 monitor_physical_distance= 70 # distance in cm
 foreground_color = (-1, -1, -1) # black
 background_color = (1, 1, 1) # white  
 
 
+
 #################################
 ###   1) OPEN ONLINE STUDY:     #
 #################################
-driver = webdriver.Edge() # using Edge as Chrome doesn't work with the website on my laptop..
-driver.maximize_window() # go full screen
-driver.get(study_url) # open url window
+#driver = webdriver.Chrome() # using Edge as Chrome doesn't work with the website on my laptop..
+#driver.maximize_window() # go full screen
+#driver.get(study_url) # open url window
 
 
 
@@ -191,9 +252,11 @@ el_tracker.sendCommand("button_function 5 'accept_target_fixation'")
 # Set up a graphics environment for calibration
 #
 # Open a window, be sure to specify monitor parameters
-mon = monitors.Monitor('myMonitor', width=monitor_physical_width, distance= monitor_physical_distance)
-win = visual.Window(fullscr= full_screen,
-                    monitor= mon,
+
+# Open a window, be sure to specify monitor parameters
+mon = monitors.Monitor('myMonitor', width=53.0, distance=70.0)
+win = visual.Window(fullscr=full_screen,
+                    monitor=mon,
                     winType='pyglet',
                     units='pix')
 
@@ -217,20 +280,94 @@ print(genv)  # print out the version number of the CoreGraphics library
 
 # Set background and foreground colors for the calibration target
 # in PsychoPy, (-1, -1, -1)=black, (1, 1, 1)=white, (0, 0, 0)=mid-gray
+foreground_color = (-1, -1, -1)
+background_color = win.color
 genv.setCalibrationColors(foreground_color, background_color)
 
-# Set up the calibration target:
+# Set up the calibration target
+#
+# The target could be a "circle" (default), a "picture", a "movie" clip,
+# or a rotating "spiral". To configure the type of calibration target, set
+# genv.setTargetType to "circle", "picture", "movie", or "spiral", e.g.,
+# genv.setTargetType('picture')
+#
+# Use gen.setPictureTarget() to set a "picture" target
+# genv.setPictureTarget(os.path.join('images', 'fixTarget.bmp'))
+#
+# Use genv.setMovieTarget() to set a "movie" target
+# genv.setMovieTarget(os.path.join('videos', 'calibVid.mov'))
+
+# Use the default calibration target ('circle')
 genv.setTargetType('circle')
 
 # Configure the size of the calibration target (in pixels)
 # this option applies only to "circle" and "spiral" targets
 genv.setTargetSize(24)
 
-# Beeps to play during calibration, validation and drift correction:
+# Beeps to play during calibration, validation and drift correction
+# parameters: target, good, error
+#     target -- sound to play when target moves
+#     good -- sound to play on successful operation
+#     error -- sound to play on failure or interruption
+# Each parameter could be ''--default sound, 'off'--no sound, or a wav file
 genv.setCalibrationSounds('', '', '')
+
 
 # Request Pylink to use the PsychoPy window we opened above for calibration
 pylink.openGraphicsEx(genv)
+
+
+## calibrate:
+try:
+    el_tracker.doTrackerSetup()
+except RuntimeError as err:
+    print('ERROR:', err)
+    el_tracker.exitCalibration()    
+    
+win.close()
+
+## start recording:
+    
+try:
+    el_tracker.startRecording(1, 1, 1, 1)
+except RuntimeError as error:
+    print("ERROR:", error)
+
+ 
+# Allocate some time for the tracker to cache some samples
+pylink.pumpDelay(100)
+
+unix_timestamp = int(datetime.datetime.timestamp(datetime.datetime.now())*1000)
+el_tracker.sendMessage('UNIX '+ str(unix_timestamp))
+
+
+# # Put tracker in Offline mode
+# el_tracker.setOfflineMode()
+
+# # Clear the Host PC screen and wait for 500 ms
+# el_tracker.sendCommand('clear_screen 0')
+# pylink.msecDelay(500)
+
+# # Close the edf data file on the Host
+# el_tracker.closeDataFile()
+
+# # Download the EDF data file from the Host PC to a local data folder
+# # parameters: source_file_on_the_host, destination_file_on_local_drive
+# local_edf = os.path.join(session_folder, session_identifier + '.EDF')
+# try:
+#     el_tracker.receiveDataFile(edf_file, local_edf)
+# except RuntimeError as error:
+#     print('ERROR:', error)
+
+# # Close the link to the tracker.
+# el_tracker.close()
+
+# # win= el_window_routine(el_tracker, EyeLinkCoreGraphicsPsychoPy)
+
+# # core.wait(3)
+# # win.close()
+
+
 
 
 
