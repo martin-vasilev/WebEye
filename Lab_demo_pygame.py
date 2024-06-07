@@ -8,27 +8,158 @@ Created on Fri May 10 12:58:33 2024
 from __future__ import division
 from __future__ import print_function
 
-import platform
+#import platform
 import sys
 import pygame
-import random
+#import random
 import time
 from pygame.locals import *
 from CalibrationGraphicsPygame import CalibrationGraphics
 from string import ascii_letters, digits
-
-
 import pylink
 import datetime
 import os
-#import platform
-#import random
-import time
-import sys
-from psychopy import visual, core, monitors, gui, event
-from EyeLinkCoreGraphicsPsychoPy import EyeLinkCoreGraphicsPsychoPy
-from string import ascii_letters, digits
-from selenium import webdriver
+
+
+def show_message(message, fg_color, bg_color):
+    """ show messages on the screen
+
+    message: The message you would like to show on the screen
+    fg_color/bg_color: color for the texts and the background screen
+    """
+
+    # clear the screen and blit the texts
+    win_surf = pygame.display.get_surface()
+    win_surf.fill(bg_color)
+
+    scn_w, scn_h = win_surf.get_size()
+    message_fnt = pygame.font.SysFont('Arial', 32)
+    msgs = message.split('\n')
+    for i in range(len(msgs)):
+        message_surf = message_fnt.render(msgs[i], True, fg_color)
+        w, h = message_surf.get_size()
+        msg_y = scn_h / 2 + h / 2 * 2.5 * (i - len(msgs) / 2.0)
+        win_surf.blit(message_surf, (int(scn_w / 2 - w / 2), int(msg_y)))
+
+    pygame.display.flip()
+
+
+def wait_key(key_list, duration=sys.maxsize):
+    """ detect and return a keypress, terminate the task if ESCAPE is pressed
+
+    parameters:
+    key_list: allowable keys (pygame key constants, e.g., [K_a, K_ESCAPE]
+    duration: the maximum time allowed to issue a response (in ms)
+              wait for response 'indefinitely' (with sys.maxsize)
+    """
+
+    got_key = False
+    # clear all cached events if there are any
+    pygame.event.clear()
+    t_start = pygame.time.get_ticks()
+    resp = [None, t_start, -1]
+
+    while not got_key:
+        # check for time out
+        if (pygame.time.get_ticks() - t_start) > duration:
+            break
+
+        # check key presses
+        for ev in pygame.event.get():
+            if ev.type == KEYDOWN:
+                if ev.key in key_list:
+                    resp = [pygame.key.name(ev.key),
+                            t_start,
+                            pygame.time.get_ticks()]
+                    got_key = True
+
+            if (ev.type == KEYDOWN) and (ev.key == K_c):
+                if ev.mod in [KMOD_LCTRL, KMOD_RCTRL, 4160, 4224]:
+                    terminate_task()
+
+    # clear the screen following each keyboard response
+    win_surf = pygame.display.get_surface()
+    win_surf.fill(genv.getBackgroundColor())
+    pygame.display.flip()
+
+    return resp
+
+
+def abort_trial():
+    """Ends recording
+
+    We add 100 msec to catch final events
+    """
+
+    # get the currently active tracker object (connection)
+    el_tracker = pylink.getEYELINK()
+
+    # Stop recording
+    if el_tracker.isRecording():
+        # add 100 ms to catch final trial events
+        pylink.pumpDelay(100)
+        el_tracker.stopRecording()
+
+    # clear the screen
+  #  surf = pygame.display.get_surface()
+  #  surf.fill((128, 128, 128))
+  #  pygame.display.flip()
+    # Send a message to clear the Data Viewer screen
+    el_tracker.sendMessage('!V CLEAR 128 128 128')
+
+    # send a message to mark trial end
+    el_tracker.sendMessage('TRIAL_RESULT %d' % pylink.TRIAL_ERROR)
+
+    return pylink.TRIAL_ERROR
+
+
+
+def terminate_task():
+    """ Terminate the task gracefully and retrieve the EDF data file
+
+    file_to_retrieve: The EDF on the Host that we would like to download
+    win: the current window used by the experimental script
+    """
+
+    # disconnect from the tracker if there is an active connection
+    el_tracker = pylink.getEYELINK()
+
+    if el_tracker.isConnected():
+        # Terminate the current trial first if the task terminated prematurely
+        error = el_tracker.isRecording()
+        if error == pylink.TRIAL_OK:
+            abort_trial()
+
+        # Put tracker in Offline mode
+        el_tracker.setOfflineMode()
+
+        # Clear the Host PC screen and wait for 500 ms
+        el_tracker.sendCommand('clear_screen 0')
+        pylink.msecDelay(500)
+
+        # Close the edf data file on the Host
+        el_tracker.closeDataFile()
+
+        # Show a file transfer message on the screen
+        #msg = 'EDF data is transferring from EyeLink Host PC...'
+        #show_message(msg, (0, 0, 0), (128, 128, 128))
+
+        # Download the EDF data file from the Host PC to a local data folder
+        # parameters: source_file_on_the_host, destination_file_on_local_drive
+        local_edf = os.path.join(session_folder, session_identifier + '.EDF')
+        try:
+            el_tracker.receiveDataFile(edf_file, local_edf)
+        except RuntimeError as error:
+            print('ERROR:', error)
+
+        # Close the link to the tracker.
+        el_tracker.close()
+
+    # quit pygame and python
+    pygame.quit()
+    sys.exit()
+
+
 
 
 # initialize pygame
@@ -62,29 +193,18 @@ edf_fname = 'TEST'
 
 # Prompt user to specify an EDF data filename
 # before we open a fullscreen window
-dlg_title = 'Enter EDF File Name'
-dlg_prompt = 'Please enter a file name with 8 or fewer characters\n' + \
-             '[letters, numbers, and underscore].'
-             
-             
-# loop until we get a valid filename
 while True:
-    dlg = gui.Dlg(dlg_title)
-    dlg.addText(dlg_prompt)
-    dlg.addField('File Name:', edf_fname)
-    # show dialog and wait for OK or Cancel
-    ok_data = dlg.show()
-    if dlg.OK:  # if ok_data is not None
-        print('EDF data filename: {}'.format(ok_data[0]))
-    else:
-        print('user cancelled')
-        core.quit()
-        sys.exit()
-
-    # get the string entered by the experimenter
-    tmp_str = dlg.data[0]
-    # strip trailing characters, ignore the ".edf" extension
-    edf_fname = tmp_str.rstrip().split('.')[0]
+    # use "raw_input" to get user input if running with Python 2.x
+    try:
+        input = raw_input
+    except NameError:
+        pass
+    prompt = '\nSpecify an EDF filename\n' + \
+        'Filename must not exceed eight alphanumeric characters.\n' + \
+        'ONLY letters, numbers and underscore are allowed.\n\n--> '
+    edf_fname = input(prompt)
+    # strip trailing characters, ignore the '.edf' extension
+    edf_fname = edf_fname.rstrip().split('.')[0]
 
     # check if the filename is valid (length <= 8 & no special char)
     allowed_char = ascii_letters + digits + '_'
@@ -112,7 +232,8 @@ session_identifier = edf_fname + time_str
 session_folder = os.path.join(results_folder, session_identifier)
 if not os.path.exists(session_folder):
     os.makedirs(session_folder)
-    
+
+   
     
 #######################################
 ###   3) SET UP TRACKER CONNECTION:   #
@@ -210,15 +331,15 @@ el_tracker.sendCommand("button_function 5 'accept_target_fixation'")
 #
 # Open a window, be sure to specify monitor parameters
 
-# Open a window, be sure to specify monitor parameters
-mon = monitors.Monitor('myMonitor', width=53.0, distance=70.0)
-win = visual.Window(fullscr=full_screen,
-                    monitor=mon,
-                    winType='pyglet',
-                    units='pix')
-
-# get the native screen resolution used by PsychoPy
-scn_width, scn_height = win.size
+# open a Pygame window
+win=None
+if full_screen:
+    win = pygame.display.set_mode((0, 0), FULLSCREEN | DOUBLEBUF)
+else:
+    win = pygame.display.set_mode((0, 0), 0)
+    
+scn_width, scn_height = win.get_size()
+pygame.mouse.set_visible(False)  # hide mouse cursor
 
 # Pass the display pixel coordinates (left, top, right, bottom) to the tracker
 # see the EyeLink Installation Guide, "Customizing Screen Settings"
@@ -232,14 +353,15 @@ dv_coords = "DISPLAY_COORDS  0 0 %d %d" % (scn_width - 1, scn_height - 1)
 el_tracker.sendMessage(dv_coords)
 
 # Configure a graphics environment (genv) for tracker calibration
-genv = EyeLinkCoreGraphicsPsychoPy(el_tracker, win)
-print(genv)  # print out the version number of the CoreGraphics library
+genv = CalibrationGraphics(el_tracker, win)
 
-# Set background and foreground colors for the calibration target
-# in PsychoPy, (-1, -1, -1)=black, (1, 1, 1)=white, (0, 0, 0)=mid-gray
-foreground_color = (-1, -1, -1)
-background_color = win.color
+# Set background and foreground colors
+# parameters: foreground_color, background_color
+foreground_color = (0, 0, 0)
+background_color = (128, 128, 128)
 genv.setCalibrationColors(foreground_color, background_color)
+
+
 
 # Set up the calibration target
 #
@@ -274,6 +396,26 @@ genv.setCalibrationSounds('', '', '')
 pylink.openGraphicsEx(genv)
 
 
+# Show the task instructions
+task_msg = 'In the task, you may press D to call up calligrarion\n' + \
+           'and C to call up calibration.' + \
+    '\nPress Ctrl-Q to if you need to quit the task and stop recording.\n'
+if dummy_mode:
+    task_msg = task_msg + '\nNow, press ENTER to start the task'
+else:
+    task_msg = task_msg + '\nNow, press ENTER to calibrate tracker'
+
+# Pygame bug warning
+pygame_warning = '\n\nDue to a bug in Pygame 2, the window may have lost' + \
+                 '\nfocus and stopped accepting keyboard inputs.' + \
+                 '\nClicking the mouse helps get around this issue.'
+if pygame.__version__.split('.')[0] == '2':
+    task_msg = task_msg + pygame_warning
+
+show_message(task_msg, (0, 0, 0), (128, 128, 128))
+wait_key([K_RETURN])
+
+
 ## calibrate:
 try:
     el_tracker.doTrackerSetup()
@@ -281,28 +423,55 @@ except RuntimeError as err:
     print('ERROR:', err)
     el_tracker.exitCalibration()    
     
-win.close()
+pygame.display.quit()
+pylink.closeGraphics()
 
-## start recording:
+# start recording:
     
 try:
     el_tracker.startRecording(1, 1, 1, 1)
 except RuntimeError as error:
     print("ERROR:", error)
-
- 
+    
 # Allocate some time for the tracker to cache some samples
-pylink.pumpDelay(100)
+#pylink.pumpDelay(100)
 
 unix_timestamp = int(datetime.datetime.timestamp(datetime.datetime.now())*1000)
-el_tracker.sendMessage('UNIX '+ str(unix_timestamp))
+el_tracker.sendMessage('UNIX '+ str(unix_timestamp))    
+    
+terminate_task()
+
+# stop recording:
+# try:
+#     el_tracker.stopRecording()
+# except RuntimeError as error:
+#     print("ERROR:", error)
+
+# Close the edf data file on the Host
+#el_tracker.closeDataFile()
+
+# Download the EDF data file from the Host PC to a local data folder
+# parameters: source_file_on_the_host, destination_file_on_local_drive
+#local_edf = os.path.join(session_folder, session_identifier + '.EDF')
+# try:
+#     el_tracker.receiveDataFile(edf_file, local_edf)
+# except RuntimeError as error:
+#     print('ERROR:', error)
+
+#el_tracker.close() 
+
+
+
+
+
+
+#terminate_task()
 
 
 # # Put tracker in Offline mode
 # el_tracker.setOfflineMode()
 
-# # Clear the Host PC screen and wait for 500 ms
-# el_tracker.sendCommand('clear_screen 0')
+
 # pylink.msecDelay(500)
 
 # # Close the edf data file on the Host
