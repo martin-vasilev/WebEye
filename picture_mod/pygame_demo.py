@@ -283,7 +283,7 @@ def wait_key(key_list, duration=sys.maxsize):
     duration: the maximum time allowed to issue a response (in ms)
               wait for response 'indefinitely' (with sys.maxsize)
     """
-
+   # pygame.init()
     got_key = False
     # clear all cached events if there are any
     pygame.event.clear()
@@ -332,6 +332,9 @@ def terminate_task():
         error = el_tracker.isRecording()
         if error == pylink.TRIAL_OK:
             abort_trial()
+            
+        win = pygame.display.set_mode((0, 0), FULLSCREEN | DOUBLEBUF)
+        pylink.openGraphicsEx(genv)
             
         # send time stamp
         unix_timestamp = int(datetime.datetime.timestamp(datetime.datetime.now())*1000)
@@ -484,7 +487,7 @@ def abort_trial():
 
     # Send a message to clear the Data Viewer screen, get it ready for
     # drawing the pictures during visualization
-    el_tracker.sendMessage('!V CLEAR 128 128 128')
+    #el_tracker.sendMessage('!V CLEAR 128 128 128')
 
     pygame.display.quit()
     pylink.closeGraphics()
@@ -495,11 +498,11 @@ def abort_trial():
     RT = -1
     while not get_keypress:
         # present the picture for a maximum of 5 seconds
-        if pygame.time.get_ticks() - onset_time >= 5000:
+        if pygame.time.get_ticks() - onset_time >= 10000:
             el_tracker.sendMessage('time_out')
             win = pygame.display.set_mode((0, 0), FULLSCREEN | DOUBLEBUF)
             pylink.openGraphicsEx(genv)
-            break
+            #break
 
         # abort the current trial if the tracker is no longer recording
         error = el_tracker.isRecording()
@@ -515,6 +518,9 @@ def abort_trial():
     # send a 'TRIAL_RESULT' message to mark the end of trial, see Data
     # Viewer User Manual, "Protocol for EyeLink Data to Viewer Integration"
     el_tracker.sendMessage('TRIAL_RESULT %d' % pylink.TRIAL_OK)
+    
+    
+    
 def do_drift_check(calibrate= False):
     
     pygame.init()
@@ -603,37 +609,66 @@ def do_drift_check(calibrate= False):
 
     # Send a message to clear the Data Viewer screen, get it ready for
     # drawing the pictures during visualization
-    el_tracker.sendMessage('!V CLEAR 128 128 128')
+#    el_tracker.sendMessage('!V CLEAR 128 128 128')
 
     pygame.display.quit()
     pylink.closeGraphics()
+    
+#     print('1')
 
-    # show the image for 5 secs; break if the SPACEBAR is pressed
-#    pygame.event.clear()  # clear all cached events if there were any
-    get_keypress = False
-    RT = -1
-    while not get_keypress:
-        # present the picture for a maximum of 5 seconds
-        if pygame.time.get_ticks() - onset_time >= 1:
-            el_tracker.sendMessage('time_out')
-            win = pygame.display.set_mode((0, 0), FULLSCREEN | DOUBLEBUF)
-            pylink.openGraphicsEx(genv)
-            break
+#     # show the image for 5 secs; break if the SPACEBAR is pressed
+# #    pygame.event.clear()  # clear all cached events if there were any
+#     get_keypress = False
+#     RT = -1
+#     while not get_keypress:
+#         # present the picture for a maximum of 5 seconds
+#         if pygame.time.get_ticks() - onset_time >= 5000:
+#             #el_tracker.sendMessage('time_out')
+#             #win = pygame.display.set_mode((0, 0), FULLSCREEN | DOUBLEBUF)
+#             #pylink.openGraphicsEx(genv)
+#             print('2')
+#             break
 
-        # abort the current trial if the tracker is no longer recording
-        error = el_tracker.isRecording()
-        if error is not pylink.TRIAL_OK:
-            el_tracker.sendMessage('tracker_disconnected')
-            abort_trial()
-            return error
+#         # abort the current trial if the tracker is no longer recording
+#         error = el_tracker.isRecording()
+#         if error is not pylink.TRIAL_OK:
+#             el_tracker.sendMessage('tracker_disconnected')
+#             abort_trial()
+#             return error
 
     # stop recording; add 100 msec to catch final events before stopping
-    pylink.pumpDelay(100)
-    el_tracker.stopRecording()
+    #pylink.pumpDelay(100)
+#    el_tracker.stopRecording()
 
     # send a 'TRIAL_RESULT' message to mark the end of trial, see Data
     # Viewer User Manual, "Protocol for EyeLink Data to Viewer Integration"
-    el_tracker.sendMessage('TRIAL_RESULT %d' % pylink.TRIAL_OK)
+#    el_tracker.sendMessage('TRIAL_RESULT %d' % pylink.TRIAL_OK)
+    
+
+def wait_for_key():
+    from pynput import keyboard
+
+    result = []
+    
+    def on_activate_d():
+        result.append('drift')
+        h.stop()
+    
+    def on_activate_c():
+        result.append('calibrate')
+        h.stop()
+    
+    def quit():
+        result.append('quit')
+        h.stop()
+    
+    with keyboard.GlobalHotKeys({
+            'd': on_activate_d,
+            'c': on_activate_c,
+            '<ctrl>+e': quit}) as h:
+        h.join()
+    
+    return result[0] if result else None
     
     
 
@@ -668,20 +703,21 @@ if not dummy_mode:
         print('ERROR:', err)
         el_tracker.exitCalibration()
 
-# Step 6: Wait for use to call routines:
+# Step 6: Wait for user to call routines:
 task_done= False
 
 while not task_done:
-    resp= wait_key([K_d, K_c, K_q, K_l])
+    #resp= wait_key([K_d, K_c, K_q, K_l])
+    resp= wait_for_key()
     
-    if resp[0]== 'd': # drift check
+    if resp== 'drift': #resp[0]== 'd': # drift check
         do_drift_check()
         
         
-    if resp[0]== 'c':   # calibration
+    if resp== 'calibrate': #resp[0]== 'c':   # calibration
         do_drift_check(calibrate= True)
         
-    if resp[0]== 'quit':    
+    if resp== 'quit': #resp[0]== 'quit':    
         task_done= True
         terminate_task()
         
