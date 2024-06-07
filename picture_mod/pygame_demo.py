@@ -54,10 +54,6 @@ dummy_mode = False
 #screen mode in linux
 full_screen=True
 
-# API-2312
-#if 'Linux' in platform.platform():
-#    if int(pygame.version.ver[0])>1:
-#        full_screen=False
 
 # get the screen resolution natively supported by the monitor
 scn_width, scn_height = 0,0
@@ -225,12 +221,8 @@ genv.setCalibrationColors(foreground_color, background_color)
 # The target could be a "circle" (default) or a "picture",
 # To configure the type of calibration target, set
 # genv.setTargetType to "circle", "picture", e.g.,
-# genv.setTargetType('picture')
-#
-# Use gen.setPictureTarget() to set a "picture" target, e.g.,
-# genv.setPictureTarget(os.path.join('images', 'fixTarget.bmp'))
 
-# Use a picture as the calibration target
+# Use a circle as the calibration target
 genv.setTargetType('circle')
 
 # Configure the size of the calibration target (in pixels)
@@ -308,12 +300,6 @@ def wait_key(key_list, duration=sys.maxsize):
                 if ev.mod in [KMOD_LCTRL, KMOD_RCTRL, 4160, 4224]:
                     resp[0]= 'quit'
                     #terminate_task()
-
-    # clear the screen following each keyboard response
-    #win_surf = pygame.display.get_surface()
-    #win_surf.fill(genv.getBackgroundColor())
-    #pygame.display.flip()
-
     return resp
 
 
@@ -335,6 +321,8 @@ def terminate_task():
             
         win = pygame.display.set_mode((0, 0), FULLSCREEN | DOUBLEBUF)
         pylink.openGraphicsEx(genv)
+        
+        el_tracker.sendMessage('USER: TERMINATE')
             
         # send time stamp
         unix_timestamp = int(datetime.datetime.timestamp(datetime.datetime.now())*1000)
@@ -349,10 +337,6 @@ def terminate_task():
 
         # Close the edf data file on the Host
         el_tracker.closeDataFile()
-
-        # Show a file transfer message on the screen
-       # msg = 'EDF data is transferring from EyeLink Host PC...'
-       # show_message(msg, (0, 0, 0), (128, 128, 128))
 
         # Download the EDF data file from the Host PC to a local data folder
         # parameters: source_file_on_the_host, destination_file_on_local_drive
@@ -385,12 +369,6 @@ def abort_trial():
         pylink.pumpDelay(100)
         el_tracker.stopRecording()
 
-    # clear the screen
-   # surf = pygame.display.get_surface()
-   # surf.fill((128, 128, 128))
-   # pygame.display.flip()
-    # Send a message to clear the Data Viewer screen
-    #el_tracker.sendMessage('!V CLEAR 128 128 128')
 
     # send a message to mark trial end
     el_tracker.sendMessage('TRIAL_RESULT %d' % pylink.TRIAL_ERROR)
@@ -521,7 +499,7 @@ def abort_trial():
     
     
     
-def do_drift_check(calibrate= False):
+def do_drift_check(calibrate= False, print_UNIX= True):
     
     pygame.init()
     win = pygame.display.set_mode((0, 0), FULLSCREEN | DOUBLEBUF)
@@ -542,6 +520,12 @@ def do_drift_check(calibrate= False):
 
     # get a reference to the currently active EyeLink connection
     el_tracker = pylink.getEYELINK()
+    
+    # Stop recording
+    if el_tracker.isRecording():
+        # add 100 ms to catch final trial events
+        pylink.pumpDelay(100)
+        el_tracker.stopRecording()
 
     # put the tracker in the offline mode first
     el_tracker.setOfflineMode()
@@ -549,6 +533,10 @@ def do_drift_check(calibrate= False):
     # clear the host screen before we draw the backdrop
     el_tracker.sendCommand('clear_screen 0')
     
+    if calibrate:
+        el_tracker.sendMessage('USER: CALIBRATION')
+    else:
+        el_tracker.sendMessage('USER: DRIFT CHECK')
     if calibrate:
         if not dummy_mode:
             try:
@@ -598,51 +586,14 @@ def do_drift_check(calibrate= False):
     # Allocate some time for the tracker to cache some samples
     pylink.pumpDelay(100)
     
-    # send time stamp
-    unix_timestamp = int(datetime.datetime.timestamp(datetime.datetime.now())*1000)
-    el_tracker.sendMessage('UNIX '+ str(unix_timestamp))   
-
-    onset_time = pygame.time.get_ticks()  # image onset time
-
-    # send over a message to mark the onset of the image
-#    el_tracker.sendMessage('image_onset')
-
-    # Send a message to clear the Data Viewer screen, get it ready for
-    # drawing the pictures during visualization
-#    el_tracker.sendMessage('!V CLEAR 128 128 128')
+    if print_UNIX:
+        # send time stamp
+        unix_timestamp = int(datetime.datetime.timestamp(datetime.datetime.now())*1000)
+        el_tracker.sendMessage('UNIX '+ str(unix_timestamp))   
 
     pygame.display.quit()
     pylink.closeGraphics()
     
-#     print('1')
-
-#     # show the image for 5 secs; break if the SPACEBAR is pressed
-# #    pygame.event.clear()  # clear all cached events if there were any
-#     get_keypress = False
-#     RT = -1
-#     while not get_keypress:
-#         # present the picture for a maximum of 5 seconds
-#         if pygame.time.get_ticks() - onset_time >= 5000:
-#             #el_tracker.sendMessage('time_out')
-#             #win = pygame.display.set_mode((0, 0), FULLSCREEN | DOUBLEBUF)
-#             #pylink.openGraphicsEx(genv)
-#             print('2')
-#             break
-
-#         # abort the current trial if the tracker is no longer recording
-#         error = el_tracker.isRecording()
-#         if error is not pylink.TRIAL_OK:
-#             el_tracker.sendMessage('tracker_disconnected')
-#             abort_trial()
-#             return error
-
-    # stop recording; add 100 msec to catch final events before stopping
-    #pylink.pumpDelay(100)
-#    el_tracker.stopRecording()
-
-    # send a 'TRIAL_RESULT' message to mark the end of trial, see Data
-    # Viewer User Manual, "Protocol for EyeLink Data to Viewer Integration"
-#    el_tracker.sendMessage('TRIAL_RESULT %d' % pylink.TRIAL_OK)
     
 
 def wait_for_key():
@@ -678,7 +629,7 @@ def wait_for_key():
 task_msg = 'While recording: you can press:\n' + \
            '- C to call up calibration\n' + \
            '- D to call up drift check\n' + \
-           '- CTRL+Q to stop recording and exit\n'
+           '- CTRL+E to stop recording and exit\n'
           
 if dummy_mode:
     task_msg = task_msg + '\nNow, press ENTER to start the task'
@@ -702,6 +653,11 @@ if not dummy_mode:
     except RuntimeError as err:
         print('ERROR:', err)
         el_tracker.exitCalibration()
+        
+# do initial drift check:        
+do_drift_check()        
+        
+
 
 # Step 6: Wait for user to call routines:
 task_done= False
