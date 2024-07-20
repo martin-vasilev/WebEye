@@ -14,8 +14,13 @@ library(tidyverse)
 options(scipen=999)
 trials <- read.csv("~/R/WebEye/preproc/trials.csv")
 dat <- read.csv("preproc/timeseries.csv")
-dat2<- dat %>% pivot_wider(names_from = variable_name, values_from = value)
-dat2$timestamp<- format(dat2$timestamp, scientific = F)
+dat<- subset(dat, variable_name== 'gaze_data')
+
+#dat2<- dat %>% pivot_wider(names_from = variable_name, values_from = value)
+#dat2$timestamp<- format(dat2$timestamp, scientific = F)
+
+dat2<- dat
+dat2$t<- format(dat2$t, scientific = F)
 
 dat2$question_answer<- NULL
 dat2$gaze_data<- NULL
