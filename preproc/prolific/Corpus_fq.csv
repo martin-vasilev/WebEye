@@ -1,0 +1,259 @@
+Study_ID,Sentence,Target word type,Length,Frequency type,Target (N),Frequency,BNC frequency,Zipf frequency,Bigram frequency,N,Predictability,Sentence,line_breaks,Question,Question_answer,Length (char),N words,Target position,N+1 length,Fits on screen?
+1,1,Adjective,6,HF,social,18768,42269,4.97,817.66,0,0,Mrs. Clark is a social person who gets along with everybody.,Mrs. Clark is a@social person who@gets along with@everybody.,Does Mrs. Clark get along with everybody?,1,60,11,5,#REF!,Yes
+1,1,Adjective,6,LF,chatty,218,80,3.04,687.64,0,0,Mrs. Clark is a chatty person who gets along with everybody.,Mrs. Clark is a@chatty person who@gets along with@everybody.,Does Mrs. Clark get along with everybody?,1,60,11,5,#REF!,Yes
+31,2,Adjective,6,HF,modern,21083,13180,5.02,844.12,0,0,Hannah enjoyed the modern artworks at the museum of contemporary art.,Hannah enjoyed@the modern artworks@at the museum of@contemporary art.,Did Hannah visit a classical art museum?,0,69,11,4,#REF!,Yes
+31,2,Adjective,6,LF,trendy,758,246,3.58,515.92,1,0,Hannah enjoyed the trendy artworks at the museum of contemporary art.,Hannah enjoyed@the trendy artworks@at the museum of@contemporary art.,Did Hannah visit a classical art museum?,0,69,11,4,#REF!,Yes
+2,3,Adjective,5,HF,green,33158,14637,5.22,1675.06,3,0,The house was recognisable by its green fence and big windows.,The house@was recognisable by@its green fence and@big windows.,Did the house have small windows?,0,62,11,8,#REF!,Yes
+2,3,Adjective,5,LF,beige,254,237,3.1,914.08,0,0,The house was recognisable by its beige fence and big windows.,The house@was recognisable by@its beige fence and@big windows.,Did the house have small windows?,0,62,11,8,#REF!,Yes
+32,4,Adjective,5,HF,large,25532,33771,5.1,1057.97,2,0,The building inspector examined the large roof of the house.,,Did the inspector examine the kitchen?,0,60,10,6,#REF!,Yes
+32,4,Adjective,5,LF,leaky,240,82,3.08,1303.18,2,0,The building inspector examined the leaky roof of the house.,,Did the inspector examine the kitchen?,0,60,10,6,#REF!,Yes
+3,5,Adjective,7,HF,massive,21948,4376,5.04,639.94,2,0,Building a house requires a massive amount of money.,Building a house@requires@a massive amount of@money.,Was the last sentence was about home building?,1,52,9,6,#REF!,Yes
+3,5,Adjective,7,LF,sizable,303,79,3.18,330.11,0,0,Building a house requires a sizable amount of money.,Building a house@requires@a sizable amount of@money.,Was the last sentence was about home building?,1,52,9,6,#REF!,Yes
+33,6,Adjective,6,HF,strong,35613,16126,5.25,1688.42,3,0,The bike was strong enough to be used in the mountain.,,Can the bike can be used for mountain biking?,1,54,11,4,#REF!,Yes
+33,6,Adjective,6,LF,sturdy,523,471,3.42,665.99,0,0,The bike was sturdy enough to be used in the mountain.,,Can the bike can be used for mountain biking?,1,54,11,4,#REF!,Yes
+4,7,Adjective,4,HF,blue,29263,10476,5.16,223.1,4,0,The company's updated logo featured a blue star in the foreground.,The company's updated@logo featured@a blue star in the@foreground.,Did the logo contain a rectangle?,0,66,11,7,#REF!,Yes
+4,7,Adjective,4,LF,cyan,13,28,1.84,763.78,1,0,The company's updated logo featured a cyan star in the foreground.,The company's updated@logo featured@a cyan star in the@foreground.,Did the logo contain a rectangle?,0,66,11,7,#REF!,Yes
+34,8,Adjective,4,HF,nice,136144,13186,5.83,700.59,7,0,Jim prepared a nice outfit for his best friend's wedding. ,,Was Jim going to a wedding?,1,58,10,4,#REF!,Yes
+34,8,Adjective,4,LF,neat,2020,1729,4,7050.06,11,0,Jim prepared a neat outfit for his best friend's wedding. ,,Was Jim going to a wedding?,1,58,10,4,#REF!,Yes
+5,9,Adjective,6,HF,famous,21704,6543,5.03,708.79,0,0,The crowd listened to the famous hymn before the event.,The crowd listened to@the famous hymn@before the event.,Did the crowd listen to a speech?,0,55,10,6,#REF!,Yes
+5,9,Adjective,6,LF,solemn,352,474,3.24,465.11,0,0,The crowd listened to the solemn hymn before the event.,The crowd listened to@the solemn hymn@before the event.,Did the crowd listen to a speech?,0,55,10,6,#REF!,Yes
+35,10,Adjective,6,HF,lovely,89542,6278,5.65,1376.08,2,0,The children all had a lovely smile on their face at the zoo.,,Were the children smiling?,1,61,13,6,#REF!,Yes
+35,10,Adjective,6,LF,cheery,330,177,3.22,701.43,3,0,The children all had a cheery smile on their face at the zoo.,,Were the children smiling?,1,61,13,6,#REF!,Yes
+6,11,Adjective,6,HF,clever,10291,2357,4.71,1690.44,1,0,"During the financial crisis, the clever merchant invested in gold.","During the financial@crisis,@the clever merchant@invested in gold.",Did the merchant invest in real estate?,0,66,10,6,#REF!,Yes
+6,11,Adjective,6,LF,astute,347,247,3.24,333.42,0,0,"During the financial crisis, the astute merchant invested in gold.","During the financial@crisis,@the astute merchant@invested in gold.",Did the merchant invest in real estate?,0,66,10,6,#REF!,Yes
+36,12,Adjective,7,HF,welcome,52417,6513,5.42,347.33,0,0,The host family gave a welcome gift to their visitors.,,Did the visitors receive a present?,1,54,10,6,#REF!,Yes
+36,12,Adjective,7,LF,sincere,574,481,3.46,952.77,0,0,The host family gave a sincere gift to their visitors.,,Did the visitors receive a present?,1,54,10,6,#REF!,Yes
+7,13,Adjective,7,HF,classic,9906,3419,4.69,481.32,0,0,There are many critics of the classic prison system today.,There are many@critics of@the classic prison@system today.,Does the prison system face criticism?,1,58,10,7,#REF!,Yes
+7,13,Adjective,7,LF,archaic,159,367,2.9,314.59,0,0,There are many critics of the archaic prison system today.,There are many@critics of@the archaic prison@system today.,Does the prison system face criticism?,1,58,10,7,#REF!,Yes
+37,14,Adjective,7,HF,careful,14069,5218,4.84,733.35,0,0,Sarah always tried to make careful use of her money.,,Did Sarah spend her money carefree? ,0,52,10,7,#REF!,Yes
+37,14,Adjective,7,LF,prudent,252,493,3.1,887.25,0,0,Sarah always tried to make prudent use of her money.,,Did Sarah spend her money carefree? ,0,52,10,7,#REF!,Yes
+8,15,Adjective,5,HF,short,26871,18652,5.13,1407.78,7,0,Linda used the short pencil to write a quick note on the fridge.,Linda used@the short pencil to@write a quick note on@the fridge.,Did Linda make a drawing?,0,64,13,4,#REF!,Yes
+8,15,Adjective,5,LF,blunt,970,598,3.68,1079.96,1,0,Linda used the blunt pencil to write a quick note on the fridge.,Linda used@the blunt pencil to@write a quick note on@the fridge.,Did Linda make a drawing?,0,64,13,4,#REF!,Yes
+38,16,Adjective,5,HF,quick,27155,6060,5.13,1785.56,2,0,Some citizens were concerned with the quick growth of tourism.,,Was tourism growing fast?,1,62,10,7,#REF!,Yes
+38,16,Adjective,5,LF,rapid,1524,3605,3.88,313.96,3,0,Some citizens were concerned with the rapid growth of tourism.,,Was tourism growing fast?,1,62,10,7,#REF!,Yes
+9,17,Adjective,5,HF,local,56127,46363,5.44,688.83,3,0,The little town was known for its local brewery with 400 years of tradition.,The little town was@known for@its local brewery@with 400 years of tradition.,Was the town known for its water park?,0,76,14,8,#REF!,Yes
+9,17,Adjective,5,LF,famed,524,279,3.42,1215.42,8,0,The little town was known for its famed brewery with 400 years of tradition.,The little town was@known for@its famed brewery@with 400 years of tradition.,Was the town known for its water park?,0,76,14,8,#REF!,Yes
+39,18,Adjective,5,HF,happy,73554,11731,5.56,344.44,2,0,People saw Samantha as a happy girl who did very well in her studies.,,Did Samantha perform well in her studies?,1,69,14,6,#REF!,Yes
+39,18,Adjective,5,LF,nerdy,132,0,2.82,600.79,2,0,People saw Samantha as a nerdy girl who did very well in her studies.,,Did Samantha perform well in her studies?,1,69,14,6,#REF!,Yes
+10,19,Adjective,5,HF,quiet,14487,6420,4.86,710.85,2,0,"For many species, the quiet forest is an ideal natural habitat.","For many species,@the quiet forest is@an ideal natural@habitat.",Was the forest inhabited by very few species?,0,63,11,5,#REF!,Yes
+10,19,Adjective,5,LF,dense,1096,928,3.74,1393.96,2,0,"For many species, the dense forest is an ideal natural habitat.","For many species,@the dense forest is@an ideal natural@habitat.",Was the forest inhabited by very few species?,0,63,11,5,#REF!,Yes
+40,20,Adjective,5,HF,heavy,16048,9484,4.9,1332.38,2,0,The taxi driver struggled to put the heavy suitcase in the back of the car.,,Did the driver have difficulty loading the suitcase?,1,75,15,8,#REF!,Yes
+40,20,Adjective,5,LF,bulky,186,339,2.97,202.4,2,0,The taxi driver struggled to put the bulky suitcase in the back of the car.,,Did the driver have difficulty loading the suitcase?,1,75,15,8,#REF!,Yes
+11,21,Adjective,5,HF,lucky,21638,4114,5.03,146.04,2,0,The little girl liked to sleep with her lucky toy next to her.,The little girl liked@to sleep with@her lucky toy next@to her.,Did the girl sleep next to her cat?,0,62,13,9,#REF!,Yes
+11,21,Adjective,5,LF,plush,190,172,2.98,566.97,3,0,The little girl liked to sleep with her plush toy next to her.,The little girl liked@to sleep with@her plush toy next@to her.,Did the girl sleep next to her cat?,0,62,13,9,#REF!,Yes
+41,22,Adjective,5,HF,usual,11185,6262,4.74,454.53,0,0,David's friends were tired of listening to his usual jokes all the time.,,Were David's friends fed up with his jokes?,1,72,13,9,#REF!,Yes
+41,22,Adjective,5,LF,stale,387,408,3.28,1829.18,12,0,David's friends were tired of listening to his stale jokes all the time.,,Were David's friends fed up with his jokes?,1,72,13,9,#REF!,Yes
+12,23,Adjective,6,HF,bright,13304,5540,4.82,698.31,4,0,The progress of the bright student made his teacher very proud.,The progress of@the bright student@made his teacher very@proud.,Was the teacher disappointed with the student?,0,63,11,5,#REF!,Yes
+12,23,Adjective,6,LF,docile,148,174,2.87,1280.24,0,0,The progress of the docile student made his teacher very proud.,The progress of@the docile student@made his teacher very@proud.,Was the teacher disappointed with the student?,0,63,11,5,#REF!,Yes
+42,24,Adjective,6,HF,proper,15399,6505,4.88,2233.85,1,0,"Thanks to the proper response of the mayor, the dispute was resolved.",,Did the mayor help resolve the dispute?,1,69,12,4,#REF!,Yes
+42,24,Adjective,6,LF,prompt,272,829,3.13,503.57,0,0,"Thanks to the prompt response of the mayor, the dispute was resolved.",,Did the mayor help resolve the dispute?,1,69,12,4,#REF!,Yes
+13,25,Adjective,6,HF,normal,16247,12454,4.91,783.19,1,0,Mark tried to keep a normal tone after finding out about the secret.,Mark tried to keep@a normal tone after@finding out about the@secret.,Did Mark find out a secret?,1,68,13,6,#REF!,Yes
+13,25,Adjective,6,LF,casual,996,1792,3.69,883.49,0,0,Mark tried to keep a casual tone after finding out about the secret.,Mark tried to keep@a casual tone after@finding out about the@secret.,Did Mark find out a secret?,1,68,13,6,#REF!,Yes
+43,26,Adjective,4,HF,long,128115,51479,5.8,1881.32,7,0,Many spectators were fascinated by the long hair of the lead actress.,,Were the spectators fascinated by the actress' costume?,0,69,12,7,#REF!,Yes
+43,26,Adjective,4,LF,wavy,269,146,3.13,2266.45,4,0,Many spectators were fascinated by the wavy hair of the lead actress.,,Were the spectators fascinated by the actress' costume?,0,69,12,7,#REF!,Yes
+14,27,Adjective,4,HF,warm,16826,7036,4.92,1402.84,10,0,The hotel guests liked the warm reception area.,The hotel guests@liked@the warm reception@area.,Did the guests hate the reception?,0,47,8,6,#REF!,Yes
+14,27,Adjective,4,LF,airy,933,260,3.67,809.19,3,0,The hotel guests liked the airy reception area.,The hotel guests@liked@the airy reception@area.,Did the guests hate the reception?,0,47,8,6,#REF!,Yes
+44,28,Adjective,4,HF,keen,14107,3779,4.85,5173.3,5,0,Alex is the keen type of golfer who plays every weekend.,,Does Alex play every weekened?,1,56,11,4,#REF!,Yes
+44,28,Adjective,4,LF,avid,344,166,3.23,1041.56,3,0,Alex is the avid type of golfer who plays every weekend.,,Does Alex play every weekened?,1,56,11,4,#REF!,Yes
+15,29,Adjective,4,HF,cold,25839,12220,5.11,1456.68,10,0,The mountaineers experienced cold feet due to the heavy snowfall.,The mountaineers@experienced cold feet@due to the heavy@snowfall.,Did it snow a lot in the mountain?,1,65,10,4,#REF!,Yes
+15,29,Adjective,4,LF,numb,588,275,3.47,82.55,1,0,The mountaineers experienced numb feet due to the heavy snowfall.,The mountaineers@experienced numb feet@due to the heavy@snowfall.,Did it snow a lot in the mountain?,1,65,10,4,#REF!,Yes
+45,30,Adjective,4,HF,real,68410,23180,5.53,1941.87,13,0,"In the big city, there was a real need for more family houses.",,Was there a need for more small flats?,0,62,13,8,#REF!,Yes
+45,30,Adjective,4,LF,dire,906,500,3.65,2940.05,14,0,"In the big city, there was a dire need for more family houses.",,Was there a need for more small flats?,0,62,13,8,#REF!,Yes
+16,31,Noun,6,HF,island,18560,6630,4.96,577.08,1,0,"According to the commission, the island should be better protected.","According to the@commission,@the island should be@better protected.",Did the commission recommend more protection?,1,67,10,6,#REF!,Yes
+16,31,Noun,6,LF,lagoon,366,203,3.26,543.7,0,0,"According to the commission, the lagoon should be better protected.","According to the@commission,@the lagoon should be@better protected.",Did the commission recommend more protection?,1,67,10,6,#REF!,Yes
+46,32,Noun,4,HF,wine,14006,6305,4.84,4718.18,21,0,"Last night, Joseph stopped by the wine shop on his way home.",,Did Joseph stop by the casino?,0,60,12,7,#REF!,Yes
+46,32,Noun,4,LF,pawn,378,272,3.27,1068.23,7,0,"Last night, Joseph stopped by the pawn shop on his way home.",,Did Joseph stop by the casino?,0,60,12,7,#REF!,Yes
+17,33,Noun,6,HF,market,33772,30078,5.22,1332.47,2,0,Jack visited the market situated just outside of the city centre.,Jack visited@the market situated@just outside of the@city centre.,Did Jack go to the airport?,0,65,11,4,#REF!,Yes
+17,33,Noun,6,LF,tavern,259,372,3.11,605.51,1,0,Jack visited the tavern situated just outside of the city centre.,Jack visited@the tavern situated@just outside of the@city centre.,Did Jack go to the airport?,0,65,11,4,#REF!,Yes
+47,34,Noun,5,HF,hotel,11614,11447,4.76,1409.72,2,0,"During the summer, the hotel attracted many tourists with its low prices.",,Were prices high in the summer?,0,73,12,5,#REF!,Yes
+47,34,Noun,5,LF,motel,235,142,3.07,1379.77,4,0,"During the summer, the motel attracted many tourists with its low prices.",,Were prices high in the summer?,0,73,12,5,#REF!,Yes
+18,35,Noun,5,HF,house,135288,50926,5.83,3678.92,5,0.095238095,Mary sold the old house hidden in the shades of the nearby forest.,Mary sold the@old house hidden in@the shades of the@nearby forest.,Was the property sold?,1,66,13,5,#REF!,Yes
+18,35,Noun,5,LF,shack,341,112,3.23,1283.53,8,0,Mary sold the old shack hidden in the shades of the nearby forest.,Mary sold the@old shack hidden in@the shades of the@nearby forest.,Was the property sold?,1,66,13,5,#REF!,Yes
+48,36,Noun,5,HF,crime,16168,7155,4.9,642.96,4,0,The documentary showed a series of crime cases that remain unsolved.,,Were the cases unsolved?,1,68,11,7,#REF!,Yes
+48,36,Noun,5,LF,heist,103,15,2.71,1055.29,1,0,The documentary showed a series of heist cases that remain unsolved.,,Were the cases unsolved?,1,68,11,7,#REF!,Yes
+19,37,Noun,5,HF,stage,31143,16565,5.19,1412.93,6,0,"For the upcoming performance, the stage had to be decorated.","For the upcoming@performance,@the stage had to be@decorated.",Were decorations necessary?,1,60,10,6,#REF!,Yes
+19,37,Noun,5,LF,foyer,171,390,2.93,2116.92,1,0,"For the upcoming performance, the foyer had to be decorated.","For the upcoming@performance,@the foyer had to be@decorated.",Were decorations necessary?,1,60,10,6,#REF!,Yes
+49,38,Noun,5,HF,fight,22129,6905,5.04,2533.89,8,0,"Not long after the fight escalated in the bar, the police was called.",,Was the fire brigade called?,0,69,13,5,#REF!,Yes
+49,38,Noun,5,LF,brawl,209,153,3.02,545.42,4,0,"Not long after the brawl escalated in the bar, the police was called.",,Was the fire brigade called?,0,69,13,5,#REF!,Yes
+20,39,Noun,5,HF,glass,16716,9856,4.92,1016.99,3,0,The teacher used a glass to demonstrate the properties of light.,The teacher used@a glass to@demonstrate the@properties of light.,Did the teacher do a demonstration?,1,64,11,5,#REF!,Yes
+20,39,Noun,5,LF,prism,258,80,3.11,624.16,0,0,The teacher used a prism to demonstrate the properties of light.,The teacher used@a prism to@demonstrate the@properties of light.,Did the teacher do a demonstration?,1,64,11,5,#REF!,Yes
+50,40,Noun,5,HF,sugar,13899,3773,4.84,315.16,0,0,The large production of sugar was a big boost for the economy.,,Was the increased production good for the economy?,1,62,12,5,#REF!,Yes
+50,40,Noun,5,LF,maize,258,330,3.11,382.42,1,0,The large production of maize was a big boost for the economy.,,Was the increased production good for the economy?,1,62,12,5,#REF!,Yes
+21,41,Noun,5,HF,water,68324,35078,5.53,3267.72,7,0,The maintenance of the water pipe made it necessary to close the road.,The maintenance of@the water pipe made@it necessary to close@the road.,Was the road open?,0,70,13,5,#REF!,Yes
+21,41,Noun,5,LF,sewer,552,216,3.44,2208.92,4,0,The maintenance of the sewer pipe made it necessary to close the road.,The maintenance of@the sewer pipe made@it necessary to close@the road.,Was the road open?,0,70,13,5,#REF!,Yes
+51,42,Noun,5,HF,staff,17945,22723,4.95,1230.63,2,0.047619048,The manager asked the staff to be careful with the paperwork.,,Was it necessary to be diligent with the paperwork?,1,61,11,5,#REF!,Yes
+51,42,Noun,5,LF,clerk,683,1952,3.53,1738.56,0,0,The manager asked the clerk to be careful with the paperwork.,,Was it necessary to be diligent with the paperwork?,1,61,11,5,#REF!,Yes
+22,43,Noun,5,HF,speed,16470,7741,4.91,1315.31,3,0,None of the trainees could work at the speed set by their supervisor.,None of the trainees@could work at@the speed set by@their supervisor.,Were the trainees struggling to keep up with their work?,1,69,13,9,#REF!,Yes
+22,43,Noun,5,LF,tempo,774,349,3.59,177.4,3,0,None of the trainees could work at the tempo set by their supervisor.,None of the trainees@could work at@the tempo set by@their supervisor.,Were the trainees struggling to keep up with their work?,1,69,13,9,#REF!,Yes
+52,44,Noun,4,HF,rain,24402,6517,5.08,1796.22,10,0,The lack of rain in the park made it possible to conduct the field experiment.,,Did they conduct a party in the park?,0,78,15,4,#REF!,Yes
+52,44,Noun,4,LF,haze,291,366,3.16,2200.27,10,0,The lack of haze in the park made it possible to conduct the field experiment.,,Did they conduct a party in the park?,0,78,15,4,#REF!,Yes
+23,45,Noun,6,HF,system,36799,44674,5.26,1092.17,0,0,The budget included money for a system upgrade this year.,The budget included@money for@a system upgrade this@year.,Was there money for an upgrade this year?,1,57,10,7,#REF!,Yes
+23,45,Noun,6,LF,server,172,1482,2.93,2089.88,2,0,The budget included money for a server upgrade this year.,The budget included@money for@a server upgrade this@year.,Was there money for an upgrade this year?,1,57,10,7,#REF!,Yes
+53,46,Noun,6,HF,record,26257,14978,5.11,1453.04,0,0,The discovery of the missing record shed new light on the police investigation.,,Was something missing discovered?,1,79,13,6,#REF!,Yes
+53,46,Noun,6,LF,folder,176,350,2.94,2010.51,6,0,The discovery of the missing folder shed new light on the police investigation.,,Was something missing discovered?,1,79,13,6,#REF!,Yes
+24,47,Noun,7,HF,picture,26944,10888,5.13,607.18,0,0,The professor explained that the picture dates back to the 1870s.,The professor@explained that@the picture dates@back to the 1870s.,Was the origin in the 1930s?,0,65,11,6,#REF!,Yes
+24,47,Noun,7,LF,proverb,187,99,2.97,1118.17,0,0,The professor explained that the proverb dates back to the 1870s.,The professor@explained that@the proverb dates@back to the 1870s.,Was the origin in the 1930s?,0,65,11,6,#REF!,Yes
+54,48,Noun,7,HF,problem,65012,28993,5.51,1038.07,0,0,The new theory led to a problem which was seemingly very difficult to solve.,,Was the solution easy?,0,76,14,7,#REF!,Yes
+54,48,Noun,7,LF,paradox,351,674,3.24,572.54,0,0,The new theory led to a paradox which was seemingly very difficult to solve.,,Was the solution easy?,0,76,14,7,#REF!,Yes
+25,49,Noun,3,HF,oil,19139,10277,4.98,128.99,3,0,The company developed a new type of hair oil intended for everyday use.,The company developed@a new type of@hair oil intended for@everyday use.,Was the product made for everyday use?,1,71,13,9,#REF!,Yes
+25,49,Noun,3,LF,gel,842,712,3.62,590.33,6,0.142857143,The company developed a new type of hair gel intended for everyday use.,The company developed@a new type of@hair gel intended for@everyday use.,Was the product made for everyday use?,1,71,13,9,#REF!,Yes
+55,50,Noun,5,HF,money,138993,37367,5.84,782.97,1,0,Vanessa realised she had forgotten her money when she was in the shop.,,Did Vanessa forget something?,1,70,13,7,#REF!,Yes
+55,50,Noun,5,LF,purse,1684,731,3.92,1564.16,5,0.238095238,Vanessa realised she had forgotten her purse when she was in the shop.,,Did Vanessa forget something?,1,70,13,7,#REF!,Yes
+26,51,Noun,4,HF,foot,16733,7544,4.92,2029.77,12,0.095238095,The patient reported feeling a strange sensation in her foot today.,The patient reported@feeling a strange@sensation in@her foot today.,Did the patient complain of a toothache?,0,67,11,10,#REF!,Yes
+26,51,Noun,4,LF,heel,1290,801,3.81,2832.58,7,0,The patient reported feeling a strange sensation in her heel today.,The patient reported@feeling a strange@sensation in@her heel today.,Did the patient complain of a toothache?,0,67,11,10,#REF!,Yes
+56,52,Noun,4,HF,bird,14348,3955,4.85,587.2,4,0.047619048,The dog barked at the bird nesting in the branches of the tree.,,Did the dog bark?,1,63,13,6,#REF!,Yes
+56,52,Noun,4,LF,crow,890,340,3.65,2164.56,6,0,The dog barked at the crow nesting in the branches of the tree.,,Did the dog bark?,1,63,13,6,#REF!,Yes
+27,53,Noun,5,HF,table,25504,20200,5.1,820,4,0,The young family was looking to buy a new table suitable for their living room.,The young family was@looking to buy a@new table suitable for their@living room.,Were they looking to buy a new fridge?,0,79,15,10,#REF!,Yes
+27,53,Noun,5,LF,couch,831,528,3.62,3910.02,6,0,The young family was looking to buy a new couch suitable for their living room.,The young family was@looking to buy a@new couch suitable for their@living room.,Were they looking to buy a new fridge?,0,79,15,10,#REF!,Yes
+57,54,Noun,6,HF,father,36427,23989,5.26,2829.9,4,0.047619048,Margaret benefited a lot from the advice of her father during her school years.,,Did Margaret find the advice useless?,0,79,14,10,#REF!,Yes
+57,54,Noun,6,LF,mentor,999,263,3.7,673.61,0,0,Margaret benefited a lot from the advice of her mentor during her school years.,,Did Margaret find the advice useless?,0,79,14,10,#REF!,Yes
+28,55,Noun,7,HF,weather,26764,5824,5.12,1911.65,3,0,The military leader examined the weather map before the operation.,The military leader@examined@the weather map@before the operation.,Did he examine radar systems?,0,66,10,6,#REF!,Yes
+28,55,Noun,7,LF,terrain,1015,620,3.7,757.32,0,0.047619048,The military leader examined the terrain map before the operation.,The military leader@examined@the terrain map@before the operation.,Did he examine radar systems?,0,66,10,6,#REF!,Yes
+58,56,Noun,7,HF,bedroom,20187,4352,5,647.21,0,0,Sally bought flowers for the bedroom upon moving into her new house.,,Did Sally buy groceries?,0,68,12,6,#REF!,Yes
+58,56,Noun,7,LF,doorway,1031,1661,3.71,212.98,0,0,Sally bought flowers for the doorway upon moving into her new house.,,Did Sally buy groceries?,0,68,12,6,#REF!,Yes
+29,57,Noun,7,HF,history,35603,19308,5.25,944.51,0,0,"In the library, the history section was closed due to the ongoing renovations.","In the library,@the history section@was closed due to the@ongoing renovations.",Was the library section open?,0,78,13,5,#REF!,Yes
+29,57,Noun,7,LF,archive,1132,703,3.75,375.87,0,0,"In the library, the archive section was closed due to the ongoing renovations.","In the library,@the archive section@was closed due to the@ongoing renovations.",Was the library section open?,0,78,13,5,#REF!,Yes
+59,58,Noun,7,HF,meeting,21461,20801,5.03,3625.48,1,0,"After finishing his meeting early, the student was free to go home.",,Was the student free to go home?,1,67,12,4,#REF!,Yes
+59,58,Noun,7,LF,lecture,1101,1883,3.74,977.49,0,0,"After finishing his lecture early, the student was free to go home.",,Was the student free to go home?,1,67,12,4,#REF!,Yes
+30,59,Noun,7,HF,quality,20497,16320,5.01,782.1,1,0,The author's book lacked the quality needed to get a good contract.,The author's book@lacked@the quality needed to@get a good contract.,Was the book good enough to get a contract?,0,67,12,6,#REF!,Yes
+30,59,Noun,7,LF,clarity,1251,1089,3.79,850.55,2,0,The author's book lacked the clarity needed to get a good contract.,The author's book@lacked@the quality needed to@get a good contract.,Was the book good enough to get a contract?,0,67,12,6,#REF!,Yes
+60,60,Noun,5,HF,floor,22323,11556,5.04,834.04,2,0,"After the house was fully cleaned, the floor shined in the sunlight.",,Was the house cleaned?,1,68,12,8,#REF!,Yes
+60,60,Noun,5,LF,porch,588,549,3.47,2021.79,4,0,"After the house was fully cleaned, the porch shined in the sunlight.",,Was the house cleaned?,1,68,12,8,#REF!,Yes
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,

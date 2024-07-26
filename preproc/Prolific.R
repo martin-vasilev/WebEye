@@ -15,6 +15,9 @@ for(i in 1:length(folders)){
   
   # open files:
   folder_dir<- folders[i]
+  
+  list<- substr(folder_dir, nchar(folder_dir), nchar(folder_dir))
+  
   trials <- read_csv(paste(folder_dir, '/trials.csv', sep=''))
   trials<- subset(trials, Task_Name== 'sentence'|Task_Name== 'sentence_DC' )
   
@@ -37,6 +40,8 @@ for(i in 1:length(folders)){
   ts<- read_csv(paste(folder_dir, '/timeseries.csv', sep=''))
   ts<- subset(ts, Task_Name== 'sentence'|Task_Name== 'sentence_DC')
   
+  ts$list<- list
+  
   tasks<- unique(trials$Task_Name)
   
   for(j in 1:length(tasks)){
@@ -52,8 +57,15 @@ for(i in 1:length(folders)){
       trial_ts<- subset(task_ts, Trial_Id== task_trials$Trial_Id[k] & variable_name== 'gaze_data') 
       
       
-      trial_ts$Frequency<- task_trials$Frequency[k]
-      trial_ts$Preview<- task_trials$Preview[k]
+      if(list=='A'){
+        trial_ts$Frequency<- task_trials$Frequency[k]
+        trial_ts$Preview<- task_trials$Preview[k]
+      }else{
+        trial_ts$Frequency<- ifelse(task_trials$Frequency[k]=='low', 'high', ifelse(task_trials$Frequency[k]=='high', 'low', NA))
+        trial_ts$Preview<- ifelse(task_trials$Preview[k]== 'valid', 'invalid', ifelse(task_trials$Preview[k]== 'invalid', 'valid', NA))
+      }
+      
+
 
       trial_ts$x<- NA
       trial_ts$y<- NA
@@ -69,8 +81,8 @@ for(i in 1:length(folders)){
           next
         }
         
-        trial_ts$x[l]<- string[1]*width_multiplier # change to native width
-        trial_ts$y[l]<- string[2]*height_multiplier # change to native height
+        trial_ts$x[l]<- string[1]#*width_multiplier # change to native width
+        trial_ts$y[l]<- string[2]#*height_multiplier # change to native height
         trial_ts$time[l]<- string[3]
         trial_ts$conf[l]<- string[4]
         
@@ -92,7 +104,7 @@ for(i in 1:length(folders)){
       
       # calculate time difference from previous sample:
       trial_ts<- trial_ts %>%
-        mutate(time_diff = time - lag(time, default = first(time)))
+        mutate(time_diff = time - lag(time))
       
       eye_data<- rbind(eye_data, trial_ts)
       
@@ -109,11 +121,10 @@ write.csv(eye_data, 'preproc/prolific/eye_data.csv')
 
 
 
-DC<- subset(eye_data, Task_Name== 'sentence_DC')
+sent<- subset(eye_data, Task_Name== 'sentence')
 
-library(readxl)
-corpus_dc <- read_excel("preproc/prolific/Corpus_fq.xlsx", 
-                               sheet = "DC")
+library(readr)
+Corpus_fq <- read_csv("preproc/prolific/Corpus_fq.csv")
 
 
 library(saccades)
@@ -136,143 +147,59 @@ for(i in 1:length(subs)){
     
 }
 
-a<- subset(eye_data, Task_Name== 'sentence'  &Trial_Id== 2 & Exp_Subject_Id==953681)
+a<- subset(eye_data, Task_Name== 'sentence'  &Trial_Id< 31)
 
-sent<- c('The house\nwas recognisable by\nits green fence and\nbig windows.')
+source('preproc/functions/get_coords.R')
+dat<- NULL
 
-x_offset<- 125
-y_offset<- 112    
-ppl<- 78
-linespan<- 233
+nitems<- sort(unique(a$Trial_Id))
 
-lines<- unlist(strsplit(sent, '\n'))
-
-coords<- NULL
-
-for(i in 1:length(lines)){
+for(i in 1:length(nitems)){
+  b<- subset(a, Trial_Id== nitems[i])
   
-  if(i==1){ # if first line
+  sent<-Corpus_fq$line_breaks[which(Corpus_fq$Study_ID== nitems[i])[1]]
+  coords<- get_coords(sent)
+  
+  b$wordID<- NA
+  b$char<- NA
+  b$char_num<- NA
+  
+  for(i in 1:nrow(b)){
     
-    for(j in 1:nchar(lines[i])){
-      
-      if(j==1){
-        x1<- x_offset
-        x2<- x_offset + ppl
-        y1<- y_offset
-        y2<- y_offset+ linespan
-        char<- substr(lines[i], j, j)
-
-      }else{
-        x1<- coords$x2[j-1] +1
-        x2<- x1+ ppl
-        y1<- y_offset
-        y2<- y_offset+ linespan
-        char<- substr(lines[i], j, j)
-      }
-      t<- data.frame('x1'=x1, 'x2'=x2, 'y1'=y1, 'y2'=y2, 'char'= char)
-      coords<- rbind(coords, t)
-      
-    }
+    loc<- which(coords$x1<= b$x[i] & coords$x2>= b$x[i] & coords$y1<= b$y[i] & coords$y2>= b$y[i])
     
-  }else{
-    
-    for(j in 1:nchar(lines[i])){
-      
-      if(j==1){
-        x1<- x_offset
-        x2<- x1+ ppl
-        y1<- coords[nrow(coords), 'y2' ]+1
-        y2<- y1+ linespan
-        char<- substr(lines[i], j, j)
-      }else{
-        x1<- coords[nrow(coords), 'x2' ]+1
-        x2<- x1+ ppl
-        y1<- coords[nrow(coords), 'y1' ]
-        y2<- coords[nrow(coords), 'y2' ]
-        char<- substr(lines[i], j, j)
-      }
-      
-      t<- data.frame('x1'=x1, 'x2'=x2, 'y1'=y1, 'y2'=y2, 'char'= char)
-      coords<- rbind(coords, t)
-      
+    if(length(loc)>0){
+      b$wordID[i]<- coords$wordID[loc]
+      b$char[i]<- coords$char[loc]
+      b$char_num[i]<- coords$char_num[loc] 
     }
     
   }
+  
+  dat<- rbind(dat, b)
   
 }
 
+colnames(b)<- c("seq", "trial", "Task_Name", "sub", "Rec_Session_Id",
+                "timestamp", "list", "Frequency", "Preview", "x",             
+                "y", "time", "conf", "time_diff", "wordID",        
+                "char", "char_num", "word_length")
+
+b$wordID<- gsub(" ", "", b$wordID, fixed = TRUE)
+
+tab<- b %>% group_by(sub, wordID) %>% summarise(TVT= sum(time_diff))
+tab$word_length<- nchar(tab$wordID)
+
+freq<- Frequency(tab)
+tab$lexical_freq<- freq$zipf
+
+plot(tab$word_length, tab$TVT)
+
+tab$lexical_freq_c= scale(tab$lexical_freq, center = T, scale = F)
+tab$word_length_c= scale(tab$word_length, center = T, scale = F)
 
 
+summary(M1<- lm(TVT ~ word_length_c*lexical_freq_c, data= tab))
 
-## map words to dataframe:
-
-coords$wordID<- NA
-coords$char_num<- NA
-
-line_breaks<- which(diff(coords$x1)<0)
-new_coords<-NULL
-
-for(i in 1:(length(line_breaks)+1)){
-  
-  if(i==1){
-    t<- coords[1:line_breaks[i],]
-  }else{
-    
-    if(i== length(line_breaks)+1){
-      t<- coords[(line_breaks[i-1]+1): nrow(coords),]
-    }else{
-      t<- coords[(line_breaks[i-1]+1):line_breaks[i],]
-    }
-    
-  }
-  
-  empty_spaces<- c(which(t$char== ' '), nrow(t))
-  
-  for(j in 1:length(empty_spaces)){
-    if(j==1){
-      t[1:(empty_spaces[j]-1), 'wordID']<- paste(t[1:(empty_spaces[j]-1), 'char'], collapse = '')
-      t[1:(empty_spaces[j]-1), 'char_num']<- 1:(empty_spaces[j]-1)
-    }else{
-      
-      t[empty_spaces[j-1] : empty_spaces[j], 'wordID']<- paste(t[empty_spaces[j-1] : empty_spaces[j], 'char'], collapse='')
-      t[empty_spaces[j-1] : empty_spaces[j], 'char_num']<- 0:(empty_spaces[j]-empty_spaces[j-1])
-      
-      
-    }
-  }
-  
-  new_coords<- rbind(new_coords, t)
-
-}
-
-
-
-
-for(i in 1:length(empty_spaces)){
-  
-  if(i==1){
-    coords[1:(empty_spaces[i]-1), 'wordID']<- paste(coords[1:(empty_spaces[i]-1), 'char'], collapse = '')
-    coords[1:(empty_spaces[i]-1), 'char_num']<- 1:(empty_spaces[i]-1)
-    
-  }else{
-    
-    if(!is.na(coords[empty_spaces[i-1], 'wordID'])){
-      
-      coords[(empty_spaces[i-1]+1) : (empty_spaces[i]-1), 'wordID']<- paste(coords[(empty_spaces[i-1]+1) : (empty_spaces[i]-1), 'char' ], collapse = '')
-      
-
-      
-    }
-    
-    coords[empty_spaces[i-1] : empty_spaces[i], 'wordID']<- paste(coords[empty_spaces[i-1] : empty_spaces[i], 'char'], collapse='')
-    coords[empty_spaces[i-1] : empty_spaces[i], 'char_num']<- 0:(empty_spaces[i]-empty_spaces[i-1])
-  }
-  
-}
-
-## revert back to original frame size:
-coords$x1<- coords$x1/2.4
-coords$x2<- coords$x2/2.4
-coords$y1<- coords$y1/2.4
-coords$y2<- coords$y2/2.4
+plot(effect('lexical_freq_c', M1))
 
