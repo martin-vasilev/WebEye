@@ -199,7 +199,7 @@ tab$lexical_freq_c= scale(tab$lexical_freq, center = T, scale = F)
 tab$word_length_c= scale(tab$word_length, center = T, scale = F)
 
 
-summary(M1<- lm(TVT ~ word_length_c*lexical_freq_c, data= tab))
+summary(M1<- lmer(TVT ~ word_length_c+lexical_freq_c +(1|sub), data= tab))
 
 plot(effect('lexical_freq_c', M1))
 
