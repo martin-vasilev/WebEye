@@ -6,29 +6,32 @@ options(scipen=999)
 library(readr)
 library(tidyverse)
 
+# load data folders:
 folders<- list.dirs('preproc/prolific/')
 folders<- folders[2:length(folders)]
 
 eye_data<- NULL
 
-for(i in 1:length(folders)){
+for(i in 1:length(folders)){ # for each subject folder
   
   # open files:
   folder_dir<- folders[i]
   
+  # get study list
   list<- substr(folder_dir, nchar(folder_dir), nchar(folder_dir))
   
+  # trial info data:
   trials <- read_csv(paste(folder_dir, '/trials.csv', sep=''))
-  trials<- subset(trials, Task_Name== 'sentence'|Task_Name== 'sentence_DC' )
+  trials<- subset(trials, Task_Name== 'sentence')#|Task_Name== 'sentence_DC' )
   
   # info:
   info<- read_csv(paste(folder_dir, '/sessions.csv', sep=''))
   
-  ## screen settings:
+  ## screen settings for subject:
   scr_width<- info$Screen_Width_In_Pixels
   scr_height<- info$Screen_Height_In_Pixels
   
-  scr_width/scr_height
+  #scr_width/scr_height
   
   native_width<- 800
   native_height<- 450
@@ -36,20 +39,20 @@ for(i in 1:length(folders)){
   width_multiplier<- scr_width/native_width
   height_multiplier<- scr_height/native_height
   
-  # timeseries:
+  # timeseries (i.e., eye-tracking data):
   ts<- read_csv(paste(folder_dir, '/timeseries.csv', sep=''))
-  ts<- subset(ts, Task_Name== 'sentence'|Task_Name== 'sentence_DC')
+  ts<- subset(ts, Task_Name== 'sentence')#|Task_Name== 'sentence_DC')
   
   ts$list<- list
   
   tasks<- unique(trials$Task_Name)
   
-  for(j in 1:length(tasks)){
+  for(j in 1:length(tasks)){ # for each task
     
     task_trials<- subset(trials, Task_Name== tasks[j])
     task_ts<- subset(ts, Task_Name== tasks[j])
     
-    for(k in 1:nrow(task_trials)){
+    for(k in 1:nrow(task_trials)){ # for each trial...
       
       start_time<- task_trials$trial_start[k]
       end_time<- task_trials$trial_end[k]
@@ -60,12 +63,12 @@ for(i in 1:length(folders)){
       if(list=='A'){
         trial_ts$Frequency<- task_trials$Frequency[k]
         trial_ts$Preview<- task_trials$Preview[k]
-      }else{
+        
+      }else{ # frequency labels are reversed for list B (difficult to change on website)
         trial_ts$Frequency<- ifelse(task_trials$Frequency[k]=='low', 'high', ifelse(task_trials$Frequency[k]=='high', 'low', NA))
         trial_ts$Preview<- ifelse(task_trials$Preview[k]== 'valid', 'invalid', ifelse(task_trials$Preview[k]== 'invalid', 'valid', NA))
       }
       
-
 
       trial_ts$x<- NA
       trial_ts$y<- NA
@@ -75,9 +78,10 @@ for(i in 1:length(folders)){
       
       for(l in 1:nrow(trial_ts)){
         
+        # take eye-tracking data as string
         string<- as.numeric(unlist(strsplit(trial_ts$value[l], ',')))
         
-        if(length(string)==1){
+        if(length(string)==1){ # if no data, go to next sample
           next
         }
         
@@ -95,6 +99,10 @@ for(i in 1:length(folders)){
       trial_ts$Block_Nr<- NULL
       trial_ts$Task_Nr<- NULL
       trial_ts$Session_Nr<- NULL
+      trial_ts$Preview<- NULL
+      trial_ts$Rec_Session_Id<- NULL
+      trial_ts$Session_Nr<- NULL
+      
       
       ## take only data when the sentence was read:
       trial_ts<- subset(trial_ts, time>= start_time & time<end_time)
@@ -117,7 +125,7 @@ for(i in 1:length(folders)){
 }
 
 
-write.csv(eye_data, 'preproc/prolific/eye_data.csv')
+write.csv(eye_data, 'preproc/prolific/eye_data_raw.csv')
 
 
 
@@ -127,25 +135,24 @@ library(readr)
 Corpus_fq <- read_csv("preproc/prolific/Corpus_fq.csv")
 
 
-library(saccades)
+#library(saccades)
 
+# subs<- unique(DC$Exp_Subject_Id)
+# fix<- NULL
 
-subs<- unique(DC$Exp_Subject_Id)
-fix<- NULL
-
-for(i in 1:length(subs)){
-  
-  n<- subset(DC, Exp_Subject_Id==subs[i])
-  
-  a<- n[, c('time', 'x', 'y', 'Trial_Id')]
-  colnames(a)<- c('time', 'x', 'y', 'trial', 'sub')
-  
-  b<- detect.fixations(a)
-  
-  
-
-    
-}
+# for(i in 1:length(subs)){
+#   
+#   n<- subset(DC, Exp_Subject_Id==subs[i])
+#   
+#   a<- n[, c('time', 'x', 'y', 'Trial_Id')]
+#   colnames(a)<- c('time', 'x', 'y', 'trial', 'sub')
+#   
+#   b<- detect.fixations(a)
+#   
+#   
+# 
+#     
+# }
 
 a<- subset(eye_data, Task_Name== 'sentence'  &Trial_Id< 31)
 
@@ -190,6 +197,7 @@ b$wordID<- gsub(" ", "", b$wordID, fixed = TRUE)
 tab<- b %>% group_by(sub, wordID) %>% summarise(TVT= sum(time_diff))
 tab$word_length<- nchar(tab$wordID)
 
+library(EMreading)
 freq<- Frequency(tab)
 tab$lexical_freq<- freq$zipf
 
