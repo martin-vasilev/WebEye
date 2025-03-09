@@ -162,7 +162,9 @@ dat<- NULL
 eye_data$wordID<- NA
 eye_data$char<- NA
 eye_data$char_num<- NA
+eye_data$target_word<- NA
 
+library(stringr)
 
 nsubs<- unique(eye_data$Exp_Subject_Id)
 
@@ -181,15 +183,26 @@ for(k in 1:length(nsubs)){ # for each subject...
     sent<-Corpus_fq$line_breaks[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
     coords<- get_coords(sent)
     
+    target<- Corpus_fq$`Target (N)`[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
+    
     
     for(j in 1:nrow(b)){ # for each fixation
       
       loc<- which(coords$x1<= b$x[j] & coords$x2>= b$x[j] & coords$y1<= b$y[j] & coords$y2>= b$y[j])
       
       if(length(loc)>0){
-        b$wordID[j]<- coords$wordID[loc]
+        b$wordID[j]<- str_trim(coords$wordID[loc])
         b$char[j]<- coords$char[loc]
         b$char_num[j]<- coords$char_num[loc] 
+        
+        if(!is.na(coords$wordID[loc])){
+          if(b$wordID[j]== target){
+            b$target_word[j]<- "Yes"
+          }else{
+            b$target_word[j]<- "No"
+          }
+        }
+
       }
       
     }
@@ -199,14 +212,14 @@ for(k in 1:length(nsubs)){ # for each subject...
     
   }
   
-  cat(i); cat(' ')
+  cat(k); cat(' ')
   
 }
 
 
 
 
-colnames(b)<- c("seq", "trial", "Task_Name", "sub", "Rec_Session_Id",
+colnames(dat)<- c("seq", "trial", "Task_Name", "sub", "Rec_Session_Id",
                 "timestamp", "list", "Frequency", "Preview", "x",             
                 "y", "time", "conf", "time_diff", "wordID",        
                 "char", "char_num", "word_length")
