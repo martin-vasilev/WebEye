@@ -133,7 +133,7 @@ sent<- subset(eye_data, Task_Name== 'sentence')
 
 library(readr)
 Corpus_fq <- read_csv("preproc/prolific/Corpus_fq.csv")
-
+Corpus_fq<- Corpus_fq[1:120,]
 
 #library(saccades)
 
@@ -154,15 +154,15 @@ Corpus_fq <- read_csv("preproc/prolific/Corpus_fq.csv")
 #     
 # }
 
-a<- subset(eye_data, Task_Name== 'sentence'  &Trial_Id< 31)
+#a<- subset(eye_data, Task_Name== 'sentence'  &Trial_Id< 31)
 
 source('preproc/functions/get_coords.R')
 dat<- NULL
 
-nitems<- sort(unique(a$Trial_Id))
+nitems<- sort(unique(eye_data$Trial_Id))
 
 for(i in 1:length(nitems)){
-  b<- subset(a, Trial_Id== nitems[i])
+  b<- subset(eye_data, Trial_Id== nitems[i])
   
   sent<-Corpus_fq$line_breaks[which(Corpus_fq$Study_ID== nitems[i])[1]]
   coords<- get_coords(sent)
@@ -171,14 +171,14 @@ for(i in 1:length(nitems)){
   b$char<- NA
   b$char_num<- NA
   
-  for(i in 1:nrow(b)){
+  for(j in 1:nrow(b)){
     
-    loc<- which(coords$x1<= b$x[i] & coords$x2>= b$x[i] & coords$y1<= b$y[i] & coords$y2>= b$y[i])
+    loc<- which(coords$x1<= b$x[j] & coords$x2>= b$x[j] & coords$y1<= b$y[j] & coords$y2>= b$y[j])
     
     if(length(loc)>0){
-      b$wordID[i]<- coords$wordID[loc]
-      b$char[i]<- coords$char[loc]
-      b$char_num[i]<- coords$char_num[loc] 
+      b$wordID[j]<- coords$wordID[loc]
+      b$char[j]<- coords$char[loc]
+      b$char_num[j]<- coords$char_num[loc] 
     }
     
   }

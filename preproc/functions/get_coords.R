@@ -1,10 +1,10 @@
 
-get_coords<- function(string, revert= T){
+get_coords<- function(string, revert= F){
   
-  x_offset<- 125
-  y_offset<- 112    
-  ppl<- 78
-  linespan<- 233
+  x_offset<- 52
+  y_offset<- 50    
+  ppl<- 32
+  linespan<- 95
   
   lines<- unlist(strsplit(string, '@'))
   

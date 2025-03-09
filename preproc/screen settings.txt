@@ -1,0 +1,6 @@
+Labvanced screen: 800 x 450
+
+x offset: 52
+
+pixels per letter: 33
+
