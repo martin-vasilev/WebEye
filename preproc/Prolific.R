@@ -159,33 +159,52 @@ Corpus_fq<- Corpus_fq[1:120,]
 source('preproc/functions/get_coords.R')
 dat<- NULL
 
-nitems<- sort(unique(eye_data$Trial_Id))
+eye_data$wordID<- NA
+eye_data$char<- NA
+eye_data$char_num<- NA
 
-for(i in 1:length(nitems)){
-  b<- subset(eye_data, Trial_Id== nitems[i])
+
+nsubs<- unique(eye_data$Exp_Subject_Id)
+
+for(k in 1:length(nsubs)){ # for each subject...
   
-  sent<-Corpus_fq$line_breaks[which(Corpus_fq$Study_ID== nitems[i])[1]]
-  coords<- get_coords(sent)
+  a<- subset(eye_data, Exp_Subject_Id== nsubs[k])
   
-  b$wordID<- NA
-  b$char<- NA
-  b$char_num<- NA
+  nitems<- unique(eye_data$Trial_Id)
   
-  for(j in 1:nrow(b)){
+  for(i in 1:length(nitems)){ # for each item...
     
-    loc<- which(coords$x1<= b$x[j] & coords$x2>= b$x[j] & coords$y1<= b$y[j] & coords$y2>= b$y[j])
+    b<- subset(a, Trial_Id== nitems[i])
     
-    if(length(loc)>0){
-      b$wordID[j]<- coords$wordID[loc]
-      b$char[j]<- coords$char[loc]
-      b$char_num[j]<- coords$char_num[loc] 
+    freq<- ifelse(b$Frequency[1]== 'low', 'LF', 'HF')
+    
+    sent<-Corpus_fq$line_breaks[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
+    coords<- get_coords(sent)
+    
+    
+    for(j in 1:nrow(b)){ # for each fixation
+      
+      loc<- which(coords$x1<= b$x[j] & coords$x2>= b$x[j] & coords$y1<= b$y[j] & coords$y2>= b$y[j])
+      
+      if(length(loc)>0){
+        b$wordID[j]<- coords$wordID[loc]
+        b$char[j]<- coords$char[loc]
+        b$char_num[j]<- coords$char_num[loc] 
+      }
+      
     }
+    
+    dat<- rbind(dat, b)
+    
     
   }
   
-  dat<- rbind(dat, b)
+  cat(i); cat(' ')
   
 }
+
+
+
 
 colnames(b)<- c("seq", "trial", "Task_Name", "sub", "Rec_Session_Id",
                 "timestamp", "list", "Frequency", "Preview", "x",             
