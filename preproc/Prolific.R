@@ -60,7 +60,7 @@ for(i in 1:length(folders)){ # for each subject folder
       trial_ts<- subset(task_ts, Trial_Id== task_trials$Trial_Id[k] & variable_name== 'gaze_data') 
       
       
-      if(list=='A'){
+      if(list=='A' | list== 'C'){
         trial_ts$Frequency<- task_trials$Frequency[k]
         trial_ts$Preview<- task_trials$Preview[k]
         
