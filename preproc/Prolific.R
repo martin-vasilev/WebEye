@@ -219,14 +219,17 @@ for(k in 1:length(nsubs)){ # for each subject...
 
 
 
-colnames(dat)<- c("seq", "trial", "Task_Name", "sub", "Rec_Session_Id",
-                "timestamp", "list", "Frequency", "Preview", "x",             
+colnames(dat)<- c("seq", "item", "Task_Name", "sub",
+                "timestamp", "list", "Frequency", "x",             
                 "y", "time", "conf", "time_diff", "wordID",        
-                "char", "char_num", "word_length")
+                "char", "char_num", "target_word")
 
-b$wordID<- gsub(" ", "", b$wordID, fixed = TRUE)
+#b$wordID<- gsub(" ", "", b$wordID, fixed = TRUE)
 
-tab<- b %>% group_by(sub, wordID) %>% summarise(TVT= sum(time_diff))
+dat$word_length<- nchar(dat$wordID)
+
+
+tab<- dat %>% group_by(sub, item, wordID) %>% summarise(TVT= sum(time_diff, na.rm = T))
 tab$word_length<- nchar(tab$wordID)
 
 library(EMreading)
@@ -238,8 +241,22 @@ plot(tab$word_length, tab$TVT)
 tab$lexical_freq_c= scale(tab$lexical_freq, center = T, scale = F)
 tab$word_length_c= scale(tab$word_length, center = T, scale = F)
 
+library(lmerTest)
 
-summary(M1<- lmer(TVT ~ word_length_c+lexical_freq_c +(1|sub), data= tab))
+summary(M1<- lmer(TVT ~ word_length_c*lexical_freq_c +(1|sub), data= tab))
 
-plot(effect('lexical_freq_c', M1))
+library(ggeffects)
+plot(ggeffect(M1, terms = c('lexical_freq_c', 'word_length_c' )))
+
+
+target_data<- subset(dat, target_word== 'Yes')
+
+target_data<- target_data %>% 
+  group_by(sub, item, Frequency, wordID) %>%
+  summarise(TVT= sum(time_diff, na.rm = T))%>%
+  filter(TVT<5000)
+
+summary(M2<- lmer(TVT ~ Frequency +(1|sub)+ (1|item), data= target_data))
+
+plot(ggeffect(M2, terms = 'Frequency'))
 
