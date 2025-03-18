@@ -3,11 +3,15 @@ rm(list= ls())
 
 options(scipen=999)
 
+get_num<- function(string){as.numeric(unlist(gsub("[^0-9]", "", unlist(string)), ""))}
+
 library(readr)
 library(tidyverse)
 
 folders<- list.dirs('preproc/lab/')
 folders<- folders[2:length(folders)]
+
+#folders<- folders[-4]
 
 eye_data<- NULL
 trial_data<- NULL
@@ -17,9 +21,12 @@ for(i in 1:length(folders)){
   # open files:
   folder_dir<- folders[i]
   
-  list<- substr(folder_dir, nchar(folder_dir), nchar(folder_dir))
+  list= unlist(strsplit(folder_dir, '/'))[3]
+  list= get_num(list)
   
-  trials <- read_csv(paste(folder_dir, '/trials.csv', sep=''))
+  #list<- substr(folder_dir, nchar(folder_dir), nchar(folder_dir))
+  
+  trials <- suppressMessages(read_csv(paste(folder_dir, '/trials.csv', sep='')))
   trials<- subset(trials, Task_Name== 'sentence'|Task_Name== 'sentence_DC' )
   trials$sub<- list
   
@@ -36,7 +43,7 @@ for(i in 1:length(folders)){
   ## eye-movement data files:
   
   # timeseries:
-  ts<- read_csv(paste(folder_dir, '/timeseries.csv', sep=''))
+  ts<- suppressMessages(read_csv(paste(folder_dir, '/timeseries.csv', sep='')))
   ts<- subset(ts, Task_Name== 'sentence'|Task_Name== 'sentence_DC')
   
   ts$sub<- list
@@ -75,8 +82,15 @@ for(i in 1:length(folders)){
   sacc_samples$unix_time<- sacc_samples$start_time+start
   
   
+  cat(sprintf('\n\nSubject %g, Item: ',list ))
   
   for(j in 1:nrow(trials)){
+    
+    # if(i==3 & j==100 ){
+    #   next;
+    # }
+    
+    cat(sprintf('%g ', j))
     
     start_time<- trials$trial_start[j]
     end_time<- trials$trial_end[j]
@@ -140,8 +154,11 @@ for(i in 1:length(folders)){
     }
     
     
+    if(nrow(trial_ts)>0){
+      try(eye_data<- rbind(eye_data, trial_ts))
+    }
     
-    eye_data<- rbind(eye_data, trial_ts)
+
     
     
   }
@@ -158,3 +175,4 @@ write.csv(eye_data, 'preproc/lab/raw_data.csv')
 
 cor.test(eye_data$x, eye_data$el_x_std)
 cor.test(eye_data$y, eye_data$el_y_std)
+

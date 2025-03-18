@@ -228,6 +228,8 @@ colnames(dat)<- c("seq", "item", "Task_Name", "sub",
 
 dat$word_length<- nchar(dat$wordID)
 
+write.csv(dat, file= "preproc/Prolific_data.csv")
+
 
 tab<- dat %>% group_by(sub, item, wordID) %>% summarise(TVT= sum(time_diff, na.rm = T))
 tab$word_length<- nchar(tab$wordID)
@@ -253,10 +255,12 @@ target_data<- subset(dat, target_word== 'Yes')
 
 target_data<- target_data %>% 
   group_by(sub, item, Frequency, wordID) %>%
-  summarise(TVT= sum(time_diff, na.rm = T))%>%
-  filter(TVT<5000)
+  summarise(TVT= sum(time_diff, na.rm = T))
 
-summary(M2<- lmer(TVT ~ Frequency +(1|sub)+ (1|item), data= target_data))
+target_data<- target_data%>%
+  filter(TVT>0& TVT<4000)
+
+summary(M2<- lmer(log(TVT) ~ Frequency +(Frequency|sub)+ (1|item), data= target_data))
 
 plot(ggeffect(M2, terms = 'Frequency'))
 
