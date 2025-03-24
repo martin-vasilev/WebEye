@@ -163,6 +163,7 @@ eye_data$wordID<- NA
 eye_data$char<- NA
 eye_data$char_num<- NA
 eye_data$target_word<- NA
+eye_data$word_num<- NA
 
 library(stringr)
 
@@ -193,7 +194,8 @@ for(k in 1:length(nsubs)){ # for each subject...
       if(length(loc)>0){
         b$wordID[j]<- str_trim(coords$wordID[loc])
         b$char[j]<- coords$char[loc]
-        b$char_num[j]<- coords$char_num[loc] 
+        b$char_num[j]<- coords$char_num[loc]
+        b$word_num[j]<- coords$word_num[loc]
         
         if(!is.na(coords$wordID[loc])){
           if(b$wordID[j]== target){
@@ -222,11 +224,15 @@ for(k in 1:length(nsubs)){ # for each subject...
 colnames(dat)<- c("seq", "item", "Task_Name", "sub",
                 "timestamp", "list", "Frequency", "x",             
                 "y", "time", "conf", "time_diff", "wordID",        
-                "char", "char_num", "target_word")
+                "char", "char_num", "target_word", "word_number")
 
 #b$wordID<- gsub(" ", "", b$wordID, fixed = TRUE)
 
 dat$word_length<- nchar(dat$wordID)
+
+library(EMreading)
+dat<- Frequency(dat)
+#dat$lexical_freq<- dat$zipf
 
 write.csv(dat, file= "preproc/Prolific_data.csv")
 

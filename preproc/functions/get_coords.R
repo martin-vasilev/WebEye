@@ -3,7 +3,7 @@ get_coords<- function(string, revert= F){
   
   x_offset<- 52
   y_offset<- 50    
-  ppl<- 32
+  ppl<- 33
   linespan<- 95
   
   lines<- unlist(strsplit(string, '@'))
@@ -76,7 +76,14 @@ get_coords<- function(string, revert= F){
   for(i in 1:(length(line_breaks)+1)){
     
     if(i==1){
-      t<- coords[1:line_breaks[i],]
+      
+      if(length(line_breaks)>0){
+        t<- coords[1:line_breaks[i],]
+      }else{
+        t<- coords
+      }
+      
+
     }else{
       
       if(i== length(line_breaks)+1){
@@ -105,6 +112,31 @@ get_coords<- function(string, revert= F){
     new_coords<- rbind(new_coords, t)
     
   }
+  
+  ### map word ID:
+  
+  new_coords$word_num<- NA
+  word<-1
+  for(i in 1:nrow(new_coords)){
+    if(i==1){
+      new_coords$word_num[i]<- 1
+    }else{
+      
+      if(!is.na(new_coords$wordID[i])&!is.na(new_coords$wordID[i-1])){
+        if(new_coords$wordID[i]==new_coords$wordID[i-1]){
+          new_coords$word_num[i]<- word
+          
+        }else{
+          # increment word by 1:
+          word<- word +1
+          new_coords$word_num[i]<- word
+        }
+      }
+      
+
+    }
+  }
+  
   
   if(revert){
     
