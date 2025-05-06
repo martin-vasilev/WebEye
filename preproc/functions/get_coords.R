@@ -1,10 +1,20 @@
 
 get_coords<- function(string, revert= F){
   
-  x_offset<- 52
-  y_offset<- 50    
-  ppl<- 33
-  linespan<- 95
+  if(revert==T){
+    x_offset<- 125
+    y_offset<- 115
+    ppl<- 75
+    linespan<- 228
+    
+    
+  }else{
+    x_offset<- 52
+    y_offset<- 50    
+    ppl<- 33
+    linespan<- 95
+  }
+
   
   lines<- unlist(strsplit(string, '@'))
   
@@ -140,11 +150,11 @@ get_coords<- function(string, revert= F){
   
   if(revert){
     
-    ## revert back to original frame size:
-    new_coords$x1<- new_coords$x1/2.4
-    new_coords$x2<- new_coords$x2/2.4
-    new_coords$y1<- new_coords$y1/2.4
-    new_coords$y2<- new_coords$y2/2.4
+    # ## revert back to original frame size:
+    # new_coords$x1<- new_coords$x1/2.4
+    # new_coords$x2<- new_coords$x2/2.4
+    # new_coords$y1<- new_coords$y1/2.4
+    # new_coords$y2<- new_coords$y2/2.4
     
   }
   

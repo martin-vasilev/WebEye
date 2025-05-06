@@ -199,7 +199,7 @@ for(k in 1:length(nsubs)){ # for each subject...
     c<- subset(a, Task_Name== nitems[l])
     
     npages<-  unique(eye_data$Page)
-    npages<- which(!is.na(npages))
+    npages<- npages[which(!is.na(npages))]
     
     for(i in 1:length(nitems)){ # for each item...
       
@@ -330,6 +330,8 @@ for (i in 1:length(nsubs)){
   
   
 }
+
+write.csv(new, file = 'preproc/Provo_skipping.csv')
 
 
 tab<- dat %>% group_by(sub, item, wordID) %>% summarise(TVT= sum(time_diff, na.rm = T))

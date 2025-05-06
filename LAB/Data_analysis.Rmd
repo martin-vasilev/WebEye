@@ -1,0 +1,107 @@
+---
+title: "LAB_data_analysis"
+output: html_document
+date: "2025-05-02"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message= FALSE, warning = FALSE)
+
+setwd("C:/Users/Martin/Documents/R/WebEye/LAB")
+
+# colorblind palletes: # https://venngage.com/blog/color-blind-friendly-palette/
+pallete1= c("#CA3542", "#27647B", "#849FA0", "#AECBC9", "#57575F") # "Classic & trustworthy"
+
+```
+
+### Comprehension Accuracy:
+
+```{r echo=F}
+library(readr)
+library(tidyverse)
+
+trial <- suppressMessages(read_csv("data/trial_data.csv"))
+
+desc_acc<- trial %>% group_by(Task_Name) %>%summarise(M= mean(question_accuracy)*100,SD= sd(question_accuracy)*100)
+
+desc_acc[,2:3]<- round(desc_acc[,2:3],1)
+
+## accuracy by participant:
+
+sub_acc<- trial %>% group_by(Rec_Session_Id, Task_Name) %>% summarise(M= mean(question_accuracy))
+
+range_freq<- round(range(sub_acc$M[which(sub_acc$Task_Name=='sentence')])*100,1)
+range_single_line<- round(range(sub_acc$M[which(sub_acc$Task_Name=='sentence_DC')])*100,1)
+```
+
+The average comprehension accuracy was `r desc_acc[1,2]`% (SD= `r desc_acc[1,2]` %; range: `r range_freq[1]` - `r range_freq[2]` %) in the lexical frequency corpus and `r desc_acc[2,2]`% (SD= `r desc_acc[2,2]` %; range: `r range_single_line[1]` - `r range_single_line[2]` %) in the single-line corpus. Therefore, participants were reading for comprehension.
+
+
+### Correlation between Eyelink and Webcam
+
+```{r echo=F}
+
+# load in webcam data:
+webcam <- read.csv("~/R/WebEye/LAB/data/webcam_raw_data.csv")
+
+webcam<- webcam %>% filter(conf>0)
+
+sub_correlations<- webcam %>% drop_na() %>% group_by(Task_Name, sub)%>% summarise(Corr_x= cor(x,el_x), Corr_y= cor(y,el_y))
+
+
+sub_correlations<- sub_correlations %>% pivot_longer(cols = 3:4, names_to = 'Dimension', values_to = 'corr' )
+
+```
+
+
+```{r}
+
+sub_correlations$Task_Name[which(sub_correlations$Task_Name=='Freq_sentences')]<- 'Frequency corpus'
+
+sub_correlations$Task_Name[which(sub_correlations$Task_Name=='Single_line_sentences')]<- 'Single-line corpus'
+
+fun_mean <- function(x, rounding= 2){
+  return(data.frame(y=mean(x),label= paste("M= ", round(mean(x,na.rm=T), rounding), sep= '')))}
+
+P1<- ggplot(sub_correlations, aes(x = Dimension, y = corr, 
+                      color= Dimension, fill= Dimension)) + 
+  facet_wrap(~Task_Name)+
+  ggdist::stat_halfeye(
+    adjust = .5, 
+    width = .6, 
+    .width = 0, 
+    justification = -.3, 
+    point_colour = NA) + 
+  geom_boxplot(
+    width = .25, 
+    outlier.shape = NA, fill= NA
+  ) +
+  geom_point(
+    size = 1.7,
+    alpha = .3,
+    position = position_jitter(
+      seed = 1, width = .1
+    )
+  ) + 
+  coord_cartesian(xlim = c(1.2, NA), clip = "off")+
+  scale_color_manual(values=pallete1[1:2])+
+  scale_fill_manual(values=pallete1[1:2])+
+  theme_classic(20) +ylab("Pearson's (r) coefficient")+
+  xlab("Screen dimension")+
+  #labs(color= c('X', 'Y'))+
+  scale_x_discrete(labels=c('X', 'Y'))+
+  ylim(0, 1)+
+  # geom_text(data = ann_text,label = "No sound", 
+  #           colour= '#545252', size= 5.5, hjust = +1.25)+
+  # geom_text(data = ann_text2,label = "No sound", 
+  #           colour= '#545252', size= 5.5, hjust = +1.25)+
+  theme(legend.position = 'none',
+        strip.background = element_rect(colour=NA, fill=NA),
+        strip.text = element_text(face="bold"))+
+  stat_summary(fun = mean, geom="point",colour="black", size=4) +
+  stat_summary(fun.data = fun_mean, geom="text", vjust=-1.15,
+               hjust= 0.75, colour="black", size= 7);P1
+
+```
+
+
