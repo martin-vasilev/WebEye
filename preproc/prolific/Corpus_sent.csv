@@ -1,0 +1,41 @@
+﻿Study_ID,ID,Preview,Sentence,Target,Length,Question,Question_answ,number of words,Target Pos
+1,1,valid,The man was fed up.,fed,19,Was the man pleased?,0,5,4
+21,2,valid,The cat saw the bird.,saw,21,Did the cat see a dog?,0,5,3
+2,3,valid,The green vase broke.,vase,21,Is the vase broken?,1,4,3
+22,4,valid,John was late again.,late,20,Was John unpunctual again?,1,4,3
+3,5,valid,Paul made some tea.,some,19,Did Paul make coffee?,0,4,3
+23,6,valid,The driver was tired.,was,21,Was the driver fatigued?,1,4,3
+4,7,valid,Jo was very pleased.,very,20,Was Jo happy?,1,4,3
+24,8,valid,He had to clean up.,clean,19,Did he need to tidy up?,1,5,4
+5,9,valid,A break was long due.,long,21,Was a break necessary?,1,5,4
+25,10,valid,The bike is sold now.,sold,21,Was it a car that was sold?,0,5,4
+6,11,valid,James opened his car.,opened,21,Did James open the fridge?,0,4,2
+26,12,valid,His aunt sang along.,sang,20,Was his aunt singing?,1,4,3
+7,13,valid,Poppy got paid today.,paid,21,Did Poppy receive money?,1,4,3
+27,14,valid,The room went dark.,went,19,Was the room full of light?,0,4,3
+8,15,valid,Samantha drew the ox.,drew,21,Did Samantha draw a goat?,0,4,2
+28,16,valid,The river dried up.,dried,19,Did water in the river evaporate?,1,4,3
+9,17,valid,The game ended fast.,ended,20,Did the game end slowly?,0,4,3
+29,18,valid,The bus turned right.,turned,21,Did the bus go left?,0,4,3
+10,19,valid,He got lost at sea.,lost,19,Did he get lost on land?,0,5,3
+30,20,valid,The dog got scared.,got,19,Was the dog afraid?,1,4,3
+11,21,valid,Cam was dressed well.,dressed,21,Was Cam dressed badly?,0,4,3
+31,22,valid,The bird flew away.,flew,19,Did the bird fly away?,1,4,3
+12,23,valid,The bar looked empty.,looked,21,Did the bar look full?,0,4,3
+32,24,valid,Michael drew his gun.,drew,21,Did Michael get his gun out?,1,4,3
+13,25,valid,He ate his soup last.,soup,21,Did he eat his soup first?,0,5,4
+33,26,valid,Li took away his toy.,away,21,Was the toy taken away?,1,5,3
+14,27,valid,The sand felt smooth.,felt,21,Was the sand smooth?,1,4,3
+34,28,valid,The girl walked past.,walked,21,Did the girl walk by?,1,4,3
+15,29,valid,She is new to sewing.,new,21,Does she have a lot of experience sewing?,0,5,3
+35,30,valid,It was a cold night.,cold,20,Was the night warm?,0,5,3
+16,31,valid,The sun shined today.,shined,21,Was it sunny today?,1,4,3
+36,32,valid,Some people were sad.,people,21,Were some people sad?,1,4,2
+17,33,valid,Several kids ate pie.,kids,21,Did several kids eat ice-cream?,0,4,2
+37,34,valid,The car broke down.,broke,19,Was there a problem with the car?,1,4,3
+18,35,valid,He ate many fruits.,many,19,Did he eat fruits?,1,4,3
+38,36,valid,Timothy knew the map.,knew,21,Did Timothy have no knowledge of the map?,0,4,2
+19,37,valid,Tristan liked music.,liked,20,Did Tristan hate music?,0,3,2
+39,38,valid,She knew this artist.,this,21,Was the artist unfamiliar to her?,0,4,3
+20,39,valid,The shop closed down.,closed,21,Did the shop remain open?,0,4,3
+40,40,valid,He was quite annoyed.,quite,21,Was he annoyed?,1,4,3

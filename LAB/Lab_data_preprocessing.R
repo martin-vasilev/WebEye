@@ -359,6 +359,9 @@ library(readr)
 Corpus_fq <- read_csv("preproc/prolific/Corpus_fq.csv")
 Corpus_fq<- Corpus_fq[1:120,]
 
+Corpus_sent <- read_csv("preproc/prolific/Corpus_sent.csv")
+
+
 source('preproc/functions/get_coords.R')
 dat<- NULL
 
@@ -376,66 +379,83 @@ for(k in 1:length(nsubs)){ # for each subject...
   
   a<- subset(el, sub== nsubs[k])
   
-  ntasks<- unique(el$task)
+  ntasks<- unique(a$task)
   
   for(l in 1:length(ntasks)){
     n<- subset(a, task== ntasks[l])
     
-  }
-  
-  nitems<- unique(el$item)
-  
-  for(i in 1:length(nitems)){ # for each item...
+    nitems<- unique(n$item)
     
-    b<- subset(a, item== nitems[i]& task== ntasks[l])
-    
-    if(b$task[1]=='sentence'){
+    for(i in 1:length(nitems)){ # for each item...
       
-      freq<- ifelse(b$cond[1]== 'low', 'LF', 'HF')
+      b<- subset(n, item== nitems[i]& task== ntasks[l])
       
-      sent<-Corpus_fq$line_breaks[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
-      coords<- get_coords(sent, revert = T)
-      
-      target<- Corpus_fq$`Target (N)`[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
-      
-    }
-    
-
-    
-   
-    
-    
-    for(j in 1:nrow(b)){ # for each fixation
-      
-      loc<- which(coords$x1<= b$x[j] & coords$x2>= b$x[j] & coords$y1<= b$y[j] & coords$y2>= b$y[j])
-      
-      if(length(loc)>0){
-        b$wordID[j]<- str_trim(coords$wordID[loc])
-        b$char[j]<- coords$char[loc]
-        b$char_num[j]<- coords$char_num[loc]
-        b$word_num[j]<- coords$word_num[loc]
+      if(b$task[1]=='sentence'){ # frequency corpus
         
-        if(!is.na(coords$wordID[loc])){
-          if(b$wordID[j]== target){
-            b$target_word[j]<- "Yes"
-          }else{
-            b$target_word[j]<- "No"
+        freq<- ifelse(b$cond[1]== 'low', 'LF', 'HF')
+        
+        sent<-Corpus_fq$line_breaks[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
+        coords<- get_coords(sent, revert = T)
+        
+        target<- Corpus_fq$`Target (N)`[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
+        
+      }else{ # single line sentence corpus
+        sent<-Corpus_sent$Sentence[which(Corpus_sent$Study_ID== nitems[i])]
+        
+        coords<- get_coords(sent, revert = T)
+        
+        # sentence is on a single line so y dimension is not important
+        # we set the y limits of the text box to the screen size
+        coords$y1<- 1
+        coords$y2<- 1080
+      }
+      
+      
+      
+      for(j in 1:nrow(b)){ # for each fixation
+        
+        loc<- which(coords$x1<= b$x[j] & coords$x2>= b$x[j] & coords$y1<= b$y[j] & coords$y2>= b$y[j])
+        
+        if(length(loc)>0){
+          b$wordID[j]<- str_trim(coords$wordID[loc])
+          b$char[j]<- coords$char[loc]
+          b$char_num[j]<- coords$char_num[loc]
+          b$word_num[j]<- coords$word_num[loc]
+          
+          if(b$task[1]=='sentence'){
+            
+            if(!is.na(coords$wordID[loc])){
+              if(b$wordID[j]== target){
+                b$target_word[j]<- "Yes"
+              }else{
+                b$target_word[j]<- "No"
+              }
+            }
+            
           }
+          
+
+          
         }
         
       }
       
+      dat<- rbind(dat, b)
+      
+      
     }
     
-    dat<- rbind(dat, b)
-    
-    
   }
+  
+
+  
+
   
   cat(k); cat(' ')
   
 }
 
-
+# eye-link fix data:
+write.csv(dat, 'LAB/data/eyelink_fix_data.csv')
 
 
