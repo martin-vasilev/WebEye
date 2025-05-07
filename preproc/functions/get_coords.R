@@ -2,9 +2,9 @@
 get_coords<- function(string, revert= F){
   
   if(revert==T){
-    x_offset<- 125
+    x_offset<- 120
     y_offset<- 115
-    ppl<- 75
+    ppl<- 78
     linespan<- 228
     
     

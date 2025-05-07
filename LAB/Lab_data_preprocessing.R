@@ -130,174 +130,200 @@ for(i in 1:length(folders)){ # for each subject
   
   cat(sprintf('\n\nSubject %g, Item: ',sub ))
   
-  for(j in 1:nrow(trials)){
+  ntasks<- unique(ts$Task_Name)
+  
+  for(t in 1:length(ntasks)){
     
-    # if(i==3 & j==100 ){
-    #   next;
-    # }
+    n<- subset(trials, Task_Name==ntasks[t])
     
-    cat(sprintf('%g ', j))
     
-    start_time<- trials$trial_start[j]
-    end_time<- trials$trial_end[j]
-    
-    trial_ts<- subset(ts, Trial_Id== trials$Trial_Id[j] & variable_name== 'gaze_data') 
-    
-    if(is.na(start_time)){
-      start_time<- trial_ts$timestamp[2]
-    }
-    
-    trial_ts$x<- NA
-    trial_ts$y<- NA
-    trial_ts$time<- NA
-    trial_ts$conf<- NA
-    
-    trial_ts$el_x<- NA
-    trial_ts$el_y<- NA
-    trial_ts$el_pupil<- NA
-    trial_ts$el_time<- NA
-    
-    for(l in 1:nrow(trial_ts)){
+    for(j in 1:nrow(n)){
       
-      string<- as.numeric(unlist(strsplit(trial_ts$value[l], ',')))
+      cat(sprintf('%g ', j))
       
-      if(length(string)==1){
-        next
+      start_time<- n$trial_start[j]
+      end_time<- n$trial_end[j]
+      
+      trial_ts<- subset(ts, Trial_Id== n$Trial_Id[j] & variable_name== 'gaze_data' & Task_Name== n$Task_Name[j]) 
+      
+      if(is.na(start_time)){
+        start_time<- trial_ts$timestamp[2]
       }
       
-      trial_ts$x[l]<- string[1]#*width_multiplier # change to native width
-      trial_ts$y[l]<- string[2]#*height_multiplier # change to native height
-      trial_ts$time[l]<- string[3]
-      trial_ts$conf[l]<- string[4]
+      trial_ts$x<- NA
+      trial_ts$y<- NA
+      trial_ts$time<- NA
+      trial_ts$conf<- NA
       
-    }
-    
-    # remove variables we don't need:
-    trial_ts$value<- NULL
-    trial_ts$variable_name<- NULL
-    trial_ts$Block_Name <- NULL
-    trial_ts$Block_Nr<- NULL
-    trial_ts$Task_Nr<- NULL
-    trial_ts$Session_Nr<- NULL
-    trial_ts$Exp_Subject_Id<- NULL
-    trial_ts$Rec_Session_Id<- NULL
-    
-    trial_ts<- subset(trial_ts, time>= start_time & time<end_time)
-    
-    # standardise timestamps relative to screen start time:
-    trial_ts$time_start<- trial_ts$time- start_time
-    
-    # calculate time difference from previous sample:
-    trial_ts<- trial_ts %>%
-      mutate(time_diff = time_start - lag(time_start))
-    
-    
-    for(l in 1:nrow(trial_ts)){
-      loc<- which(sacc_samples$unix_time== round(trial_ts$time[l])) 
+      trial_ts$el_x<- NA
+      trial_ts$el_y<- NA
+      trial_ts$el_pupil<- NA
+      trial_ts$el_time<- NA
       
-      if(length(loc)>0){
-        trial_ts$el_x[l]<- sacc_samples$V2[loc]
-        trial_ts$el_y[l]<- sacc_samples$V3[loc]
-        trial_ts$el_pupil[l]<- sacc_samples$V4[loc]
-        trial_ts$el_time[l]<- sacc_samples$V1[loc]
+      for(l in 1:nrow(trial_ts)){
+        
+        string<- as.numeric(unlist(strsplit(trial_ts$value[l], ',')))
+        
+        if(length(string)==1){
+          next
+        }
+        
+        trial_ts$x[l]<- string[1]#*width_multiplier # change to native width
+        trial_ts$y[l]<- string[2]#*height_multiplier # change to native height
+        trial_ts$time[l]<- string[3]
+        trial_ts$conf[l]<- string[4]
+        
       }
-    }
-    
-    
-    if(nrow(trial_ts)>0){
-      try(eye_data<- rbind(eye_data, trial_ts))
-    }
-    
-    ### save eyelink data for the whole trial:
-    
-    start_time_el<- sacc_samples$V1[which(sacc_samples$unix_time== start_time)]
-
-    end_time_el<- sacc_samples$V1[which(sacc_samples$unix_time== end_time)]
-
-    trial_file_el<- dataF[which(grepl(as.character(start_time_el), dataF)):which(grepl(as.character(end_time_el), dataF))]
-
-
-    ## get all fixation stamps for extraction and processing:
-    # get position of fixation stamps:
-    SFIX_stamps<- which(grepl('SFIX', trial_file_el))
-    EFIX_stamps<- which(grepl('EFIX', trial_file_el))
-    if(length(SFIX_stamps)==0 | length(EFIX_stamps)==0){
-      # means that there was no complete fixation on this trial (i.e,
-      # participant likely pressed end button by mistake)
-      message(sprintf("No fixations in subject %d Trial %d: excluded",i, j))
-      next;
-
-    }
-
-    if(EFIX_stamps[1]<SFIX_stamps[1]){ # removes fixation that triggered gaze box
-      EFIX_stamps<- EFIX_stamps[-1]
-    }
-
-    if(EFIX_stamps[length(EFIX_stamps)]< SFIX_stamps[length(SFIX_stamps)]){
-      SFIX_stamps<- SFIX_stamps[-length(SFIX_stamps)]
-    } # fixation was not terminated before the end of trial
-
-
-    parse_sacc<- function(string){a<- unlist(strsplit(string, "\t")); return(as.numeric(a[3]))}
-
-    esacc_flag<- trial_file_el[SFIX_stamps-1]
-
-    saccDur<- NULL
-    for(k in 1:length(esacc_flag)){
-      saccDur[k]<- parse_sacc(esacc_flag[k])
-    }
-
-
-    # get start and end time of fixations:
-    s_time<- get_num(trial_file_el[SFIX_stamps])  # start time of fixation
-    e_time<- get_FIX_stamp(trial_file_el[EFIX_stamps]) # end time of fixation
-
-    # calculate fixation durations:
-    fixDur<- e_time- s_time
-
-    # get x pixel position:
-    x<- get_x_pixel(trial_file_el[EFIX_stamps])
-
-    # get y pixel position:
-    y<- get_y_pixel(trial_file_el[EFIX_stamps])
-
-    
-    if(length(saccDur)<length(fixDur)){
       
-      saccDur[(length(saccDur)+1):length(fixDur)]<- NA
-    }
-
-
-    fix<- data.frame(sub= sub , item= trials$Trial_Id[j], cond= trials$Frequency[j],
-                     task= trials$Task_Name[j], s_time, e_time, fixDur, saccDur, x, y,
-                     blink_before = NA,blink_after = NA,fix_num = NA) #blink, prev_blink, after_blink)
-
-
-    fix$fix_num<- 1:nrow(fix)
-
-    for(k in 1:nrow(fix)){
-
-      if(!is.na(fix$sub[k+1])){
-        fix_between <- trial_file_el[SFIX_stamps[k]:SFIX_stamps[k+1]]
-        blink_stamp_s <- fix_between[which(grepl('SBLINK',fix_between))]
-        blink_stamp_e <- fix_between[which(grepl('EBLINK',fix_between))]
-
-        if(length(blink_stamp_s)!=0 | length(blink_stamp_e)!=0){
-          fix$blink_after[k] <- 1
-          fix$blink_before[k+1] <-1
+      # remove variables we don't need:
+      trial_ts$value<- NULL
+      trial_ts$variable_name<- NULL
+      trial_ts$Block_Name <- NULL
+      trial_ts$Block_Nr<- NULL
+      trial_ts$Task_Nr<- NULL
+      trial_ts$Session_Nr<- NULL
+      trial_ts$Exp_Subject_Id<- NULL
+      trial_ts$Rec_Session_Id<- NULL
+      
+      trial_ts<- subset(trial_ts, time>= start_time & time<end_time)
+      
+      # standardise timestamps relative to screen start time:
+      trial_ts$time_start<- trial_ts$time- start_time
+      
+      # calculate time difference from previous sample:
+      trial_ts<- trial_ts %>%
+        mutate(time_diff = time_start - lag(time_start))
+      
+      
+      for(l in 1:nrow(trial_ts)){
+        loc<- which(sacc_samples$unix_time== round(trial_ts$time[l])) 
+        
+        if(length(loc)>0){
+          trial_ts$el_x[l]<- sacc_samples$V2[loc]
+          trial_ts$el_y[l]<- sacc_samples$V3[loc]
+          trial_ts$el_pupil[l]<- sacc_samples$V4[loc]
+          trial_ts$el_time[l]<- sacc_samples$V1[loc]
         }
       }
+      
+      
+      if(nrow(trial_ts)>0){
+        try(eye_data<- rbind(eye_data, trial_ts))
+      }
+      
+      ### save eyelink data for the whole trial:
+      
+      start_time_el<- sacc_samples$V1[which(sacc_samples$unix_time== start_time)]
+      
+      end_time_el<- sacc_samples$V1[which(sacc_samples$unix_time== end_time)]
+      
+      trial_file_el<- dataF[which(grepl(as.character(start_time_el), dataF)):which(grepl(as.character(end_time_el), dataF))]
+      
+      
+      ## get all fixation stamps for extraction and processing:
+      # get position of fixation stamps:
+      SFIX_stamps<- which(grepl('SFIX', trial_file_el))
+      EFIX_stamps<- which(grepl('EFIX', trial_file_el))
+      if(length(SFIX_stamps)==0 | length(EFIX_stamps)==0){
+        # means that there was no complete fixation on this trial (i.e,
+        # participant likely pressed end button by mistake)
+        message(sprintf("No fixations in subject %d Trial %d: excluded",i, j))
+        next;
+        
+      }
+      
+      if(length(EFIX_stamps)>0 & length(SFIX_stamps[1])>0){
+        
+        if(EFIX_stamps[1]<SFIX_stamps[1]){ # removes fixation that triggered gaze box
+          EFIX_stamps<- EFIX_stamps[-1]
+          
+          if(length(EFIX_stamps)==0){
+            next # no fixations left, skip trial
+          }
+        }
+        
+        if(length(EFIX_stamps[length(EFIX_stamps)])>0 & length(SFIX_stamps[length(SFIX_stamps)])>0){
+          
+          if(EFIX_stamps[length(EFIX_stamps)]< SFIX_stamps[length(SFIX_stamps)]){
+            SFIX_stamps<- SFIX_stamps[-length(SFIX_stamps)]
+          } # fixation was not terminated before the end of trial
+          
+        }
+        
+      }
+      
 
-    }
-
-    el_fix_data<- rbind(el_fix_data, fix)
-
+      
+      parse_sacc<- function(string){a<- unlist(strsplit(string, "\t")); return(as.numeric(a[3]))}
+      
+      esacc_flag<- trial_file_el[SFIX_stamps-1]
+      
+      saccDur<- NULL
+      for(k in 1:length(esacc_flag)){
+        saccDur[k]<- parse_sacc(esacc_flag[k])
+      }
+      
+      
+      # get start and end time of fixations:
+      s_time<- get_num(trial_file_el[SFIX_stamps])  # start time of fixation
+      e_time<- get_FIX_stamp(trial_file_el[EFIX_stamps]) # end time of fixation
+      
+      # calculate fixation durations:
+      fixDur<- e_time- s_time
+      
+      # get x pixel position:
+      x<- get_x_pixel(trial_file_el[EFIX_stamps])
+      
+      # get y pixel position:
+      y<- get_y_pixel(trial_file_el[EFIX_stamps])
+      
+      
+      if(length(saccDur)<length(fixDur)){
+        
+        saccDur[(length(saccDur)+1):length(fixDur)]<- NA
+      }
+      
+      
+      fix<- data.frame(sub= sub , item= trials$Trial_Id[j], cond= trials$Frequency[j],
+                       task= trials$Task_Name[j], s_time, e_time, fixDur, saccDur, x, y,
+                       blink_before = NA,blink_after = NA,fix_num = NA) #blink, prev_blink, after_blink)
+      
+      
+      fix$fix_num<- 1:nrow(fix)
+      
+      if(nrow(fix)>500){
+        stop('too many fixations!')
+      }
+      
+      for(k in 1:nrow(fix)){
+        
+        if(!is.na(fix$sub[k+1])){
+          fix_between <- trial_file_el[SFIX_stamps[k]:SFIX_stamps[k+1]]
+          blink_stamp_s <- fix_between[which(grepl('SBLINK',fix_between))]
+          blink_stamp_e <- fix_between[which(grepl('EBLINK',fix_between))]
+          
+          if(length(blink_stamp_s)!=0 | length(blink_stamp_e)!=0){
+            fix$blink_after[k] <- 1
+            fix$blink_before[k+1] <-1
+          }
+        }
+        
+      }
+      
+      el_fix_data<- rbind(el_fix_data, fix)
+      
+      
+      
+      
+      
+      
+    } # end of trial loop
     
     
+  } # end of task loop
+  
+  
 
-    
-    
-  }
   
 
 
@@ -353,7 +379,7 @@ for(k in 1:length(nsubs)){ # for each subject...
   ntasks<- unique(el$task)
   
   for(l in 1:length(ntasks)){
-    b<- subset(a, task== ntasks[l])
+    n<- subset(a, task== ntasks[l])
     
   }
   
@@ -361,14 +387,22 @@ for(k in 1:length(nsubs)){ # for each subject...
   
   for(i in 1:length(nitems)){ # for each item...
     
-    b<- subset(a, item== nitems[i])
+    b<- subset(a, item== nitems[i]& task== ntasks[l])
     
-    freq<- ifelse(b$cond[1]== 'low', 'LF', 'HF')
+    if(b$task[1]=='sentence'){
+      
+      freq<- ifelse(b$cond[1]== 'low', 'LF', 'HF')
+      
+      sent<-Corpus_fq$line_breaks[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
+      coords<- get_coords(sent, revert = T)
+      
+      target<- Corpus_fq$`Target (N)`[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
+      
+    }
     
-    sent<-Corpus_fq$line_breaks[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
-    coords<- get_coords(sent, revert = T)
+
     
-    target<- Corpus_fq$`Target (N)`[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
+   
     
     
     for(j in 1:nrow(b)){ # for each fixation
