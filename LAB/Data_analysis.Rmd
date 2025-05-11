@@ -104,4 +104,16 @@ P1<- ggplot(sub_correlations, aes(x = Dimension, y = corr,
 
 ```
 
+```{r, echo= FALSE}
+library(readr)
+el <- read_csv("data/eyelink_fix_data.csv")
+
+target_data<- subset(el, target_word== 'Yes' & task=="sentence")
+
+# compute total fixation time:
+
+TFT<- target_data %>% group_by(sub, item, cond) %>% summarise(Sum= sum(fixDur))
+
+
+```
 

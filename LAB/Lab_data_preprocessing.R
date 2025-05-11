@@ -52,8 +52,23 @@ for(i in 1:length(folders)){ # for each subject
   trials$Task_Nr<- NULL
   trials$Preview<- NULL
   
-  ## calculate question accuracy:
+  ## calculate question accuracy & re-map frequency:
   for(o in 1:nrow(trials)){
+    
+    ## re-map frequency (for B lists):
+    
+    if(list=="B" & !is.na(trials$Frequency[o])){
+      if(trials$Frequency[o]== 'high'){
+        trials$Frequency[o]<- 'low'
+      }
+      
+      if(trials$Frequency[o]== 'low'){
+        trials$Frequency[o]<- 'high'
+      }
+      
+    }
+    
+    # calculate accuracy
     if(trials$Task_Name[o]== 'sentence'){ # frequency corpus
       loc<- which(freq$Study_ID== trials$Trial_Id[o])[1]
       item<- freq[loc, ]
