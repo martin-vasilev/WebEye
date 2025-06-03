@@ -264,7 +264,7 @@ target_data<- target_data %>%
   summarise(TVT= sum(time_diff, na.rm = T))
 
 target_data<- target_data%>%
-  filter(TVT>0& TVT<4000)
+  filter(TVT>80& TVT<3000)
 
 summary(M2<- lmer(log(TVT) ~ Frequency +(Frequency|sub)+ (1|item), data= target_data))
 

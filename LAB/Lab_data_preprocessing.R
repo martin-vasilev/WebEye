@@ -484,23 +484,30 @@ rm(list= ls())
 
 
 library(readr)
-web <- read_csv("LAB/data/webcam_raw_data.csv")
-
-eye_data<- subset(web, Task_Name== 'Freq_sentences')
+eye_data <- read_csv("LAB/data/webcam_raw_data.csv")
 
 library(readr)
 Corpus_fq <- read_csv("preproc/prolific/Corpus_fq.csv")
 Corpus_fq<- Corpus_fq[1:120,]
 
+Corpus_sent <- read_csv("C:/Users/Martin/Documents/R/WebEye/preproc/prolific/Corpus_sent.csv")
+
 
 source('preproc/functions/get_coords.R')
 dat<- NULL
 
-eye_data$wordID<- NA
-eye_data$char<- NA
-eye_data$char_num<- NA
-eye_data$target_word<- NA
-eye_data$word_num<- NA
+eye_data$web_wordID<- NA
+eye_data$web_char<- NA
+eye_data$web_char_num<- NA
+eye_data$web_target_word<- NA
+eye_data$web_word_num<- NA
+
+eye_data$el_wordID<- NA
+eye_data$el_char<- NA
+eye_data$el_char_num<- NA
+eye_data$el_target_word<- NA
+eye_data$el_word_num<- NA
+
 
 library(stringr)
 
@@ -510,105 +517,169 @@ for(k in 1:length(nsubs)){ # for each subject...
   
   a<- subset(eye_data, sub== nsubs[k])
   
-  nitems<- unique(eye_data$Trial_Id)
+  ntasks<- unique(a$Task_Name)
   
-  for(i in 1:length(nitems)){ # for each item...
+  for (l in 1:length(ntasks)){ # for each task...
+    b<- subset(a, Task_Name==ntasks[l])
     
-    b<- subset(a, Trial_Id== nitems[i])
+    nitems<- unique(b$Trial_Id)
     
-    freq<- ifelse(b$Frequency[1]== 'low', 'LF', 'HF')
-    
-    sent<-Corpus_fq$line_breaks[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
-    coords<- get_coords(sent)
-    
-    target<- Corpus_fq$`Target (N)`[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
-    
-    
-    for(j in 1:nrow(b)){ # for each fixation
+    for(i in 1:length(nitems)){ # for each item...
       
-      loc<- which(coords$x1<= b$x[j] & coords$x2>= b$x[j] & coords$y1<= b$y[j] & coords$y2>= b$y[j])
+      c<- subset(b, Trial_Id== nitems[i])
       
-      if(length(loc)>0){
-        b$wordID[j]<- str_trim(coords$wordID[loc])
-        b$char[j]<- coords$char[loc]
-        b$char_num[j]<- coords$char_num[loc]
-        b$word_num[j]<- coords$word_num[loc]
+      if(ntasks[l]== "Single_line_sentences"){
         
-        if(!is.na(coords$wordID[loc])){
-          if(b$wordID[j]== target){
-            b$target_word[j]<- "Yes"
-          }else{
-            b$target_word[j]<- "No"
-          }
-        }
+        sent<- Corpus_sent$Sentence[which(Corpus_sent$Study_ID== nitems[i])]
+        coords<- get_coords(sent, revert = T)
+        target<- NA
+        
+        coords$y1<- 1
+        coords$y2<- 1080
+        
+      }else{
+        
+        freq<- ifelse(c$Freq[1]== 'low', 'LF', 'HF')
+        
+        sent<-Corpus_fq$line_breaks[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
+        coords<- get_coords(sent, revert = T)
+        
+        target<- Corpus_fq$`Target (N)`[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
+        
         
       }
       
+      c$x<- c$x*2.4
+      c$y<- c$y*2.4
+
+      for(j in 1:nrow(c)){ # for each fixation
+        
+        
+        ### map webcam samples:
+        
+        loc<- which(coords$x1<= c$x[j] & coords$x2>= c$x[j] & coords$y1<= c$y[j] & coords$y2>= c$y[j])
+        
+        if(length(loc)>0){
+          c$web_wordID[j]<- str_trim(coords$wordID[loc])
+          c$web_char[j]<- coords$char[loc]
+          c$web_char_num[j]<- coords$char_num[loc]
+          c$web_word_num[j]<- coords$word_num[loc]
+          
+          if(ntasks[l]!= "Single_line_sentences"){
+            if(!is.na(coords$wordID[loc])){
+              if(c$web_wordID[j]== target){
+                c$web_target_word[j]<- "Yes"
+              }else{
+                c$web_target_word[j]<- "No"
+              }
+            }
+          }
+          
+          
+        }
+        
+        #### map Eyelink samples:
+        loc2<- which(coords$x1<= c$el_x[j] & coords$x2>= c$el_x[j] & coords$y1<= c$el_y[j] & coords$y2>= c$el_y[j])
+        
+        if(length(loc2)>0){
+          c$el_wordID[j]<- str_trim(coords$wordID[loc2])
+          c$el_char[j]<- coords$char[loc2]
+          c$el_char_num[j]<- coords$char_num[loc2]
+          c$el_word_num[j]<- coords$word_num[loc2]
+          
+          if(ntasks[l]!= "Single_line_sentences"){
+            if(!is.na(coords$wordID[loc2])){
+              if(c$el_wordID[j]== target){
+                c$el_target_word[j]<- "Yes"
+              }else{
+                c$el_target_word[j]<- "No"
+              }
+            }
+          }
+          
+          
+        }
+        
+        
+        
+      }
+      
+      dat<- rbind(dat, c)
+      
+      
     }
     
-    dat<- rbind(dat, b)
     
     
   }
   
+  
+  
+
+  
+
   cat(k); cat(' ')
   
 }
 
-
-
-
-colnames(dat)<- c("seq", "item", "Task_Name", "sub",
-                  "timestamp", "list", "Frequency", "x",             
-                  "y", "time", "conf", "time_diff", "wordID",        
-                  "char", "char_num", "target_word", "word_number")
-
-#b$wordID<- gsub(" ", "", b$wordID, fixed = TRUE)
-
-dat$word_length<- nchar(dat$wordID)
+dat$...1<- NULL
+dat$timestamp<- NULL
 
 library(EMreading)
 dat<- Frequency(dat)
-#dat$lexical_freq<- dat$zipf
 
-write.csv(dat, file= "preproc/Prolific_data.csv")
-
-
-tab<- dat %>% group_by(sub, item, wordID) %>% summarise(TVT= sum(time_diff, na.rm = T))
-tab$word_length<- nchar(tab$wordID)
-
-library(EMreading)
-freq<- Frequency(tab)
-tab$lexical_freq<- freq$zipf
-
-plot(tab$word_length, tab$TVT)
-
-tab$lexical_freq_c= scale(tab$lexical_freq, center = T, scale = F)
-tab$word_length_c= scale(tab$word_length, center = T, scale = F)
-
-library(lmerTest)
-
-summary(M1<- lmer(TVT ~ word_length_c*lexical_freq_c +(1|sub), data= tab))
-
-library(ggeffects)
-plot(ggeffect(M1, terms = c('lexical_freq_c', 'word_length_c' )))
-
-
-target_data<- subset(dat, target_word== 'Yes')
-
-target_data<- target_data %>% 
-  group_by(sub, item, Frequency, wordID) %>%
-  summarise(TVT= sum(time_diff, na.rm = T))
-
-target_data<- target_data%>%
-  filter(TVT>0& TVT<4000)
-
-summary(M2<- lmer(log(TVT) ~ Frequency +(Frequency|sub)+ (1|item), data= target_data))
-
-plot(ggeffect(M2, terms = 'Frequency'))
+write.csv(dat, 'LAB/data/webcam_data.csv')
 
 
 
-
+# colnames(dat)<- c("seq", "item", "Task_Name", "sub",
+#                   "timestamp", "list", "Frequency", "x",             
+#                   "y", "time", "conf", "time_diff", "wordID",        
+#                   "char", "char_num", "target_word", "word_number")
+# 
+# #b$wordID<- gsub(" ", "", b$wordID, fixed = TRUE)
+# 
+# dat$word_length<- nchar(dat$wordID)
+# 
+# library(EMreading)
+# dat<- Frequency(dat)
+# #dat$lexical_freq<- dat$zipf
+# 
+# write.csv(dat, file= "preproc/Prolific_data.csv")
+# 
+# 
+# tab<- dat %>% group_by(sub, item, wordID) %>% summarise(TVT= sum(time_diff, na.rm = T))
+# tab$word_length<- nchar(tab$wordID)
+# 
+# library(EMreading)
+# freq<- Frequency(tab)
+# tab$lexical_freq<- freq$zipf
+# 
+# plot(tab$word_length, tab$TVT)
+# 
+# tab$lexical_freq_c= scale(tab$lexical_freq, center = T, scale = F)
+# tab$word_length_c= scale(tab$word_length, center = T, scale = F)
+# 
+# library(lmerTest)
+# 
+# summary(M1<- lmer(TVT ~ word_length_c*lexical_freq_c +(1|sub), data= tab))
+# 
+# library(ggeffects)
+# plot(ggeffect(M1, terms = c('lexical_freq_c', 'word_length_c' )))
+# 
+# 
+# target_data<- subset(dat, target_word== 'Yes')
+# 
+# target_data<- target_data %>% 
+#   group_by(sub, item, Frequency, wordID) %>%
+#   summarise(TVT= sum(time_diff, na.rm = T))
+# 
+# target_data<- target_data%>%
+#   filter(TVT>0& TVT<4000)
+# 
+# summary(M2<- lmer(log(TVT) ~ Frequency +(Frequency|sub)+ (1|item), data= target_data))
+# 
+# plot(ggeffect(M2, terms = 'Frequency'))
+# 
 
 

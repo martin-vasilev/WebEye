@@ -46,7 +46,7 @@ webcam <- read.csv("~/R/WebEye/LAB/data/webcam_raw_data.csv")
 
 webcam<- webcam %>% filter(conf>0)
 
-sub_correlations<- webcam %>% drop_na() %>% group_by(Task_Name, sub)%>% summarise(Corr_x= cor(x,el_x), Corr_y= cor(y,el_y))
+sub_correlations<- webcam %>% select(-Freq)%>% drop_na() %>% group_by(Task_Name, sub)%>% summarise(Corr_x= cor(x,el_x), Corr_y= cor(y,el_y))
 
 
 sub_correlations<- sub_correlations %>% pivot_longer(cols = 3:4, names_to = 'Dimension', values_to = 'corr' )
@@ -90,7 +90,7 @@ P1<- ggplot(sub_correlations, aes(x = Dimension, y = corr,
   xlab("Screen dimension")+
   #labs(color= c('X', 'Y'))+
   scale_x_discrete(labels=c('X', 'Y'))+
-  ylim(0, 1)+
+  ylim(-.25, 1)+
   # geom_text(data = ann_text,label = "No sound", 
   #           colour= '#545252', size= 5.5, hjust = +1.25)+
   # geom_text(data = ann_text2,label = "No sound", 
@@ -102,7 +102,206 @@ P1<- ggplot(sub_correlations, aes(x = Dimension, y = corr,
   stat_summary(fun.data = fun_mean, geom="text", vjust=-1.15,
                hjust= 0.75, colour="black", size= 7);P1
 
+ggsave(filename = 'Plots/correlations.png', width = 2400,
+       height = 2400, units = 'px')
+
 ```
+
+```{r}
+
+subject= 7
+which_item= 1
+freq<- 'HF'
+
+fx<- webcam%>%
+  filter(sub== subject & Trial_Id==which_item & Task_Name== 'Freq_sentences')%>%
+  mutate(x= x*2.4, y= y*2.4)
+
+fx2<- data.frame(x= c(fx$x, fx$el_x),
+                 y= c(fx$y, fx$el_y),
+                 'time'= rep(fx$time_start,2),
+                 'tracker'= c(rep('webcam', nrow(fx)),
+                              rep('Eyelink', nrow(fx))))
+
+library(readr)
+Corpus_fq <- read_csv("Corpus_fq.csv")
+Corpus_fq<- Corpus_fq[1:120,]
+
+sent<- Corpus_fq$line_breaks[which(Corpus_fq$Study_ID== which_item & Corpus_fq$`Frequency type`== freq)[1]]
+    coords<- get_coords(sent)
+
+source('C:/Users/Martin/Documents/R/WebEye/preproc/functions/get_coords.R')    
+coords<- get_coords(sent, revert = T)
+
+P2<- fx2 %>% filter(x>0 & x<= 1920 & y>0 & y<=1080)%>%
+   ggplot(aes(x= x, y= y, colour= tracker, shape= tracker))+
+ ylim(1080,1 )+ xlim(1, 1920)+
+   scale_y_reverse()+
+   theme_classic(16)+
+   ggtitle(paste('Subject ', subject, ', Item ', which_item))+
+   geom_rect(data = coords, aes(xmin = x1,
+                xmax = x2,
+                ymin = y1,
+                ymax = y2),
+            fill = "transparent", color = "lightgray", size = 0.5,
+            inherit.aes = FALSE)+
+   
+   geom_text(data = coords, aes(x = (x1 + x2) / 2,
+   y = (y1 + y2) / 2, label = char),
+   color = "black", size = 4,
+   inherit.aes = FALSE)+
+   
+   geom_point()
+ 
+ggsave(filename = 'Plots/trial_example.png', width = 1920*1.5,
+       height = 1080*1.5, units = 'px')
+```
+
+
+
+```{r}
+
+subject= 7
+which_item= 1
+
+fx<- webcam%>%
+  filter(sub== subject & Trial_Id==which_item & Task_Name== 'Single_line_sentences')%>%
+  mutate(x= x*2.4, y= y*2.4)
+
+fx2<- data.frame(x= c(fx$x, fx$el_x),
+                 y= c(fx$y, fx$el_y),
+                 'time'= rep(fx$time_start,2),
+                 'tracker'= c(rep('webcam', nrow(fx)),
+                              rep('Eyelink', nrow(fx))))
+
+library(readr)
+Corpus_sent <- read_csv("C:/Users/Martin/Documents/R/WebEye/preproc/prolific/Corpus_sent.csv")
+
+sent<- Corpus_sent$Sentence[which(Corpus_sent$Study_ID== which_item)]
+coords<- get_coords(sent, revert = T)
+coords$y1<- 540-3*114
+coords$y2<- 540+3*114
+
+P3<- fx2 %>% filter(x>0 & x<= 1920 & y>0 & y<=1080)%>%
+   ggplot(aes(x= x, y= y, colour= tracker, shape= tracker))+
+ ylim(1080,1 )+ xlim(1, 1920)+
+   scale_y_reverse()+
+   theme_classic(16)+
+   ggtitle(paste('Subject ', subject, ', Item ', which_item))+
+   geom_rect(data = coords, aes(xmin = x1,
+                xmax = x2,
+                ymin = y1,
+                ymax = y2),
+            fill = "transparent", color = "lightgray", size = 0.5,
+            inherit.aes = FALSE)+
+   
+   geom_text(data = coords, aes(x = (x1 + x2) / 2,
+   y = (y1 + y2) / 2, label = char),
+   color = "black", size = 4,
+   inherit.aes = FALSE)+
+   
+   geom_point()
+ 
+ggsave(filename = 'Plots/trial_example_SL.png', plot = P3, width = 1920*1.5,
+       height = 1080*1.5, units = 'px')
+```
+
+
+```{r}
+
+webcam_data <- read_csv("data/webcam_data.csv")
+
+webcam_data<- webcam_data %>% filter(sub!=12)
+
+web_target<- subset(webcam_data, web_target_word== "Yes")
+el_target<- subset(webcam_data, el_target_word== "Yes")
+  
+web<- web_target %>% 
+  group_by(sub, Trial_Id, Freq, web_wordID) %>%
+  summarise(TVT= sum(time_diff, na.rm = T))%>%
+  filter(TVT>80 & TVT<=3000)
+
+web %>% group_by(Freq) %>% summarise(M= mean(TVT), SD= mean(TVT))
+
+el<- el_target %>% 
+  group_by(sub, Trial_Id, Freq, web_wordID) %>%
+  summarise(TVT= sum(time_diff, na.rm = T))%>%
+  filter(TVT>80 & TVT<=3000)
+
+el %>% group_by(Freq) %>% summarise(M= mean(TVT), SD= mean(TVT))
+
+summary(M1<- lmer(TVT ~ Freq +(Freq|sub) +(1|Trial_Id), data= el))
+
+library(ggeffects)
+
+plot(ggeffect(model = M1, terms = 'Freq')) +
+  labs(y= 'Total viewing time (in ms)', x= 'Lexical frequency',
+       title= 'Eyelink data')+theme_bw(18)
+
+
+summary(M2<- lmer(TVT ~ Freq +(1|sub) +(1|Trial_Id), data= web))
+
+plot(ggeffect(model = M2, terms = 'Freq')) +
+  labs(y= 'Total viewing time (in ms)', x= 'Lexical frequency',
+       title= 'Webcam data')+theme_bw(18)
+
+```
+
+
+```{r}
+sl<- subset(webcam_data, Task_Name== 'Single_line_sentences')
+
+tab<- sl %>% group_by(sub, Trial_Id, wordID, web_word_num) %>% summarise(TVT= sum(time_diff, na.rm = T))
+tab$word_length<- nchar(tab$wordID)
+
+library(EMreading)
+freq<- Frequency(tab)
+tab$lexical_freq<- freq$zipf
+
+plot(tab$word_length, tab$TVT)
+
+tab$lexical_freq_c= scale(tab$lexical_freq, center = T, scale = F)
+tab$word_length_c= scale(tab$word_length, center = T, scale = F)
+
+library(lmerTest)
+
+summary(M3<- lmer(TVT ~ word_length_c*lexical_freq_c +(1|sub), data= tab))
+
+library(ggeffects)
+plot(ggeffect(M3, terms = c('lexical_freq_c' )))
+
+plot(ggeffect(M3, terms = c('word_length_c' )))
+
+
+```
+
+
+
+```{r}
+# calculate the proportion of cases sample was on the same word
+
+prop<- webcam_data%>%
+     mutate(overlap= ifelse(web_word_num== el_word_num, 1, 0))%>%
+     group_by(Task_Name, sub, Trial_Id)%>%
+     summarise(M= mean(overlap, na.rm=T))
+
+prop$Task= prop$Task_Name
+
+P4= prop%>%
+  mutate(sub= as.character(sub))%>%
+  ggplot(aes(x= sub, y = M, color= Task))+
+  geom_boxplot()+
+  facet_wrap(~Task)+
+  theme_bw(16)+
+  labs(x= 'Subject', y= 'Proportion of samples [both cameras] on the same word')
+
+ggsave(filename = 'Plots/Prop_words.png', plot = P4, width = 3600,
+       height = 2400, units = 'px')
+
+```
+
+
+
 
 ```{r, echo= FALSE}
 library(readr)
@@ -110,11 +309,33 @@ library(readr)
 el <- read_csv("data/eyelink_fix_data.csv")
 
 target_data<- subset(el, target_word== 'Yes' & task=="sentence")
+target_data<-target_data%>% filter(fixDur>80 & fixDur < 1000)%>%
+  filter(sub!=12)
 
 # compute total fixation time:
-TFT<- target_data %>% group_by(sub, item, cond) %>% summarise(Sum= sum(fixDur))
+TFT<- target_data %>% 
+  group_by(sub, item, cond) %>%
+  summarise(Sum= sum(fixDur))%>%
+  filter(Sum<=3000)
 
 TFT %>% group_by(cond)%>% summarise(Mean= mean(Sum), sd= sd(Sum))
 
+library(lme4)
+
+TFT$cond<- as.factor(TFT$cond)
+contrasts(TFT$cond)<- c(1, 0)
+
+summary(m1<- lmer(log(Sum) ~ cond +(cond|sub)+ (cond|item), data= TFT))
+
+target_data$cond<- as.factor(target_data$cond)
+contrasts(target_data$cond)<- c(1, 0)
+
+summary(m2<- lmer(log(fixDur) ~ cond +(cond|sub)+ (cond|item),
+                  data= target_data))
+
+
+
 ```
+
+
 

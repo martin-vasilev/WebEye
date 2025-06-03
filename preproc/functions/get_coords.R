@@ -1,5 +1,5 @@
 
-get_coords<- function(string, revert= F){
+get_coords<- function(string, revert= F, SL= F){
   
   if(revert==T){
     x_offset<- 120
