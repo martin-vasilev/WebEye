@@ -1,3 +1,99 @@
+
+library(tidyverse)
+options(scipen = 999)
+
+load("LAB/data/eyelink_raw_samples.Rda")
+
+nsubs<- unique(el_raw$subject)
+
+el_blink<- NULL
+
+for(i in 1:length(nsubs)){ # for each subject..
+  n<- subset(el_raw, subject== nsubs[i]) # take subject data
+  
+  ntasks<- unique(n$task)
+  
+  cat(sprintf( "\n\nsubject %i :\n\n", nsubs[i]))
+  
+  for(j in 1:length(ntasks)){
+    
+    m<- subset(n, task== ntasks[j]) # get data from current task
+    
+    nitems<- unique(m$item)
+    
+    for(k in 1:length(nitems)){ # for each item within the task
+      
+      cat(sprintf( "subject %i, Item %i: ",nsubs[i], nitems[k]))
+      
+      s<- subset(m, item== nitems[k])
+      
+      # find blink samples within the raw trial data:
+      Blinks<- s %>%
+        filter(pupil==0)%>%
+        mutate(Diff = Unix_time - lag(Unix_time))
+      
+      if(nrow(Blinks)==0){
+        cat('0 blinks\n')
+        next # no blinks on this trial, go to next one
+      }
+      
+      start<- c(1, which(Blinks$Diff>1)) # row numbers where event starts
+      Blink_start<- NULL
+      Blink_end<- NULL
+      
+      cat(sprintf( "%i blinks\n", length(start)))
+      
+      for(l in 1:length(start)){ # for each blink within trial..
+        
+        if(l==1){ # if first blink
+          Blink_start[l]<- Blinks$Unix_time[1] # always starts at row1
+          
+          if(length(start)==1){ # there is a single blink in trial
+            
+            Blink_end[l]<- Blinks$Unix_time[nrow(Blinks)]
+            
+          }else{ # there are 2+ blinks in trial
+            Blink_end[l]<- Blinks$Unix_time[start[l+1]-1]
+          }
+          
+
+        }else{
+          if(l!= length(start)){
+            Blink_start[l]<- Blinks$Unix_time[start[l]]
+            Blink_end[l]<- Blinks$Unix_time[start[l+1]-1] 
+          }else{
+            Blink_start[l]<- Blinks$Unix_time[start[l]]
+            Blink_end[l]<- Blinks$Unix_time[nrow(Blinks)] 
+          }
+          
+        }
+        
+      }
+      db<- data.frame(subject= nsubs[i], task= ntasks[j],
+                      item= nitems[k],
+                      start= Blink_start, 
+                      end= Blink_end,
+                      duration=Blink_end - Blink_start,
+                      blink_number= 1:length(Blink_start))
+      
+      # merge with current data:
+      el_blink<- rbind(el_blink, db)
+      
+      
+      
+    } # end of item loop
+    
+    
+  } # end of task loop
+    
+  
+} # end of subject loop
+
+
+write.csv(el_blink, file = 'LAB/data/eyelink_blink_data.csv', row.names = F)
+
+
+
 library(readr)
 library(dplyr)
 library(tidyr)
@@ -6,7 +102,7 @@ library(lme4)
 library(lmerTest)  # 可选，用于获得 p 值
 
 # load the data
-df <- read_csv("webcam_data.csv")
+df <- read_csv("LAB/data/webcam_data.csv")
 # convert Trial_Nr to numric
 df$Trial_Nr <- as.numeric(df$Trial_Nr)
 
