@@ -1,0 +1,101 @@
+﻿index,frecB,sentece1B,char1,sentence2B,char2,questionB,answerB,has_question,word_high,word_low
+101,high,Se podía ver que el país,24,iba a mejor.,13,¿Se veía algo positivo?,SI,1,país,humo
+102,high,Es importante usar el,21,tipo de ropa adecuado.,23,,,0,tipo,tono
+103,high,No me ha gustado el modo,24,de hablar del médico.,22,,,0,modo,sofá
+104,high,Esta mañana el hijo está,24,jugando en el parque.,21,,,0,hijo,lago
+105,high,No confíes en que el amor,25,lo soluciona todo.,18,,,0,amor,lujo
+106,high,Cuando llegue el momento,24,la vida mejorará.,17,¿Seguirá todo igual?,NO,1,vida,nave
+107,high,Estamos preparando la,21,casa para los invitados.,25,¿Se espera visita?,SI,1,casa,sopa
+108,high,No se ha elegido dónde,22,hacer la obra todavía.,23,,,0,obra,caza
+109,high,Espero que la zona esté,23,bien habilitada.,17,,,0,zona,miel
+110,high,No puede dejar de pensar,24,en la hora del almuerzo.,24,,,0,hora,fama
+111,high,Cuando llegamos el señor,24,nos saludó.,12,¿El señor fue descortés?,NO,1,señor,primo
+112,high,Para recorrer el mundo,22,necesitarás ayuda.,19,,,0,mundo,patio
+113,high,Cuando veas el lugar,20,te encantará.,14,,,0,lugar,trozo
+114,high,Quiero ir al grupo para,23,hablarlo con todos.,19,,,0,grupo,grano
+115,high,No por tener más poder,22,te harán más caso.,19,,,0,poder,motor
+116,high,"Estando en la ciudad, la",24,mujer llamó a un taxi.,23,¿Subió al autobús?,NO,1,mujer,magia
+117,high,Tengo ganas de que caiga,24,la noche por fin.,18,,,0,noche,nieve
+118,high,No sé cómo terminar la,22,serie de números.,18,,,0,serie,frase
+119,high,Es fácil trabajar con la,24,gente adecuada.,15,,,0,gente,arena
+120,high,Para la cena la madre,21,preparó tortilla.,18,¿Hizo comida?,SI,1,madre,plata
+121,high,Tengo frío en los meses,23,de invierno.,13,¿Tiene calor?,NO,1,meses,oídos
+122,high,Si te fijas en los datos,24,verás que no te estafan.,25,,,0,datos,kilos
+123,high,Cuando se den estos casos,25,reacciona deprisa.,19,,,0,casos,daños
+124,high,Desde aquí se oyen pasos,24,que se acercan.,16,¿Se escucha algo?,SI,1,pasos,peces
+125,high,Entre amigos se ven otros,25,tipos de cariño.,17,,,0,tipos,actos
+126,high,Llegaremos lejos con,20,estas ideas de proyecto.,25,,,0,ideas,metas
+127,high,Están preparando las,20,leyes para el congreso.,24,¿Preparan recetas?,NO,1,leyes,cajas
+128,high,Entre todas las islas solo,26,una tiene volcanes.,20,¿Todas tienen volcanes?,NO,1,islas,bolas
+129,high,Hay que preparar las,20,obras para la casa.,20,,,0,obras,citas
+130,high,He mirado bien las zonas,24,por las que iremos.,20,,,0,zonas,botas
+131,high,No tenemos el tiempo,20,adecuado para ese plan.,24,¿Dará tiempo?,NO,1,tiempo,chiste
+132,high,No me acuerdo del nombre,24,del profesor de historia.,25,,,0,nombre,helado
+133,high,El movimiento del hombre,24,fue inesperado.,16,,,0,hombre,hombro
+134,high,El profesor dibujó un,21,número en la pizarra.,22,,,0,número,objeto
+135,high,Mi padre dice que el,20,estado no se sostiene.,22,,,0,estado,sótano
+136,high,Después del partido la,22,ciudad quedó sucia.,20,¿Quedó limpia la ciudad?,NO,1,ciudad,pelota
+137,high,Me duele la manera,18,en la que me hablas.,20,,,0,manera,muñeca
+138,high,En mi pueblo la tierra es,25,muy fértil.,12,,,0,tierra,parada
+139,high,Esta mañana la cabeza,21,me daba vueltas.,17,,,0,cabeza,alarma
+140,high,Al final del juego la,21,verdad sale a la luz.,22,,,0,verdad,cuerda
+141,high,Cuantos más puntos haces,24,más puedes ganar.,18,,,0,puntos,viajes
+142,high,Cuantos más metros,18,recorramos mejor.,18,,,0,metros,platos
+143,high,Seguro que tus amigos,21,están a punto de llegar.,25,,,0,amigos,fondos
+144,high,Me han devuelto unos,20,libros que extrañaba.,22,¿Se han recuperado los libros?,SI,1,libros,gastos
+145,high,Hacen falta unos padres,23,más comprometidos.,18,¿Se necesita compromiso?,SI,1,padres,grados
+146,high,Al empezar el partido las,25,líneas estaban claras.,23,,,0,líneas,marcas
+147,high,Me cansan las calles,20,de este laberinto.,19,¿Es aburrido?,SI,1,calles,bromas
+148,high,Tengo que revisar estas,23,clases antes de llegar.,24,,,0,clases,ruedas
+149,high,Son preciosas estas,19,flores campestres.,18,¿Parecen feas?,NO,1,flores,piezas
+150,high,Si pones tantas reglas,22,será muy difícil.,18,,,0,reglas,pistas
+151,low,En la empresa el nuevo,22,experto ayudó mucho.,21,¿Fue útil el profesional?,SI,1,sistema,experto
+152,low,No esperabamos que el ,22,pescado saltase a la red.,25,,,0,partido,pescado
+153,low,Esta mañana fui enfermo a,25,trabajar.,10,¿Se encontraba bien?,NO,1,derecho,enfermo
+154,low,Todo equipo debe tener un,25,jugador con iniciativa.,24,,,0,sentido,jugador
+155,low,Vamos a sacar el cristal,24,para limpiarlo.,16,,,0,informe,cristal
+156,low,El niño miraba cómo la,22,revista se imprimía.,20,,,0,familia,revista
+157,low,Durante la subasta la,21,pintura se vendió.,19,¿Compraron la obra?,,0,mayoría,pintura
+158,low,Hay una sección dedicada,24,a libros de historia.,21,,,0,persona,sección
+159,low,Estoy a una partida de,22,ganar el torneo.,17,¿Está cerca de vencer?,SI,1,palabra,partida
+160,low,Tener buena calidad es,22,fundamental para vender.,24,,,0,opinión,calidad
+161,low,Nadie se esperaba los,21,regalos de este año.,21,,,0,enlaces,regalos
+162,low,Me encanta observar los,23,colores de este cuadro.,24,¿Está escuchando música?,NO,1,dólares,colores
+163,low,En la sala de espera los,24,rumores son silenciosos.,24,¿Se cotillea?,SI,1,minutos,rumores
+164,low,Si colaboran todos los,22,equipos saldrán adelante.,26,,,0,pueblos,equipos
+165,low,En esta comunidad los,21,efectos ni se notaron.,22,,,0,efectos,efectos
+166,low,Confiamos en las,16,visitas y su educación.,23,,,0,fuerzas,visitas
+167,low,Mientras las maletas,20,"llegan, esperaremos aquí.",25,,,0,semanas,maletas
+168,low,Hay minerales valiosos,22,en las piedras del pozo.,24,,,0,tierras,piedras
+169,low,Con el calor las bebidas,24,frías vienen muy bien.,23,¿Serán refrescantes?,SI,1,plantas,tierras
+170,low,Esta tarde las tiendas,22,del centro cerrarán.,20,,,0,puertas,tiendas
+171,low,Mañana el amanecer será,23,precioso.,10,,,0,ambiente,amanecer
+172,low,Tengo que vigilar al,20,fantasma atentamente.,22,,,0,objetivo,fantasma
+173,low,Durante la lectura el,21,tribunal estaba aburrido.,26,¿Estaban entretenidos?,NO,1,escritor,tribunal
+174,low,Aunque el universo parece,25,"basto, es asombroso.",21,,,0,artículo,universo
+175,low,Hay que cuidar el,17,lenguaje que utilizamos.,24,,,0,carácter,lenguaje
+176,low,Cuando la criatura,18,apareció fascinó a todos.,25,¿Sucedió algo sorprendente?,SI,1,historia,criatura
+177,low,Creo que podemos mejorar,24,esta escalera tan vieja.,24,,,0,relación,escalera
+178,low,Se trata de un reflejo de,25,la pantalla por la luz.,24,,,0,sociedad,pantalla
+179,low,Podemos alejarnos de la,23,frontera por la guerra.,23,,,0,realidad,frontera
+180,low,No será molestia ocuparme,25,de los recados.,16,,,0,libertad,molestia
+181,low,Todos los abogados están,24,preocupados con el caso.,25,,,0,recursos,abogados
+182,low,Se sospecha que los,19,informes tengan errores.,25,,,0,partidos,informes
+183,low,Los diferentes sistemas,23,funcionan adecuadamente.,25,,,0,estudios,sistemas
+184,low,Me gustan los consejos,22,que me das siempre.,20,¿Le agradan los consejos?,SI,1,animales,consejos
+185,low,Sorprendentemente los,21,doctores lo han resuelto.,25,,,0,hermanos,doctores
+186,low,Esperemos que estas,19,ventanas aíslen del frío.,25,,,0,empresas,ventanas
+187,low,Mientras las montañas,21,estén nevadas hará frío.,25,,,0,acciones,montañas
+188,low,Se pueden ver las,17,imágenes en esta cámara.,25,,,0,regiones,imágenes
+189,low,Hay tantas tarjetas que,23,no puedo elegir.,17,¿Hay muchas tarjetas?,SI,1,especies,tarjetas
+190,low,No podremos terminar las,24,galletas esta tarde.,21,¿Van cortos de tiempo?,SI,1,imágenes,galletas
+191,low,Hay suficientes corazones,25,solos en este mundo.,21,,,0,alimentos,corazones
+192,low,Son demasiados los,18,empleados en la empresa.,25,,,0,jugadores,empleados
+193,low,Este año los impuestos,22,han subido de nuevo.,21,,,0,objetivos,impuestos
+194,low,Al parecer no todos los,23,intereses serán buenos.,23,,,0,políticos,intereses
+195,low,Algunos de los teléfonos,24,no funcionan.,14,¿Todos están correctamente?,NO,1,productos,teléfonos
+196,low,Deja que las emociones,22,fluyan contigo.,16,,,0,canciones,canciones
+197,low,En el libro aparecen las,24,criaturas más raras.,20,,,0,fronteras,criaturas
+198,low,Podremos ver diferentes,23,ocasiones para actuar.,23,,,0,funciones,ocasiones
+199,low,El niño fue a por,17,pastillas para el abuelo.,25,¿Fue a por dulces?,NO,1,películas,pastillas
+200,low,Esta semana tengo muchas ,25,reuniones por delante.,23,,,0,preguntas,reuniones

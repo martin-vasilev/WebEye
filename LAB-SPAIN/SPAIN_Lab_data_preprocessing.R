@@ -1,8 +1,6 @@
 
 rm(list= ls())
 
-setwd("C:/Users/Martin/Documents/R/WebEye")
-
 options(scipen=999)
 
 source('preproc/functions/all_functions.R')
@@ -10,16 +8,8 @@ source('preproc/functions/all_functions.R')
 library(readr)
 library(tidyverse)
 
-folders<- list.dirs('LAB-SPAIN')
+folders<- list.dirs('LAB-SPAIN/raw_data')
 folders<- folders[2:length(folders)]
-
-#folders<- folders[-4]
-
-# load in corpuses:
-#library(readxl)
-#freq <- read_excel("corpus/Corpus_fq.xlsx", sheet = 'Frequency')
-#freq<- freq[1:120,]
-#single_sent <- read_excel("corpus/Corpus_fq.xlsx", sheet = 'Single sentences')
 
 eye_data<- NULL
 trial_data<- NULL
@@ -34,73 +24,57 @@ for(i in 1:length(folders)){ # for each subject
   # open files:
   folder_dir<- folders[i]
   
-  sub= unlist(strsplit(folder_dir, '/'))[2]
+  sub= unlist(strsplit(folder_dir, '/'))[3]
   sub= get_num(sub)
   
   list<- substr(folder_dir, nchar(folder_dir), nchar(folder_dir))
   
   trials <- suppressMessages(read_csv(paste(folder_dir, '/trials.csv', sep='')))
-  trials<- subset(trials, Task_Name== 'experimental_task_A'|Task_Name== 'experimental_task_B' )
+  trials<- subset(trials, Task_Name== 'experimental_task_A'|Task_Name== 'experimental_task_B' |Task_Name== 'experimentaltask_B' | Task_Name== 'experimentaltask_A')
   trials$list<- list
   
   # remove empty columns:
   trials<- trials[colSums(!is.na(trials)) > 0]
-  #trials$Preview<- NULL
   
-  #trials$question_accuracy<- NA
+  trials$subject<- sub
+  
+  ## add missing columns
+  
+  if(!"frec"%in% colnames(trials)){
+    trials$frec<-NA
+  }
   
   
-  #trials$Block_Name<- NULL
-  #trials$Block_Nr<- NULL
-  #trials$Task_Nr<- NULL
-  #trials$Preview<- NULL
+  if(!"answer_value"%in% colnames(trials)){
+    trials$answer_value<-NA
+  }
   
-  # ## calculate question accuracy & re-map frequency:
-  # for(o in 1:nrow(trials)){
-  #   
-  #   ## re-map frequency (for B lists):
-  #   
-  #   if(list=="B" & !is.na(trials$Frequency[o])){
-  #     if(trials$Frequency[o]== 'high'){
-  #       trials$Frequency[o]<- 'low'
-  #     }else{
-  #       if(trials$Frequency[o]== 'low'){
-  #         trials$Frequency[o]<- 'high'
-  #       }
-  #     }
-  #     
-  #   }
-  #   
-  #   # calculate accuracy
-  #   if(trials$Task_Name[o]== 'sentence'){ # frequency corpus
-  #     loc<- which(freq$Study_ID== trials$Trial_Id[o])[1]
-  #     item<- freq[loc, ]
-  #     
-  #     if(trials$question_answer[o]== item$Question_answer){
-  #       trials$question_accuracy[o]<- 1
-  #     }else{
-  #       trials$question_accuracy[o]<- 0
-  #     }
-  #     
-  #   }else{ # single line corpus:
-  #     loc<- which(single_sent$Study_ID== trials$Trial_Id[o])
-  #     item<- single_sent[loc, ]
-  #     
-  #     if(trials$question_answer[o]== item$Question_answ){
-  #       trials$question_accuracy[o]<- 1
-  #     }else{
-  #       trials$question_accuracy[o]<- 0
-  #     }
-  #     
-  #   }
-  # }
-  # 
-  # if('Bnd_loc' %in% colnames(trials)){
-  #   trials$Bnd_loc<- NULL
-  #   trials$trial_screen1_end<- NULL
-  # }
+  if(!"has_question_value"%in% colnames(trials)){
+    trials$has_question_value<-NA
+  }
   
-  trials$sub<- sub
+  if(!"index_value"%in% colnames(trials)){
+    trials$index_value<-NA
+  }
+  
+  if(!"question_value...36"%in% colnames(trials)){
+    trials$question_value...36<-NA
+  }
+  
+  if(!"question_value...37"%in% colnames(trials)){
+    trials$question_value...37<-NA
+  }
+  
+  if(!"sentence_line1_value"%in% colnames(trials)){
+    trials$sentence_line1_value<-NA
+  }
+  
+  if(!"sentence_line2_value"%in% colnames(trials)){
+    trials$sentence_line2_value<-NA
+  }
+  
+  
+  
   trial_data<- rbind(trial_data, trials) # add to df
   
   
@@ -108,9 +82,9 @@ for(i in 1:length(folders)){ # for each subject
   
   # timeseries:
   ts<- suppressMessages(read_csv(paste(folder_dir, '/timeseries.csv', sep='')))
-  ts<- subset(ts, Task_Name== 'experimental_task_B')
+  ts<- subset(ts, Task_Name== 'experimental_task_B' |Task_Name=='experimental_task_A'|Task_Name== 'experimentaltask_B' | Task_Name== 'experimentaltask_B')
   
-  ts$sub<- sub
+  ts$subject<- sub
   
   
   ## load eyelink data:
@@ -240,7 +214,7 @@ for(i in 1:length(folders)){ # for each subject
       }
       
       ## add frequency information:
-      trial_ts$Freq<- n$copy_of_frec_3126[j]
+      trial_ts$Freq<- n$frec[j]
       
       
       if(nrow(trial_ts)>0){
@@ -343,7 +317,7 @@ for(i in 1:length(folders)){ # for each subject
       }
       
       
-      fix<- data.frame(sub= sub , item= trials$Trial_Id[j], cond= trials$copy_of_frec_3126[j],
+      fix<- data.frame(sub= sub , item= trials$Trial_Id[j], cond= trials$frec[j],
                        task= trials$Task_Name[j], s_time, e_time, fixDur, saccDur, x, y,
                        blink_before = NA,blink_after = NA,fix_num = NA) #blink, prev_blink, after_blink)
       
@@ -412,16 +386,17 @@ cor.test(eye_data$y, eye_data$el_y)
 
 rm(list= ls())
 
-el <- read.csv("~/R/WebEye/LAB/data/eyelink_fix_data.csv")
-
 library(readr)
-Corpus_fq <- read_csv("preproc/prolific/Corpus_fq.csv")
-Corpus_fq<- Corpus_fq[1:120,]
-
-Corpus_sent <- read_csv("preproc/prolific/Corpus_sent.csv")
+el <- read_csv("LAB-SPAIN/data/SPAIN_eyelink_fix_data.csv")
 
 
-source('preproc/functions/get_coords.R')
+Corpus_A <- read_csv("LAB-SPAIN/sentences_fullA.csv")
+Corpus_B <- read_csv("LAB-SPAIN/sentences_fullB_final.csv")
+
+Corpus_B$index<- Corpus_B$index -100# bring to same id as list A 
+
+
+source('LAB-SPAIN/get_coords.R')
 dat<- NULL
 
 el$wordID<- NA
@@ -449,26 +424,33 @@ for(k in 1:length(nsubs)){ # for each subject...
       
       b<- subset(n, item== nitems[i]& task== ntasks[l])
       
-      if(b$task[1]=='sentence'){ # frequency corpus
+      # find list:
+      list= substr(b$task[1], nchar(b$task[1]), nchar(b$task[1]))
+    
+      # get sentence coordinates and target word:
+      if(list=="A"){
         
-        freq<- ifelse(b$cond[1]== 'low', 'LF', 'HF')
+         which_row<- which(Corpus_A$index== b$item[1])
+         freq<- Corpus_A$frecA[which_row]
+         target<- ifelse(freq== 'low', Corpus_A$word_low[which_row], Corpus_A$word_high[which_row])
+         
+         sent<- paste(Corpus_A$sentence1A[which_row],
+                      Corpus_A$sentence2A[which_row], sep= '@' )
+
+             
+      }else{
+        which_row<- which(Corpus_B$index== b$item[1])
+        freq<- Corpus_B$frecB[which_row]
+        target<- ifelse(freq== 'low', Corpus_B$word_low[which_row], Corpus_B$word_high[which_row])
         
-        sent<-Corpus_fq$line_breaks[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
-        coords<- get_coords(sent, revert = T)
         
-        target<- Corpus_fq$`Target (N)`[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
         
-      }else{ # single line sentence corpus
-        sent<-Corpus_sent$Sentence[which(Corpus_sent$Study_ID== nitems[i])]
+        sent<- paste(Corpus_B$sentece1B[which_row],
+                     Corpus_B$sentence2B[which_row], sep= '@' )
         
-        coords<- get_coords(sent, revert = T)
-        
-        # sentence is on a single line so y dimension is not important
-        # we set the y limits of the text box to the screen size
-        coords$y1<- 1
-        coords$y2<- 1080
       }
       
+      coords<- get_coords(sent, revert = T)
       
       
       for(j in 1:nrow(b)){ # for each fixation
@@ -481,17 +463,16 @@ for(k in 1:length(nsubs)){ # for each subject...
           b$char_num[j]<- coords$char_num[loc]
           b$word_num[j]<- coords$word_num[loc]
           
-          if(b$task[1]=='sentence'){
-            
-            if(!is.na(coords$wordID[loc])){
-              if(b$wordID[j]== target){
-                b$target_word[j]<- "Yes"
-              }else{
-                b$target_word[j]<- "No"
-              }
+          
+          
+          if(!is.na(coords$wordID[loc])){
+            if(b$wordID[j]== target){
+              b$target_word[j]<- "Yes"
+            }else{
+              b$target_word[j]<- "No"
             }
-            
           }
+
           
 
           
@@ -525,16 +506,14 @@ rm(list= ls())
 
 
 library(readr)
-eye_data <- read_csv("LAB/data/webcam_raw_data.csv")
+eye_data <- read_csv("LAB-SPAIN/data/SPAIN_webcam_raw_data.csv")
 
-library(readr)
-Corpus_fq <- read_csv("preproc/prolific/Corpus_fq.csv")
-Corpus_fq<- Corpus_fq[1:120,]
+Corpus_A <- read_csv("LAB-SPAIN/sentences_fullA.csv")
+Corpus_B <- read_csv("LAB-SPAIN/sentences_fullB_final.csv")
 
-Corpus_sent <- read_csv("C:/Users/Martin/Documents/R/WebEye/preproc/prolific/Corpus_sent.csv")
+Corpus_B$index<- Corpus_B$index -100# bring to same id as list A 
 
-
-source('preproc/functions/get_coords.R')
+source('LAB-SPAIN/get_coords.R')
 dat<- NULL
 
 eye_data$web_wordID<- NA
@@ -552,11 +531,11 @@ eye_data$el_word_num<- NA
 
 library(stringr)
 
-nsubs<- unique(eye_data$sub)
+nsubs<- unique(eye_data$subject)
 
 for(k in 1:length(nsubs)){ # for each subject...
   
-  a<- subset(eye_data, sub== nsubs[k])
+  a<- subset(eye_data, subject== nsubs[k])
   
   ntasks<- unique(a$Task_Name)
   
@@ -569,29 +548,37 @@ for(k in 1:length(nsubs)){ # for each subject...
       
       c<- subset(b, Trial_Id== nitems[i])
       
-      if(ntasks[l]== "Single_line_sentences"){
+      
+      # find list:
+      list= substr(c$Task_Name[1], nchar(c$Task_Name[1]), nchar(c$Task_Name[1]))
+      
+      # get sentence coordinates and target word:
+      if(list=="A"){
         
-        sent<- Corpus_sent$Sentence[which(Corpus_sent$Study_ID== nitems[i])]
-        coords<- get_coords(sent, revert = T)
-        target<- NA
+        which_row<- which(Corpus_A$index== c$Trial_Id[1])
+        freq<- Corpus_A$frecA[which_row]
+        target<- ifelse(freq== 'low', Corpus_A$word_low[which_row], Corpus_A$word_high[which_row])
         
-        coords$y1<- 1
-        coords$y2<- 1080
+        sent<- paste(Corpus_A$sentence1A[which_row],
+                     Corpus_A$sentence2A[which_row], sep= '@' )
+        
         
       }else{
+        which_row<- which(Corpus_B$index== c$Trial_Id[1])
+        freq<- Corpus_B$frecB[which_row]
+        target<- ifelse(freq== 'low', Corpus_B$word_low[which_row], Corpus_B$word_high[which_row])
         
-        freq<- ifelse(c$Freq[1]== 'low', 'LF', 'HF')
         
-        sent<-Corpus_fq$line_breaks[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
-        coords<- get_coords(sent, revert = T)
-        
-        target<- Corpus_fq$`Target (N)`[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
-        
+        sent<- paste(Corpus_B$sentece1B[which_row],
+                     Corpus_B$sentence2B[which_row], sep= '@' )
         
       }
       
-      c$x<- c$x*2.4
-      c$y<- c$y*2.4
+      coords<- get_coords(sent, revert = T)
+      
+      
+      c$x<- c$x*2
+      c$y<- c$y*2
 
       for(j in 1:nrow(c)){ # for each fixation
         
@@ -606,15 +593,14 @@ for(k in 1:length(nsubs)){ # for each subject...
           c$web_char_num[j]<- coords$char_num[loc]
           c$web_word_num[j]<- coords$word_num[loc]
           
-          if(ntasks[l]!= "Single_line_sentences"){
-            if(!is.na(coords$wordID[loc])){
-              if(c$web_wordID[j]== target){
-                c$web_target_word[j]<- "Yes"
-              }else{
-                c$web_target_word[j]<- "No"
-              }
+          if(!is.na(coords$wordID[loc])){
+            if(c$web_wordID[j]== target){
+              c$web_target_word[j]<- "Yes"
+            }else{
+              c$web_target_word[j]<- "No"
             }
           }
+
           
           
         }
@@ -628,13 +614,12 @@ for(k in 1:length(nsubs)){ # for each subject...
           c$el_char_num[j]<- coords$char_num[loc2]
           c$el_word_num[j]<- coords$word_num[loc2]
           
-          if(ntasks[l]!= "Single_line_sentences"){
-            if(!is.na(coords$wordID[loc2])){
-              if(c$el_wordID[j]== target){
-                c$el_target_word[j]<- "Yes"
-              }else{
-                c$el_target_word[j]<- "No"
-              }
+          
+          if(!is.na(coords$wordID[loc2])){
+            if(c$el_wordID[j]== target){
+              c$el_target_word[j]<- "Yes"
+            }else{
+              c$el_target_word[j]<- "No"
             }
           }
           
@@ -664,63 +649,11 @@ for(k in 1:length(nsubs)){ # for each subject...
 }
 
 dat$...1<- NULL
-dat$timestamp<- NULL
+#dat$timestamp<- NULL
 
-library(EMreading)
-dat<- Frequency(dat)
-
-write.csv(dat, 'LAB/data/webcam_data.csv')
-
-
-
-# colnames(dat)<- c("seq", "item", "Task_Name", "sub",
-#                   "timestamp", "list", "Frequency", "x",             
-#                   "y", "time", "conf", "time_diff", "wordID",        
-#                   "char", "char_num", "target_word", "word_number")
-# 
-# #b$wordID<- gsub(" ", "", b$wordID, fixed = TRUE)
-# 
-# dat$word_length<- nchar(dat$wordID)
-# 
 # library(EMreading)
 # dat<- Frequency(dat)
-# #dat$lexical_freq<- dat$zipf
-# 
-# write.csv(dat, file= "preproc/Prolific_data.csv")
-# 
-# 
-# tab<- dat %>% group_by(sub, item, wordID) %>% summarise(TVT= sum(time_diff, na.rm = T))
-# tab$word_length<- nchar(tab$wordID)
-# 
-# library(EMreading)
-# freq<- Frequency(tab)
-# tab$lexical_freq<- freq$zipf
-# 
-# plot(tab$word_length, tab$TVT)
-# 
-# tab$lexical_freq_c= scale(tab$lexical_freq, center = T, scale = F)
-# tab$word_length_c= scale(tab$word_length, center = T, scale = F)
-# 
-# library(lmerTest)
-# 
-# summary(M1<- lmer(TVT ~ word_length_c*lexical_freq_c +(1|sub), data= tab))
-# 
-# library(ggeffects)
-# plot(ggeffect(M1, terms = c('lexical_freq_c', 'word_length_c' )))
-# 
-# 
-# target_data<- subset(dat, target_word== 'Yes')
-# 
-# target_data<- target_data %>% 
-#   group_by(sub, item, Frequency, wordID) %>%
-#   summarise(TVT= sum(time_diff, na.rm = T))
-# 
-# target_data<- target_data%>%
-#   filter(TVT>0& TVT<4000)
-# 
-# summary(M2<- lmer(log(TVT) ~ Frequency +(Frequency|sub)+ (1|item), data= target_data))
-# 
-# plot(ggeffect(M2, terms = 'Frequency'))
-# 
+
+write.csv(dat, 'LAB-SPAIN/data/SPAIN_webcam_data.csv')
 
 
