@@ -24,6 +24,8 @@ single_sent <- read_excel("corpus/Corpus_fq.xlsx", sheet = 'Single sentences')
 eye_data<- NULL
 trial_data<- NULL
 el_fix_data<- NULL
+el_raw<- NULL
+
 
 q<- NULL
 
@@ -43,7 +45,7 @@ for(i in 1:length(folders)){ # for each subject
   
   # remove empty columns:
   trials<- trials[colSums(!is.na(trials)) > 0]
-  
+  trials$Preview<- NULL
   trials$question_accuracy<- NA
   
   
@@ -120,19 +122,30 @@ for(i in 1:length(folders)){ # for each subject
   start<- as.numeric(unlist(strsplit(start_stamp, ' '))[3])
   el_start_time<- get_num(unlist(strsplit(start_stamp, ' '))[1])
   
-  # extract fixations:
-  sacc_samples<- dataF[start_loc[1]+1:length(dataF)]
+  sacc_samples<- dataF[start_loc[1]:length(dataF)]
+  sacc_samples <- grep("^\\d", sacc_samples, value = TRUE)
   
-  # remove flags from samples data:
-  sacc_samples<- sacc_samples[!grepl("SFIX", sacc_samples)]
-  sacc_samples<- sacc_samples[!grepl("EFIX", sacc_samples)]
-  sacc_samples<- sacc_samples[!grepl("ESACC", sacc_samples)]
-  sacc_samples<- sacc_samples[!grepl("SSACC", sacc_samples)]
-  sacc_samples<- sacc_samples[!grepl("SBLINK", sacc_samples)]
-  sacc_samples<- sacc_samples[!grepl("EBLINK", sacc_samples)]
-  sacc_samples<- sacc_samples[!grepl("MSG", sacc_samples)]
+  # # remove flags from samples data:
+  # sacc_samples<- sacc_samples[!grepl("SFIX", sacc_samples)]
+  # sacc_samples<- sacc_samples[!grepl("EFIX", sacc_samples)]
+  # sacc_samples<- sacc_samples[!grepl("ESACC", sacc_samples)]
+  # sacc_samples<- sacc_samples[!grepl("SSACC", sacc_samples)]
+  # sacc_samples<- sacc_samples[!grepl("SBLINK", sacc_samples)]
+  # sacc_samples<- sacc_samples[!grepl("EBLINK", sacc_samples)]
+  # sacc_samples<- sacc_samples[!grepl("MSG", sacc_samples)]
+  # sacc_samples<- sacc_samples[!grepl("END", sacc_samples)]
+  # sacc_samples<- sacc_samples[!grepl("START", sacc_samples)]
+  # sacc_samples<- sacc_samples[!grepl("PRESCALER", sacc_samples)]
+  # sacc_samples<- sacc_samples[!grepl("VPRESCALER", sacc_samples)]
+  # sacc_samples<- sacc_samples[!grepl("PUPIL", sacc_samples)]
+  # sacc_samples<- sacc_samples[!grepl("EVENTS", sacc_samples)]
+  # sacc_samples<- sacc_samples[!grepl("SAMPLES", sacc_samples)]
+  # sacc_samples<- sacc_samples[!grepl(">>>>>>>", sacc_samples)]
+  # sacc_samples<- sacc_samples[!grepl("Quadrant", sacc_samples)]
+  # sacc_samples<- sacc_samples[!grepl("CALIBRATION", sacc_samples)]
+  # #<- sacc_samples[!grepl("\t", sacc_samples)]
   
-  
+ 
   
   sacc_samples <-  as.data.frame(do.call( rbind, strsplit( sacc_samples, '\t' ) )) # V2 is xpos
   sacc_samples$V1<- as.numeric(sacc_samples$V1)
@@ -142,7 +155,55 @@ for(i in 1:length(folders)){ # for each subject
   sacc_samples$start_time<- sacc_samples$V1- el_start_time
   sacc_samples$unix_time<- sacc_samples$start_time+start
   
+  sacc_samples$V6<- NULL
+  sacc_samples$V5<- NULL
   
+  sacc_samples$new_ux_time<- NA
+  sacc_samples$lag<- NA
+  
+  for(z in 1:length(start_loc)){
+    
+      start_stamp<- dataF[start_loc[z]]
+      start<- as.numeric(unlist(strsplit(start_stamp, ' '))[3])
+      el_start_time<- get_num(unlist(strsplit(start_stamp, ' '))[1])
+      
+      # find time in sacc_samples:
+      s1<- which(sacc_samples$V1==el_start_time)
+      
+      sacc_samples$new_ux_time[s1]<- start
+      sacc_samples$lag[s1]<- sacc_samples$new_ux_time[s1]- sacc_samples$unix_time[s1]
+      
+      # if(z<length(start_loc)){
+      #   start_stamp2<- dataF[start_loc[z+1]]
+      #   start2<- as.numeric(unlist(strsplit(start_stamp2, ' '))[3])
+      #   el_start_time2<- get_num(unlist(strsplit(start_stamp2, ' '))[1])
+      #   
+      #   s2<- which(sacc_samples$V1==el_start_time2)-1
+      #   
+      #   
+      # }else{
+      #   s2<- nrow(sacc_samples)
+      # }
+      
+      ### calculate lag time:
+      #sacc_samples$new_ux_time[s1:s2]<- start + 0:(length(s1:s2)-1) 
+      #sacc_samples$lag[s1:s2]<- sacc_samples$unix_time[s1:s2]- sacc_samples$new_ux_time[s1:s2]
+      
+      
+  }
+  
+sacc_samples$new_ux_time_interp <- na.approx(sacc_samples$new_ux_time, x = sacc_samples$unix_time, rule = 2)
+sacc_samples$lag <- sacc_samples$unix_time - sacc_samples$new_ux_time_interp  
+  
+  message(cat(sprintf('\nLag: mean %g ms, range %g - %g ms: ',
+              mean(sacc_samples$lag), min(sacc_samples$lag),
+              max(sacc_samples$lag) )))
+
+sacc_samples$unix_time<- round(sacc_samples$new_ux_time_interp)
+sacc_samples$new_ux_time<- NULL
+sacc_samples$new_ux_time_interp<- NULL
+sacc_samples$lag<- NULL
+
   cat(sprintf('\n\nSubject %g, Item: ',sub ))
   
   ntasks<- unique(ts$Task_Name)
@@ -228,6 +289,22 @@ for(i in 1:length(folders)){ # for each subject
       if(nrow(trial_ts)>0){
         try(eye_data<- rbind(eye_data, trial_ts))
       }
+      
+      ### Save raw Eyelink samples for trial:
+      
+      el_s<- sacc_samples[which(sacc_samples$unix_time== start_time):which(sacc_samples$unix_time== end_time),]
+      
+      el_s$V5<- NULL
+      el_s$V6<- NULL
+      el_s$start_time<- NULL
+      
+      colnames(el_s)<- c('el_time', 'x', 'y', 'pupil', 'Unix_time')
+      
+      el_s$subject<- n$sub[j]
+      el_s$item<- n$Trial_Id[j]
+      el_s$task<- n$Task_Name[j]
+      
+      el_raw<- rbind(el_raw, el_s)
       
       ### save eyelink data for the whole trial:
       
@@ -362,6 +439,9 @@ write.csv(trial_data, 'LAB/data/trial_data.csv')
 # eye-link fix data:
 write.csv(el_fix_data, 'LAB/data/eyelink_fix_data.csv')
 
+# eyelink raw samples for each trial:
+write.csv(el_raw, 'LAB/data/eyelink_raw_samples.csv')
+save(el_raw, file = 'LAB/data/eyelink_raw_samples.Rda')
 
 cor.test(eye_data$x, eye_data$el_x)
 cor.test(eye_data$y, eye_data$el_y)
@@ -374,10 +454,10 @@ rm(list= ls())
 el <- read.csv("~/R/WebEye/LAB/data/eyelink_fix_data.csv")
 
 library(readr)
-Corpus_fq <- read_csv("preproc/prolific/Corpus_fq.csv")
+Corpus_fq <- read_csv("LAB/Corpus_fq.csv")
 Corpus_fq<- Corpus_fq[1:120,]
 
-Corpus_sent <- read_csv("preproc/prolific/Corpus_sent.csv")
+Corpus_sent <- read_csv("corpus/Corpus_sent.csv")
 
 
 source('preproc/functions/get_coords.R')
@@ -487,10 +567,10 @@ library(readr)
 eye_data <- read_csv("LAB/data/webcam_raw_data.csv")
 
 library(readr)
-Corpus_fq <- read_csv("preproc/prolific/Corpus_fq.csv")
+Corpus_fq <- read_csv("LAB/Corpus_fq.csv")
 Corpus_fq<- Corpus_fq[1:120,]
 
-Corpus_sent <- read_csv("C:/Users/Martin/Documents/R/WebEye/preproc/prolific/Corpus_sent.csv")
+Corpus_sent <- read_csv("corpus/Corpus_sent.csv")
 
 
 source('preproc/functions/get_coords.R')
@@ -626,7 +706,9 @@ dat$...1<- NULL
 dat$timestamp<- NULL
 
 library(EMreading)
+dat$wordID<- dat$web_wordID
 dat<- Frequency(dat)
+dat$wordID<- NULL
 
 write.csv(dat, 'LAB/data/webcam_data.csv')
 

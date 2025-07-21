@@ -29,10 +29,11 @@ write.csv(x = cal, 'LAB/data/eyelink_calibration.csv')
 library(tidyverse)
 
 el_acc<- cal %>% 
-  group_by(subject) %>%
+  group_by(flnm) %>%
   summarise(M= mean(offset_deg, na.rm= T),
             Med= median(offset_deg, na.rm= T))
 
+mean(el_acc$M)
 
 # generate a plot of 
 P_cal<- el_acc %>% 
