@@ -9,6 +9,8 @@ source('preproc/functions/all_functions.R')
 
 library(readr)
 library(tidyverse)
+library(data.table)
+
 
 folders<- list.dirs('LAB/lab_raw_data')
 folders<- folders[2:length(folders)]
@@ -100,7 +102,14 @@ for(i in 1:length(folders)){ # for each subject
   }
   
   trials$sub<- sub
-  trial_data<- rbind(trial_data, trials) # add to df
+  
+  if(i==1){
+    fwrite(trials, "LAB/data/trial_data.csv", append = F, col.names = T)
+  }else{
+    fwrite(trials, "LAB/data/trial_data.csv", append = T, col.names = F)
+  }
+  
+  #trial_data<- rbind(trial_data, trials) # add to df
   
   
   ## eye-movement data files:
@@ -285,17 +294,29 @@ sacc_samples$lag<- NULL
       ## add frequency information:
       trial_ts$Freq<- n$Frequency[j]
       
+      trial_ts$Task_Name[which(trial_ts$Task_Name=='sentence')]<-'Freq_sentences'
+      trial_ts$Task_Name[which(trial_ts$Task_Name=='sentence_DC')]<-'Single_line_sentences'
+      
       
       if(nrow(trial_ts)>0){
-        try(eye_data<- rbind(eye_data, trial_ts))
+        
+        if(i==1 & t==1 & j==1){
+          fwrite(trial_ts, "LAB/data/webcam_raw_data.csv", append = F, col.names = T)
+        }else{
+          try(fwrite(trial_ts, "LAB/data/webcam_raw_data.csv", append = TRUE, col.names = FALSE))
+        }
+        
+        #try(eye_data<- rbind(eye_data, trial_ts))
       }
+      
+      
       
       ### Save raw Eyelink samples for trial:
       
       el_s<- sacc_samples[which(sacc_samples$unix_time== start_time):which(sacc_samples$unix_time== end_time),]
       
-      el_s$V5<- NULL
-      el_s$V6<- NULL
+     # el_s$V5<- NULL
+      #el_s$V6<- NULL
       el_s$start_time<- NULL
       
       colnames(el_s)<- c('el_time', 'x', 'y', 'pupil', 'Unix_time')
@@ -304,7 +325,13 @@ sacc_samples$lag<- NULL
       el_s$item<- n$Trial_Id[j]
       el_s$task<- n$Task_Name[j]
       
-      el_raw<- rbind(el_raw, el_s)
+      if(i==1 & t==1 & j==1){
+        fwrite(el_s, "LAB/data/eyelink_raw_samples.csv", append = F, col.names = T)
+      }else{
+        try(fwrite(el_s, "LAB/data/eyelink_raw_samples.csv", append = TRUE, col.names = FALSE))
+      }
+      
+      # el_raw<- rbind(el_raw, el_s)
       
       ### save eyelink data for the whole trial:
       
@@ -405,10 +432,13 @@ sacc_samples$lag<- NULL
         
       }
       
-      el_fix_data<- rbind(el_fix_data, fix)
+      #el_fix_data<- rbind(el_fix_data, fix)
       
-      
-      
+      if(i==1 & t==1 & j==1){
+        fwrite(fix, "LAB/data/eyelink_fix_data.csv", append = F, col.names = T)
+      }else{
+        try(fwrite(fix, "LAB/data/eyelink_fix_data.csv", append = TRUE, col.names = FALSE))
+      }
       
       
       
@@ -425,26 +455,23 @@ sacc_samples$lag<- NULL
 
 }
 
-#eye_data$el_x_std<- eye_data$el_x/2.4
-#eye_data$el_y_std<- eye_data$el_y/2.4
-
-eye_data$Task_Name[which(eye_data$Task_Name=='sentence')]<-'Freq_sentences'
-eye_data$Task_Name[which(eye_data$Task_Name=='sentence_DC')]<-'Single_line_sentences'
-
-
-# webcam data:
-write.csv(eye_data, 'LAB/data/webcam_raw_data.csv')
-write.csv(trial_data, 'LAB/data/trial_data.csv')
-
-# eye-link fix data:
-write.csv(el_fix_data, 'LAB/data/eyelink_fix_data.csv')
-
-# eyelink raw samples for each trial:
-write.csv(el_raw, 'LAB/data/eyelink_raw_samples.csv')
-save(el_raw, file = 'LAB/data/eyelink_raw_samples.Rda')
-
-cor.test(eye_data$x, eye_data$el_x)
-cor.test(eye_data$y, eye_data$el_y)
+# #eye_data$el_x_std<- eye_data$el_x/2.4
+# #eye_data$el_y_std<- eye_data$el_y/2.4
+# 
+# 
+# # webcam data:
+# write.csv(eye_data, 'LAB/data/webcam_raw_data.csv')
+# write.csv(trial_data, 'LAB/data/trial_data.csv')
+# 
+# # eye-link fix data:
+# write.csv(el_fix_data, 'LAB/data/eyelink_fix_data.csv')
+# 
+# # eyelink raw samples for each trial:
+# write.csv(el_raw, 'LAB/data/eyelink_raw_samples.csv')
+# save(el_raw, file = 'LAB/data/eyelink_raw_samples.Rda')
+# 
+# cor.test(eye_data$x, eye_data$el_x)
+# cor.test(eye_data$y, eye_data$el_y)
 
 
 ##### Map words to eye-tracking data:
