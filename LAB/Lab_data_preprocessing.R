@@ -10,6 +10,7 @@ source('preproc/functions/all_functions.R')
 library(readr)
 library(tidyverse)
 library(data.table)
+library(zoo)
 
 
 folders<- list.dirs('LAB/lab_raw_data')
@@ -312,8 +313,40 @@ sacc_samples$lag<- NULL
       
       
       ### Save raw Eyelink samples for trial:
+      el_s<- NULL
       
-      el_s<- sacc_samples[which(sacc_samples$unix_time== start_time):which(sacc_samples$unix_time== end_time),]
+      start<- which(sacc_samples$unix_time== start_time)
+      end<- which(sacc_samples$unix_time== end_time)
+      
+      if(length(end)==0){
+        end<- which(sacc_samples$unix_time== end_time+1)[1]
+        
+        if(length(end)==0){
+          end<- which(sacc_samples$unix_time== end_time+3)[1]
+        }
+        
+        if(length(end)==0){
+          end<- which(sacc_samples$unix_time== end_time+4)[1]
+        }
+      }
+      
+      if(length(start)==0){
+        start<- which(sacc_samples$unix_time== start_time+1)[1]
+        
+        if(length(start)==0){
+          start<- which(sacc_samples$unix_time== start_time+3)[1]
+        }
+        
+        if(length(start)==0){
+          start<- which(sacc_samples$unix_time== start_time+4)[1]
+        }
+      }
+      
+      try(el_s<- sacc_samples[start:end,])
+      
+      if(is.null(el_s)){
+        next;
+      }
       
      # el_s$V5<- NULL
       #el_s$V6<- NULL
@@ -447,10 +480,6 @@ sacc_samples$lag<- NULL
     
   } # end of task loop
   
-  
-
-  
-
 
 
 }
