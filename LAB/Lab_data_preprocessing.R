@@ -372,6 +372,18 @@ sacc_samples$lag<- NULL
       
       end_time_el<- sacc_samples$V1[which(sacc_samples$unix_time== end_time)]
       
+      if(length(end_time_el)==0){
+        end_time_el<- sacc_samples$V1[which(sacc_samples$unix_time== end_time+1)][1]
+      }
+      
+      if(length(start_time_el)==0){
+        start_time_el<- sacc_samples$V1[which(sacc_samples$unix_time== start_time+1)][1]
+      }
+      
+      if(length(start_time_el)==0 | length(end_time_el)==0){
+        next;
+      }
+      
       trial_file_el<- dataF[which(grepl(as.character(start_time_el), dataF)):which(grepl(as.character(end_time_el), dataF))]
       
       
