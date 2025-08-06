@@ -149,24 +149,64 @@ loa_data <- ba %>%
     lower = mean_diff - 1.96 * sd(diffs_y, na.rm = TRUE)
   )
 
+# lm1<- lm(diffs_y ~ means_y, data = subset(ba, Task_Name== 'Single-line corpus'))
+# coef(lm1)
+# 
+# lm2<- lm(diffs_y ~ means_y, data = subset(ba, Task_Name!= 'Single-line corpus'))
+# coef(lm2)
+# 
+# loa_data$intercept<- c(coef(lm2)[1], coef(lm1)[1])
+# loa_data$slope<- c(coef(lm2)[2], coef(lm1)[2])
+
+get_loa_sloped <- function(data, mean_col, diff_col) {
+  data %>%
+    group_by(Task_Name) %>%
+    summarise(
+      # Fit linear model per task
+      mod = list(lm(reformulate(mean_col, diff_col), data = cur_data())),
+      .groups = "drop"
+    ) %>%
+    mutate(
+      intercept = map_dbl(mod, ~ coef(.x)[1]),
+      slope     = map_dbl(mod, ~ coef(.x)[2]),
+      sd_resid  = map_dbl(mod, ~ sd(resid(.x), na.rm = TRUE)),
+      upper_int = intercept + 1.96 * sd_resid,
+      lower_int = intercept - 1.96 * sd_resid
+    ) %>%
+    select(-mod)
+}
+
+loa_y <- get_loa_sloped(ba, "means_y", "diffs_y")
+
 Plot_y<- ggplot(ba, aes(x = means_y, y = diffs_y)) +
   geom_pointdensity(aes(color = after_stat(density))) +
   scale_color_viridis_c() +
   ylim(-1550, 700)+
-  scale_y_continuous(breaks=c(-1500, -1000, -500, 0, 500)) +
+  #scale_y_continuous(breaks=c(-1500, -1000, -500, 0, 500)) +
   xlim(0, 1400)+
-  scale_x_continuous(breaks=c(0, 500, 1000, 1500)) +
+  #scale_x_continuous(breaks=c(0, 500, 1000)) +
+  # Mean bias line (purple, dashed)
   
-  # Mean line per facet
-  geom_hline(data = loa_data, aes(yintercept = mean_diff), 
-             color = "purple", linetype = "dashed", linewidth=1.3) +
+  geom_abline(data = loa_y, aes(intercept = intercept, slope = slope),
+              color = "purple", linetype = "dashed", linewidth = 1.3) +
   
-  # Upper & lower 95% limits per facet
-  geom_hline(data = loa_data, aes(yintercept = upper), 
-             color = "red", linetype = "dotted", linewidth=1.3) +
-  geom_hline(data = loa_data, aes(yintercept = lower), 
-             color = "red", linetype = "dotted", linewidth=1.3) +
+  # Upper LoA (red, dotted)
+  geom_abline(data = loa_y, aes(intercept = upper_int, slope = slope),
+              color = "red", linetype = "dotted", linewidth = 1.3) +
   
+  # Lower LoA (red, dotted)
+  geom_abline(data = loa_y, aes(intercept = lower_int, slope = slope),
+              color = "red", linetype = "dotted", linewidth = 1.3) +
+#   # Mean line per facet
+#   geom_hline(data = loa_data, aes(yintercept = mean_diff), 
+#              color = "purple", linetype = "dashed", linewidth=1.3) +
+#   
+#   # Upper & lower 95% limits per facet
+#   geom_hline(data = loa_data, aes(yintercept = upper), 
+#              color = "red", linetype = "dotted", linewidth=1.3) +
+#   geom_hline(data = loa_data, aes(yintercept = lower), 
+#              color = "red", linetype = "dotted", linewidth=1.3) +
+# #  geom_smooth(method= 'lm', )+
   facet_wrap(vars(Task_Name)) +
   labs(title = "Y position",
        x = "Mean Y (Webcam & EyeLink)",
@@ -190,23 +230,36 @@ loa_data2 <- ba %>%
     lower = mean_diff - 1.96 * sd(diffs_x, na.rm = TRUE)
   )
 
+loa_x <- get_loa_sloped(ba, "means_x", "diffs_x")
+
 Plot_x<- ggplot(ba, aes(x = means_x, y = diffs_x)) +
   geom_pointdensity(aes(color = after_stat(density))) +
   scale_color_viridis_c() +
   ylim(-1550, 700)+
-  scale_y_continuous(breaks=c(-1500, -1000, -500, 0, 500)) +
+  #scale_y_continuous(breaks=c(-1500, -1000, -500, 0, 500)) +
   xlim(0, 1400)+
-  scale_x_continuous(breaks=c(0, 500, 1000, 1500)) +
+  #scale_x_continuous(breaks=c(0, 500, 1000)) +
   
-  # Mean line per facet
-  geom_hline(data = loa_data2, aes(yintercept = mean_diff), 
-             color = "purple", linetype = "dashed", linewidth=1.3) +
+  # Mean bias line
+  geom_abline(data = loa_x, aes(intercept = intercept, slope = slope),
+              color = "purple", linetype = "dashed", linewidth = 1.3) +
   
-  # Upper & lower 95% limits per facet
-  geom_hline(data = loa_data2, aes(yintercept = upper), 
-             color = "red", linetype = "dotted", linewidth=1.3) +
-  geom_hline(data = loa_data2, aes(yintercept = lower), 
-             color = "red", linetype = "dotted", linewidth=1.3) +
+  # Upper LoA
+  geom_abline(data = loa_x, aes(intercept = upper_int, slope = slope),
+              color = "red", linetype = "dotted", linewidth = 1.3) +
+  
+  # Lower LoA
+  geom_abline(data = loa_x, aes(intercept = lower_int, slope = slope),
+              color = "red", linetype = "dotted", linewidth = 1.3) +
+  # # Mean line per facet
+  # geom_hline(data = loa_data2, aes(yintercept = mean_diff), 
+  #            color = "purple", linetype = "dashed", linewidth=1.3) +
+  # 
+  # # Upper & lower 95% limits per facet
+  # geom_hline(data = loa_data2, aes(yintercept = upper), 
+  #            color = "red", linetype = "dotted", linewidth=1.3) +
+  # geom_hline(data = loa_data2, aes(yintercept = lower), 
+  #            color = "red", linetype = "dotted", linewidth=1.3) +
   
   facet_wrap(vars(Task_Name)) +
   labs(title = "X position",
@@ -228,5 +281,5 @@ figure <- ggarrange(Plot_x, Plot_y,
                     ncol = 1, nrow = 2)
 
 ggsave(filename = 'LAB/Plots/BA_combined.png', plot = figure,
-       width = 10, height = 10, units = 'in')
+       width = 10, height = 12, units = 'in')
 
