@@ -4,6 +4,9 @@
 rm(list= ls())
 
 
+# colorblind palletes: # https://venngage.com/blog/color-blind-friendly-palette/
+pallete1= c("#CA3542", "#27647B", "#849FA0", "#AECBC9", "#57575F") # "Classic & trustworthy"
+
 library(tidyverse)
 library(readr)
 trial <- read_csv("LAB/data/trial_data.csv")
@@ -36,7 +39,9 @@ trial %>%
 # Sample correlations -----------------------------------------------------
 
 # load in webcam data:
-webcam <- read.csv("~/R/WebEye/LAB/data/webcam_raw_data.csv")
+webcam <- read.csv("~/R/WebEye/LAB/data/webcam_data.csv")
+table(webcam$Task_Name)
+
 
 # remove samples within blinks:
 n_full<- nrow(webcam)
@@ -48,15 +53,19 @@ webcam<- webcam %>% filter(conf>0 & el_pupil>0)
 n_blinks<- nrow(webcam)
 
 # remove samples outside of screen bounds:
-webcam<- webcam %>% filter(el_x>0 & el_x<=1920 & el_y>0 & el_y<=1080 & x>0 & x<=1920 & y>0 & y<1080)
+webcam<- webcam %>% 
+  filter(el_x>0 & el_x<=1920 & el_y>0 & el_y<=1080 & x>0 & x<=1920 & y>0 & y<1080)
 
+sub_correlations<- webcam %>%
+#  select(-Freq)%>% 
+#  drop_na() %>% 
+  group_by(Task_Name, sub)%>% 
+  summarise(Corr_x= cor(x,el_x), Corr_y= cor(y,el_y))
 
-
-sub_correlations<- webcam %>% select(-Freq)%>% drop_na() %>% group_by(Task_Name, sub)%>% summarise(Corr_x= cor(x,el_x), Corr_y= cor(y,el_y))
-sub_correlations<- sub_correlations %>% pivot_longer(cols = 3:4, names_to = 'Dimension', values_to = 'corr' )
+sub_correlations<- sub_correlations %>%
+  pivot_longer(cols = 3:4, names_to = 'Dimension', values_to = 'corr' )
 
 sub_correlations$Task_Name[which(sub_correlations$Task_Name=='Freq_sentences')]<- 'Frequency corpus'
-
 sub_correlations$Task_Name[which(sub_correlations$Task_Name=='Single_line_sentences')]<- 'Single-line corpus'
 
 fun_mean <- function(x, rounding= 2){
@@ -282,4 +291,23 @@ figure <- ggarrange(Plot_x, Plot_y,
 
 ggsave(filename = 'LAB/Plots/BA_combined.png', plot = figure,
        width = 10, height = 12, units = 'in')
+
+ggsave(filename = 'LAB/Plots/BA_combined.pfd', plot = figure,
+       width = 10, height = 12, units = 'in', device = cairo_pdf)
+
+
+
+# Subject-level accuracy --------------------------------------------------
+
+
+webcam$diff_x<- (webcam$el_x - webcam$x)*0.0187
+
+webcam$diff_y<- (webcam$el_y - webcam$y)*0.0192
+
+sub= webcam %>% group_by(sub)%>%
+  summarise(X= mean(diff_x, na.rm = T),
+            Y= mean(diff_y, na.rm = T))
+
+
+
 
