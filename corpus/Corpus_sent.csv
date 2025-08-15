@@ -1,0 +1,41 @@
+Study_ID,ID,Sentence,Length,Question,Question_answ,number of words
+1,1,The man was fed up.,19,Was the man pleased?,0,5
+21,2,The cat saw the bird.,21,Did the cat see a dog?,0,5
+2,3,The green vase broke.,21,Is the vase broken?,1,4
+22,4,John was late again.,20,Was John unpunctual again?,1,4
+3,5,Paul made some tea.,19,Did Paul make coffee?,0,4
+23,6,The driver was tired.,21,Was the driver fatigued?,1,4
+4,7,Jo was very pleased.,20,Was Jo happy?,1,4
+24,8,He had to clean up.,19,Did he need to tidy up?,1,5
+5,9,A break was long due.,21,Was a break necessary?,1,5
+25,10,The bike is sold now.,21,Was it a car that was sold?,0,5
+6,11,James opened his car.,21,Did James open the fridge?,0,4
+26,12,His aunt sang along.,20,Was his aunt singing?,1,4
+7,13,Poppy got paid today.,21,Did Poppy receive money?,1,4
+27,14,The room went dark.,19,Was the room full of light?,0,4
+8,15,Samantha drew the ox.,21,Did Samantha draw a goat?,0,4
+28,16,The river dried up.,19,Did water in the river evaporate?,1,4
+9,17,The game ended fast.,20,Did the game end slowly?,0,4
+29,18,The bus turned right.,21,Did the bus go left?,0,4
+10,19,He got lost at sea.,19,Did he get lost on land?,0,5
+30,20,The dog got scared.,19,Was the dog afraid?,1,4
+11,21,Cam was dressed well.,21,Was Cam dressed badly?,0,4
+31,22,The bird flew away.,19,Did the bird fly away?,1,4
+12,23,The bar looked empty.,21,Did the bar look full?,0,4
+32,24,Michael drew his gun.,21,Did Michael get his gun out?,1,4
+13,25,He ate his soup last.,21,Did he eat his soup first?,0,5
+33,26,Li took away his toy.,21,Was the toy taken away?,1,5
+14,27,The sand felt smooth.,21,Was the sand smooth?,1,4
+34,28,The girl walked past.,21,Did the girl walk by?,1,4
+15,29,She is new to sewing.,21,Does she have a lot of experience sewing?,0,5
+35,30,It was a cold night.,20,Was the night warm?,0,5
+16,31,The sun shined today.,21,Was it sunny today?,1,4
+36,32,Some people were sad.,21,Were some people sad?,1,4
+17,33,Several kids ate pie.,21,Did several kids eat ice-cream?,0,4
+37,34,The car broke down.,19,Was there a problem with the car?,1,4
+18,35,He ate many fruits.,19,Did he eat fruits?,1,4
+38,36,Timothy knew the map.,21,Did Timothy have no knowledge of the map?,0,4
+19,37,Tristan liked music.,20,Did Tristan hate music?,0,3
+39,38,She knew this artist.,21,Was the artist unfamiliar to her?,0,4
+20,39,The shop closed down.,21,Did the shop remain open?,0,4
+40,40,He was quite annoyed.,21,Was he annoyed?,1,4

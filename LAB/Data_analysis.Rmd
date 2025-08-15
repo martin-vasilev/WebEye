@@ -44,7 +44,8 @@ The average comprehension accuracy was `r desc_acc[1,2]`% (SD= `r desc_acc[1,2]`
 # load in webcam data:
 webcam <- read.csv("~/R/WebEye/LAB/data/webcam_raw_data.csv")
 
-webcam<- webcam %>% filter(conf>0)
+# remove samples within blinks:
+webcam<- webcam %>% filter(conf>0 & el_pupil>0)
 
 sub_correlations<- webcam %>% select(-Freq)%>% drop_na() %>% group_by(Task_Name, sub)%>% summarise(Corr_x= cor(x,el_x), Corr_y= cor(y,el_y))
 
@@ -230,7 +231,7 @@ el<- el_target %>%
 
 el %>% group_by(Freq) %>% summarise(M= mean(TVT), SD= mean(TVT))
 
-summary(M1<- lmer(TVT ~ Freq +(Freq|sub) +(1|Trial_Id), data= el))
+summary(M1<- lmer(log(TVT) ~ Freq +(Freq|sub) +(1|Trial_Id), data= el))
 
 library(ggeffects)
 
@@ -239,7 +240,7 @@ plot(ggeffect(model = M1, terms = 'Freq')) +
        title= 'Eyelink data')+theme_bw(18)
 
 
-summary(M2<- lmer(TVT ~ Freq +(1|sub) +(1|Trial_Id), data= web))
+summary(M2<- lmer(log(TVT) ~ Freq +(1|sub) +(1|Trial_Id), data= web))
 
 plot(ggeffect(model = M2, terms = 'Freq')) +
   labs(y= 'Total viewing time (in ms)', x= 'Lexical frequency',
