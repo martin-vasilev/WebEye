@@ -39,7 +39,7 @@ trial %>%
 # Sample correlations -----------------------------------------------------
 
 # load in webcam data:
-webcam <- read.csv("~/R/WebEye/LAB/data/webcam_data.csv")
+webcam <- read.csv("LAB/data/webcam_data.csv")
 table(webcam$Task_Name)
 
 
@@ -49,12 +49,42 @@ n_full<- nrow(webcam)
 webcam<- webcam %>% filter(conf>0 & el_pupil>0)
 
 # samples removed due to blinks:
-(1- nrow(webcam)/n_full)*100
+perc_blinks= (1- nrow(webcam)/n_full)*100
+perc_blinks
+
 n_blinks<- nrow(webcam)
 
 # remove samples outside of screen bounds:
 webcam<- webcam %>% 
   filter(el_x>0 & el_x<=1920 & el_y>0 & el_y<=1080 & x>0 & x<=1920 & y>0 & y<1080)
+
+(1- nrow(webcam)/n_full)*100 - perc_blinks
+
+## calculate effective sampling rate:
+
+hz= webcam %>%
+  filter(!is.na(time_diff))%>%
+  mutate(valid_diffs= time_diff/1000)%>%
+  mutate(hz= 1/valid_diffs)
+
+# subject level sampling rate:
+sub<- hz%>%
+  group_by(sub)%>%
+  summarise(M= mean(hz), 
+            SD= sd(hz))
+
+mean(sub$M)
+
+mean(sub$M[which(sub$sub>4)]) # excluding first 3 subjects recorded at 30 Hz
+
+# Convert ms to seconds
+time_diff_s <- valid_diffs / 1000
+
+# Effective sampling rate in Hz
+sampling_rate_hz <- 1 / mean(time_diff_s)
+
+sampling_rate_hz
+
 
 sub_correlations<- webcam %>%
 #  select(-Freq)%>% 
@@ -330,3 +360,32 @@ ggsave(filename = 'LAB/Plots/Subject_acc_density.png',
        plot = P_density, width = 10, height = 7, units = 'in')
 
 
+
+# Target word lexical frequency analysis ----------------------------------
+
+web_target<- subset(webcam, web_target_word== "Yes")
+el_target<- subset(webcam, el_target_word== "Yes")
+
+web<- web_target %>% 
+  group_by(sub, Trial_Id, Freq, web_wordID) %>%
+  summarise(TVT= sum(time_diff, na.rm = T))%>%
+  filter(TVT>80 & TVT<=2000)
+
+web %>% 
+  group_by(Freq) %>%
+  summarise(M= mean(TVT), SD= mean(TVT))
+
+library(lme4)
+
+summary(M1<- lmer(log(TVT) ~ Freq +(Freq|sub) +(Freq|Trial_Id), data= web))
+
+el<- el_target %>% 
+  group_by(sub, Trial_Id, Freq, web_wordID) %>%
+  summarise(TVT= sum(time_diff, na.rm = T))%>%
+  filter(TVT>80 & TVT<=3000)
+
+el %>% 
+  group_by(Freq) %>%
+  summarise(M= mean(TVT), SD= mean(TVT))
+
+summary(M2<- lmer(log(TVT) ~ Freq +(Freq|sub) +(1|Trial_Id), data= el))
