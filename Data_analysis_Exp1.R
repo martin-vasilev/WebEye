@@ -292,7 +292,7 @@ figure <- ggarrange(Plot_x, Plot_y,
 ggsave(filename = 'LAB/Plots/BA_combined.png', plot = figure,
        width = 10, height = 12, units = 'in')
 
-ggsave(filename = 'LAB/Plots/BA_combined.pfd', plot = figure,
+ggsave(filename = 'LAB/Plots/BA_combined.pdf', plot = figure,
        width = 10, height = 12, units = 'in', device = cairo_pdf)
 
 
@@ -300,14 +300,33 @@ ggsave(filename = 'LAB/Plots/BA_combined.pfd', plot = figure,
 # Subject-level accuracy --------------------------------------------------
 
 
-webcam$diff_x<- (webcam$el_x - webcam$x)*0.0187
+webcam$diff_x<- (webcam$x-webcam$el_x)*0.0187
 
-webcam$diff_y<- (webcam$el_y - webcam$y)*0.0192
+webcam$diff_y<- (webcam$y- webcam$el_y)*0.0192
 
-sub= webcam %>% group_by(sub)%>%
-  summarise(X= mean(diff_x, na.rm = T),
-            Y= mean(diff_y, na.rm = T))
+sub= webcam %>% group_by(sub, Task_Name)%>%
+  summarise(`X position`= mean(diff_x, na.rm = T),
+            `Y position`= mean(diff_y, na.rm = T))
+
+sub= sub %>% 
+  pivot_longer(cols = 3:4, names_to = 'Dimension', values_to = 'error')
 
 
+P_density=sub %>%
+  ggplot(aes(x = error, fill = Dimension)) +
+  geom_density(alpha = 0.4) +
+  geom_rug(aes(color = Dimension), sides = "b", alpha = 0.6) +
+  facet_wrap(~Task_Name+Dimension)+
+  theme_minimal(18)+
+  theme(
+    panel.spacing = unit(2, "lines") # increase spacing between facets
+  )+ geom_vline(xintercept = 0,linetype = 2)+
+  labs(x= 'Error (Webcam - Eyelink) in deg', y= "Density")
+
+
+ggsave(filename = 'LAB/Plots/Subject_acc_density.pdf',
+       plot = P_density, width = 10, height = 7, units = 'in')
+ggsave(filename = 'LAB/Plots/Subject_acc_density.png',
+       plot = P_density, width = 10, height = 7, units = 'in')
 
 
