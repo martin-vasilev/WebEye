@@ -346,12 +346,15 @@ P_density=sub %>%
   ggplot(aes(x = error, fill = Dimension)) +
   geom_density(alpha = 0.4) +
   geom_rug(aes(color = Dimension), sides = "b", alpha = 0.6) +
-  facet_wrap(~Task_Name+Dimension)+
+  facet_wrap(~Dimension)+
   theme_minimal(18)+
   theme(
     panel.spacing = unit(2, "lines") # increase spacing between facets
   )+ geom_vline(xintercept = 0,linetype = 2)+
-  labs(x= 'Error (Webcam - Eyelink) in deg', y= "Density")
+  labs(x= 'Error (Webcam - Eyelink) in deg', y= "Density",
+       title = "a) Mean error per subject and screen dimension (°)")+
+  theme(panel.grid = element_blank(),
+        plot.title.position = "plot")
 
 
 ggsave(filename = 'LAB/Plots/Subject_acc_density.pdf',
@@ -360,6 +363,132 @@ ggsave(filename = 'LAB/Plots/Subject_acc_density.png',
        plot = P_density, width = 10, height = 7, units = 'in')
 
 
+
+
+# Accuracy by screen region -----------------------------------------------
+
+# Written by Hemu Xu
+
+library(readr)
+library(dplyr)
+library(tidyr)
+library(data.table)
+library(lme4)
+library(lmerTest)
+library(ggplot2)
+library(emmeans)
+
+# # --- 1. Load the dataset ---
+# df <- read_csv("webcam_data.csv")
+# 
+# # --- 2. Create trial index per participant ---
+# df <- df %>%
+#   group_by(sub, Task_Name, Trial_Nr, Trial_Id) %>%  # 加 Trial_Id
+#   summarise(dummy = 1, .groups = "drop") %>%
+#   group_by(sub) %>%
+#   mutate(Trial = row_number()) %>%
+#   select(-dummy) %>%
+#   right_join(df, by = c("sub", "Task_Name", "Trial_Nr", "Trial_Id")) %>%  # join 时也加 Trial_Id
+#   arrange(sub, Trial_Id, Trial_Nr)
+
+
+# --- 1. Define 9 screen sections (3x3 grid, numbered 1-9 left to right, top to bottom) ---
+df <- webcam %>%
+  mutate(
+    Section = case_when(
+      el_x >= 0 & el_x < 640   & el_y >= 0   & el_y < 360   ~ 1,
+      el_x >= 640 & el_x < 1280 & el_y >= 0   & el_y < 360   ~ 2,
+      el_x >= 1280 & el_x <= 1920 & el_y >= 0   & el_y < 360   ~ 3,
+      
+      el_x >= 0 & el_x < 640   & el_y >= 360 & el_y < 720   ~ 4,
+      el_x >= 640 & el_x < 1280 & el_y >= 360 & el_y < 720   ~ 5,
+      el_x >= 1280 & el_x <= 1920 & el_y >= 360 & el_y < 720   ~ 6,
+      
+      el_x >= 0 & el_x < 640   & el_y >= 720 & el_y <= 1080  ~ 7,
+      el_x >= 640 & el_x < 1280 & el_y >= 720 & el_y <= 1080  ~ 8,
+      el_x >= 1280 & el_x <= 1920 & el_y >= 720 & el_y <= 1080 ~ 9,
+      
+      TRUE ~ NA_real_
+    )
+  )
+
+
+# --- 2. Compute mean x/y error per section ---
+# Pixel error and visual angle error (°) are both calculated
+section_xy <- df %>%
+  drop_na(x, y, el_x, el_y, Section) %>%
+  mutate(
+    x_error_px = (x - el_x),         # Horizontal error in px
+    y_error_px = (y - el_y),         # Vertical error in px
+    x_error    = x_error_px * 0.0187,  # Horizontal error in visual degrees
+    y_error    = y_error_px * 0.0192   # Vertical error in visual degrees
+  ) %>%
+  group_by(Section) %>%
+  summarise(
+    mean_x_px = mean(x_error_px, na.rm = TRUE),
+    mean_y_px = mean(y_error_px, na.rm = TRUE),
+    mean_x    = mean(x_error, na.rm = TRUE),
+    mean_y    = mean(y_error, na.rm = TRUE),
+    se_x      = sd(x_error, na.rm = TRUE) / sqrt(n()),
+    se_y      = sd(y_error, na.rm = TRUE) / sqrt(n()),
+    mag       = sqrt(mean_x^2 + mean_y^2),  # Magnitude of error vector (°)
+    .groups = "drop"
+  )
+
+# --- 3. Map sections to grid coordinates (col=1:3, row=3:1) ---
+grid_xy <- section_xy %>%
+  mutate(
+    Section = as.integer(as.character(Section)),
+    col = ((Section - 1) %% 3) + 1,         # 1=Left, 2=Center, 3=Right
+    row = 3 - ((Section - 1) %/% 3)         # 3=Top, 2=Middle, 1=Bottom
+  )
+
+# --- 7. Scale arrow length based on maximum magnitude ---
+max_mag <- max(grid_xy$mag, na.rm = TRUE)
+arrow_scale <- ifelse(max_mag > 0, 0.35 / max_mag, 0.35)
+
+grid_xy <- grid_xy %>%
+  mutate(
+    xend = col + arrow_scale * mean_x,
+    yend = row - arrow_scale * mean_y
+  )
+
+# --- 8. Plot heatmap + arrows + labels ---
+Pscreen<- ggplot(grid_xy, aes(x = col, y = row)) +
+  geom_tile(aes(fill = mag), color = "white") +
+  
+  geom_segment(aes(xend = xend, yend = yend),
+               arrow = arrow(length = unit(0.12, "cm")),
+               linewidth = 1.2) +
+  
+  geom_text(aes(label = sprintf("x: %.1fpx (%.2f°)\ny: %.1fpx (%.2f°)",
+                                mean_x_px, mean_x, mean_y_px, mean_y),
+                y = row + 0.35),
+            lineheight = 0.95, size = 5) +
+  
+  scale_fill_gradient(low = "white", high = "steelblue") +
+  scale_x_continuous(breaks = 1:3, labels = c("Left","Center","Right"), expand = c(0,0)) +
+  scale_y_continuous(breaks = 1:3, labels = c("Bottom","Middle","Top"), expand = c(0,0)) +
+  
+  coord_fixed(ratio = 1080/1920) +
+  labs(x = NULL, y = NULL, fill = "Magnitude (°)",
+       title = "b) Mean directional error per screen section",
+       subtitle = "Arrows = direction of error; tile colour = combined error magnitude (°) across x and y;\n labels = mean x/y error (°)") +
+  theme_minimal(18) +
+  theme(panel.grid = element_blank(),
+        plot.title.position = "plot")
+
+Pscreen
+
+
+figure2 <- ggarrange(P_density, Pscreen,
+                    ncol = 1, nrow = 2)
+
+ggsave(filename = 'LAB/Plots/error_magnitude.png', plot = figure2,
+       width = 12, height = 14, units = 'in')
+
+ggsave(filename = 'LAB/Plots/error_magnitude.pdf', plot = figure2,
+       width = 12, height = 14, units = 'in', device = cairo_pdf)
 
 # Target word lexical frequency analysis ----------------------------------
 
