@@ -27,6 +27,8 @@ write.csv(x = cal, 'LAB/data/eyelink_calibration.csv')
 
 
 library(tidyverse)
+library(readr)
+cal <- read_csv("LAB/data/eyelink_calibration.csv")
 
 el_acc<- cal %>% 
   group_by(flnm) %>%
@@ -38,6 +40,7 @@ mean(el_acc$M)
 # generate a plot of 
 P_cal<- el_acc %>% 
   ggplot(aes(y= M))+
+  ylim(0,0.75)+
   ggdist::stat_halfeye(
     adjust = .5,
     width = .6,
@@ -48,9 +51,9 @@ P_cal<- el_acc %>%
     width = .25,
     outlier.shape = NA, fill= pallete1[5], alpha= 0.3
   )+
-  labs(y= "Avg. calibration accuracy [Eyelink]",
+  labs(y= "Avgerage calibration accuracy\nin deg. [Eyelink]",
       x= 'Density')+
-  theme_classic(16)
+  theme_classic(20)
   
 ggsave(filename = 'LAB/Plots/Eyelink_calibration_accuracy.png', plot = P_cal,
        width = 1600, height = 1600, units = 'px')
