@@ -77,13 +77,13 @@ mean(sub$M)
 
 mean(sub$M[which(sub$sub>4)]) # excluding first 3 subjects recorded at 30 Hz
 
-# Convert ms to seconds
-time_diff_s <- valid_diffs / 1000
-
-# Effective sampling rate in Hz
-sampling_rate_hz <- 1 / mean(time_diff_s)
-
-sampling_rate_hz
+# # Convert ms to seconds
+# time_diff_s <- valid_diffs / 1000
+# 
+# # Effective sampling rate in Hz
+# sampling_rate_hz <- 1 / mean(time_diff_s)
+# 
+# sampling_rate_hz
 
 
 sub_correlations<- webcam %>%
@@ -338,6 +338,14 @@ sub= webcam %>% group_by(sub, Task_Name)%>%
   summarise(`X position`= mean(diff_x, na.rm = T),
             `Y position`= mean(diff_y, na.rm = T))
 
+webcam %>% 
+  summarise(`X position_M`= mean(diff_x, na.rm = T),
+            `X position_SD`= sd(diff_x, na.rm = T),
+            `Y position_M`= mean(diff_y, na.rm = T),
+            `Y position_SD`= sd(diff_y, na.rm = T))
+
+
+
 sub= sub %>% 
   pivot_longer(cols = 3:4, names_to = 'Dimension', values_to = 'error')
 
@@ -492,29 +500,558 @@ ggsave(filename = 'LAB/Plots/error_magnitude.pdf', plot = figure2,
 
 # Target word lexical frequency analysis ----------------------------------
 
-web_target<- subset(webcam, web_target_word== "Yes")
-el_target<- subset(webcam, el_target_word== "Yes")
+# web_target<- subset(webcam, web_target_word== "Yes")
+# el_target<- subset(webcam, el_target_word== "Yes")
+# 
+# web<- web_target %>% 
+#   group_by(sub, Trial_Id, Freq, web_wordID) %>%
+#   summarise(TVT= sum(time_diff, na.rm = T))%>%
+#   filter(TVT>80 & TVT<=2000)
+# 
+# web %>% 
+#   group_by(Freq) %>%
+#   summarise(M= mean(TVT), SD= mean(TVT))
+# 
+# library(lme4)
+# 
+# summary(M1<- lmer(log(TVT) ~ Freq +(Freq|sub) +(Freq|Trial_Id), data= web))
+# 
+# el<- el_target %>% 
+#   group_by(sub, Trial_Id, Freq, web_wordID) %>%
+#   summarise(TVT= sum(time_diff, na.rm = T))%>%
+#   filter(TVT>80 & TVT<=2000)
+# 
+# el %>% 
+#   group_by(Freq) %>%
+#   summarise(M= mean(TVT), SD= mean(TVT))
+# 
+# summary(M2<- lmer(log(TVT) ~ Freq +(Freq|sub) +(1|Trial_Id), data= el))
 
-web<- web_target %>% 
-  group_by(sub, Trial_Id, Freq, web_wordID) %>%
-  summarise(TVT= sum(time_diff, na.rm = T))%>%
-  filter(TVT>80 & TVT<=2000)
+#library("devtools")
+#install_github("tmalsburg/saccades/saccades", dependencies=TRUE)
 
-web %>% 
+library(saccades)
+
+# webcam:
+webfq<- webcam%>% filter(Task_Name== 'Freq_sentences')
+
+nsubs<- unique(webfq$sub)
+
+parsed_web<- NULL
+
+for(i in 1:length(nsubs)){
+  
+  cat(sprintf("subject %g \n", i))
+  
+  t<- subset(webfq, sub== nsubs[i])
+  
+  freq<- t %>%
+    distinct(Trial_Id, .keep_all = TRUE)%>%
+    select(Trial_Id, Freq)
+  
+  colnames(freq)<- c('trial', 'Freq')
+  
+  t<- t[, c('x', 'y', 'Trial_Id', 'time_start')]
+  colnames(t)<- c("x", "y", "trial", "time")
+  ke.result<- detect.fixations(t, smooth.coordinates = T,
+                               smooth.saccades = F)
+  ke.result<- subset(ke.result, event=='fixation')
+  ke.result$sub<- nsubs[i]
+  ke.result$event<- NULL
+  
+  ke.result<- ke.result %>% inner_join(freq, by= 'trial')
+  
+  parsed_web<- rbind(parsed_web, ke.result)
+  
+}
+
+
+# Eyelink:
+parsed_el<- NULL
+
+for(i in 1:length(nsubs)){
+  
+  cat(sprintf("subject %g \n", i))
+  
+  t<- subset(webfq, sub== nsubs[i])
+  
+  freq<- t %>%
+    distinct(Trial_Id, .keep_all = TRUE)%>%
+    select(Trial_Id, Freq)
+  
+  colnames(freq)<- c('trial', 'Freq')
+  
+  t<- t[, c('el_x', 'el_y', 'Trial_Id', 'time_start')]
+  colnames(t)<- c("x", "y", "trial", "time")
+  ke.result<- detect.fixations(t, smooth.coordinates = T,
+                               smooth.saccades = F)
+  ke.result<- subset(ke.result, event=='fixation')
+  ke.result$sub<- nsubs[i]
+  ke.result$event<- NULL
+  
+  ke.result<- ke.result %>% inner_join(freq, by= 'trial')
+  
+  parsed_el<- rbind(parsed_el, ke.result)
+  
+}
+
+## re-map text coordinates to fixation data:
+
+library(readr)
+Corpus_fq <- read_csv("LAB/Corpus_fq.csv")
+Corpus_fq<- Corpus_fq[1:120,]
+source('preproc/functions/get_coords.R')
+
+web_fix<- NULL
+parsed_web$wordID<- NA
+parsed_web$char<- NA
+parsed_web$char_num<- NA
+parsed_web$target_word<- NA
+parsed_web$word_num<- NA
+
+library(stringr)
+
+for(k in 1:length(nsubs)){ # for each subject...
+  
+    a<- subset(parsed_web, sub== nsubs[k])
+    nitems<- unique(a$trial)
+    
+    for(i in 1:length(nitems)){ # for each item...
+      
+      c<- subset(a, trial== nitems[i])
+        
+      freq<- ifelse(c$Freq[1]== 'low', 'LF', 'HF')
+        
+      sent<-Corpus_fq$line_breaks[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
+      coords<- get_coords(sent, revert = T)
+      
+      target<- Corpus_fq$`Target (N)`[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
+        
+      for(j in 1:nrow(c)){ # for each fixation
+        
+        ### map webcam samples:
+        
+        loc<- which(coords$x1<= c$x[j] & coords$x2>= c$x[j] & coords$y1<= c$y[j] & coords$y2>= c$y[j])
+        
+        if(length(loc)>0){
+          c$wordID[j]<- str_trim(coords$wordID[loc])
+          c$char[j]<- coords$char[loc]
+          c$char_num[j]<- coords$char_num[loc]
+          c$word_num[j]<- coords$word_num[loc]
+          
+            if(!is.na(coords$wordID[loc])){
+              if(c$wordID[j]== target){
+                c$target_word[j]<- "Yes"
+              }else{
+                c$target_word[j]<- "No"
+              }
+            }
+          
+          
+        }
+        
+      } # end of j (fixations)
+      
+      web_fix<- rbind(web_fix, c)
+      
+    } # end of i (items)
+    
+    cat(k); cat(' ')
+    
+  } # end of k (subjects)
+  
+
+
+# Parse trial data to compute fixation duration metrics:
+
+nsubs<- unique(web_fix$sub)
+
+dat<- NULL
+
+for(i in 1:length(nsubs)){
+  a<- subset(web_fix, sub== nsubs[i])
+  
+  nitems<- unique(a$trial)
+  
+  for(j in 1:length(nitems)){
+    b<- subset(a, trial== nitems[j])
+    
+    b$regress<- NA
+    
+    max_word<- 1
+    
+    max_fixated<- max(b$word_num, na.rm=T)
+    
+    if(max_fixated<0){
+      dat<- rbind(dat, b)
+      next
+    }
+    
+    terminated<- rep(0, max_fixated)
+      
+    for(k in 1:nrow(b)){
+      
+      if(!is.na(b$word_num[k])){
+        if(b$word_num[k]>= max_word & terminated[b$word_num[k]]==0){
+           b$regress[k]<- 0
+        }else{
+          b$regress[k]<- 1
+        }
+        # 
+        # # check for cases where readers return to word before progressing:
+        # if(b$word_num[k]== max_word){
+        #  which(b[1:k,]$regress) 
+        # }
+        
+        
+        if(b$word_num[k]> max_word){
+          max_word<- b$word_num[k]
+          terminated[1:(b$word_num[k]-1)]<- 1
+        }
+        
+        if(b$word_num[k]< max_word){
+          terminated[max_word]<- 1
+        }
+        
+      }
+      
+     
+    }
+    
+    dat<- rbind(dat, b)
+    
+  } # end of item (j)
+  
+}  #end of subject (i)
+  
+  
+  
+words_web<- NULL
+nsubs<- sort(unique(web_fix$sub))
+
+web_fix<- web_fix %>%filter(dur>80 & dur<1000)
+
+for(i in 1:length(nsubs)){
+  a<- subset(dat, sub== nsubs[i])
+  
+  nitmes<- sort(unique(a$trial))
+  
+  for(j in 1:length(nitems)){
+    b<- subset(a, trial== nitems[j])
+    
+    nwords<- sort(unique(b$word_num))
+    
+    if(length(nwords)==0){
+      next
+    }
+    
+    for(k in 1:length(nwords)){
+      
+      c<- subset(b, word_num== nwords[k])
+      
+      TVT<- NA
+      FFD<- NA
+      SFD<- NA
+      GD<- NA
+      
+      p1<- subset(c, regress==0)
+      p2<- subset(c, regress==1)
+      
+      TVT<- sum(c$dur)
+      
+      if(nrow(p1)>0){
+        GD<- sum(p1$dur)
+        FFD<- p1$dur[1]
+        
+        if(nrow(p1)==1){
+          SFD<- FFD
+        }
+        
+      }
+      
+      t<- data.frame('sub'= b$sub[1], 'item'= b$trial[1], 'Freq'= b$Freq[1],
+                     'word_num'= nwords[k], 'wordID'= c$wordID[1],
+                     'target'= c$target_word[1], 'FFD'= FFD,
+                     'SFD'= SFD, 'GD'= GD, 'TVT'= TVT)
+      
+      
+      words_web<- rbind(words_web, t)
+      
+    }
+  }
+  
+  
+}
+
+words_web_t<- words_web%>% filter(target== 'Yes')%>%
+  filter(FFD>80 & FFD<1000)%>%
+  filter(GD>80 & GD<2000)%>%
+  filter(TVT>80 & TVT<3000)
+
+words_web_t %>%  group_by(Freq)%>%
+  summarise(FFD= mean(FFD, na.rm=T),
+            SFD= mean(SFD, na.rm=T),
+            GD= mean(GD, na.rm=T),
+            TVT= mean(TVT, na.rm=T))
+
+words_web_t %>%
+       group_by(Freq) %>%
+       summarise(FFD_sd = sd(FFD, na.rm = TRUE),
+                 SFD_sd = sd(SFD, na.rm = TRUE),
+                 GD_sd = sd(GD, na.rm = TRUE),
+                 TVT_sd = sd(TVT, na.rm = TRUE))
+
+summary(M2<- lmer(log(FFD) ~ Freq +(Freq|sub) +(Freq|item), data= words_web_t))
+
+
+
+######### Eyelink data:
+
+el_fix<- NULL
+parsed_el$wordID<- NA
+parsed_el$char<- NA
+parsed_el$char_num<- NA
+parsed_el$target_word<- NA
+parsed_el$word_num<- NA
+
+library(stringr)
+
+for(k in 1:length(nsubs)){ # for each subject...
+  
+  a<- subset(parsed_el, sub== nsubs[k])
+  nitems<- unique(a$trial)
+  
+  for(i in 1:length(nitems)){ # for each item...
+    
+    c<- subset(a, trial== nitems[i])
+    
+    freq<- ifelse(c$Freq[1]== 'low', 'LF', 'HF')
+    
+    sent<-Corpus_fq$line_breaks[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
+    coords<- get_coords(sent, revert = T)
+    
+    target<- Corpus_fq$`Target (N)`[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
+    
+    for(j in 1:nrow(c)){ # for each fixation
+      
+      ### map webcam samples:
+      
+      loc<- which(coords$x1<= c$x[j] & coords$x2>= c$x[j] & coords$y1<= c$y[j] & coords$y2>= c$y[j])
+      
+      if(length(loc)>0){
+        c$wordID[j]<- str_trim(coords$wordID[loc])
+        c$char[j]<- coords$char[loc]
+        c$char_num[j]<- coords$char_num[loc]
+        c$word_num[j]<- coords$word_num[loc]
+        
+        if(!is.na(coords$wordID[loc])){
+          if(c$wordID[j]== target){
+            c$target_word[j]<- "Yes"
+          }else{
+            c$target_word[j]<- "No"
+          }
+        }
+        
+        
+      }
+      
+    } # end of j (fixations)
+    
+    el_fix<- rbind(el_fix, c)
+    
+  } # end of i (items)
+  
+  cat(k); cat(' ')
+  
+} # end of k (subjects)
+
+
+# Parse trial data to compute fixation duration metrics:
+nsubs<- unique(el_fix$sub)
+
+dat<- NULL
+
+for(i in 1:length(nsubs)){
+  a<- subset(el_fix, sub== nsubs[i])
+  
+  nitems<- unique(a$trial)
+  
+  for(j in 1:length(nitems)){
+    b<- subset(a, trial== nitems[j])
+    
+    b$regress<- NA
+    
+    max_word<- 1
+    
+    max_fixated<- max(b$word_num, na.rm=T)
+    
+    if(max_fixated<0){
+      dat<- rbind(dat, b)
+      next
+    }
+    
+    terminated<- rep(0, max_fixated)
+    
+    for(k in 1:nrow(b)){
+      
+      if(!is.na(b$word_num[k])){
+        if(b$word_num[k]>= max_word & terminated[b$word_num[k]]==0){
+          b$regress[k]<- 0
+        }else{
+          b$regress[k]<- 1
+        }
+        # 
+        # # check for cases where readers return to word before progressing:
+        # if(b$word_num[k]== max_word){
+        #  which(b[1:k,]$regress) 
+        # }
+        
+        
+        if(b$word_num[k]> max_word){
+          max_word<- b$word_num[k]
+          terminated[1:(b$word_num[k]-1)]<- 1
+        }
+        
+        if(b$word_num[k]< max_word){
+          terminated[max_word]<- 1
+        }
+        
+      }
+      
+      
+    }
+    
+    dat<- rbind(dat, b)
+    
+  } # end of item (j)
+  
+}  #end of subject (i)
+
+
+
+words_el<- NULL
+nsubs<- sort(unique(el_fix$sub))
+
+el_fix<- el_fix %>%filter(dur>80 & dur<1000)
+
+for(i in 1:length(nsubs)){
+  a<- subset(dat, sub== nsubs[i])
+  
+  nitmes<- sort(unique(a$trial))
+  
+  for(j in 1:length(nitems)){
+    b<- subset(a, trial== nitems[j])
+    
+    nwords<- sort(unique(b$word_num))
+    
+    if(length(nwords)==0){
+      next
+    }
+    
+    for(k in 1:length(nwords)){
+      
+      c<- subset(b, word_num== nwords[k])
+      
+      TVT<- NA
+      FFD<- NA
+      SFD<- NA
+      GD<- NA
+      
+      p1<- subset(c, regress==0)
+      p2<- subset(c, regress==1)
+      
+      TVT<- sum(c$dur)
+      
+      if(nrow(p1)>0){
+        GD<- sum(p1$dur)
+        FFD<- p1$dur[1]
+        
+        if(nrow(p1)==1){
+          SFD<- FFD
+        }
+        
+      }
+      
+      t<- data.frame('sub'= b$sub[1], 'item'= b$trial[1], 'Freq'= b$Freq[1],
+                     'word_num'= nwords[k], 'wordID'= c$wordID[1],
+                     'target'= c$target_word[1], 'FFD'= FFD,
+                     'SFD'= SFD, 'GD'= GD, 'TVT'= TVT)
+      
+      
+      words_el<- rbind(words_el, t)
+      
+    }
+  }
+  
+  
+}
+
+words_el_t<- words_el%>% filter(target== 'Yes')%>%
+  filter(FFD>80 & FFD<1000)%>%
+  filter(GD>80 & GD<2000)%>%
+  filter(TVT>80 & TVT<3000)
+
+words_el_t %>%  group_by(Freq)%>%
+  summarise(FFD= mean(FFD, na.rm=T),
+            SFD= mean(SFD, na.rm=T),
+            GD= mean(GD, na.rm=T),
+            TVT= mean(TVT, na.rm=T))
+
+words_el_t %>%
   group_by(Freq) %>%
-  summarise(M= mean(TVT), SD= mean(TVT))
+  summarise(FFD_sd = sd(FFD, na.rm = TRUE),
+            SFD_sd = sd(SFD, na.rm = TRUE),
+            GD_sd = sd(GD, na.rm = TRUE),
+            TVT_sd = sd(TVT, na.rm = TRUE))
 
-library(lme4)
 
-summary(M1<- lmer(log(TVT) ~ Freq +(Freq|sub) +(Freq|Trial_Id), data= web))
+# combine two target word data frames:
+words_web_t$Tracker<- "Webcam"
+words_el_t$Tracker<- "Eyelink"
 
-el<- el_target %>% 
-  group_by(sub, Trial_Id, Freq, web_wordID) %>%
-  summarise(TVT= sum(time_diff, na.rm = T))%>%
-  filter(TVT>80 & TVT<=3000)
+words_dat<- rbind(words_web_t, words_el_t)
+write.csv(x = words_dat, file = 'LAB/data/target_word_fixation_data.csv')
 
-el %>% 
-  group_by(Freq) %>%
-  summarise(M= mean(TVT), SD= mean(TVT))
 
-summary(M2<- lmer(log(TVT) ~ Freq +(Freq|sub) +(1|Trial_Id), data= el))
+# generate descriptive statistics:
+library(gtsummary)
+library(dplyr)
+
+words_dat %>%
+  mutate(Freq_tracker = interaction(Freq,Tracker)) %>%   # combine into one
+  select(Freq_tracker, FFD, SFD, GD, TVT) %>%
+  tbl_summary(by = Freq_tracker,
+              statistic = list(all_continuous() ~ "{mean} ({sd})"))
+
+
+# fit lmer models:
+words_dat$Tracker<- as.factor(words_dat$Tracker)
+contrasts(words_dat$Tracker)<- c(-1, 1)
+
+words_dat$Freq<- as.factor(words_dat$Freq)
+contrasts(words_dat$Freq)<- c(-1, 1)
+
+library(lmerTest)
+
+## Models:
+
+summary(M1<- lmer(log(FFD)~ Freq*Tracker +(Freq+Tracker|sub)+(Freq|item), data= words_dat))
+
+summary(M2<- lmer(log(SFD)~ Freq*Tracker +(Freq+Tracker|sub)+(Freq+Tracker|item), data= words_dat))
+
+summary(M3<- lmer(log(GD)~ Freq*Tracker +(Tracker|sub)+(Freq|item), data= words_dat))
+
+summary(M4<- lmer(log(TVT)~ Freq*Tracker +(Freq+Tracker|sub)+(Tracker+Freq|item), data= words_dat))
+
+
+## emeans post-hoc tests:
+library(emmeans)
+
+pairs(emmeans(M1, ~ Freq | Tracker), adjust = "holm")
+
+pairs(emmeans(M2, ~ Freq | Tracker), adjust = "holm")
+
+pairs(emmeans(M3, ~ Freq | Tracker), adjust = "holm")
+
+pairs(emmeans(M4, ~ Freq | Tracker), adjust = "holm")
+
