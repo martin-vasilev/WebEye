@@ -1044,14 +1044,125 @@ summary(M3<- lmer(log(GD)~ Freq*Tracker +(Tracker|sub)+(Freq|item), data= words_
 summary(M4<- lmer(log(TVT)~ Freq*Tracker +(Freq+Tracker|sub)+(Tracker+Freq|item), data= words_dat))
 
 
+library(sjPlot)
+
+tab_model(M1,M2, show.stat = T,show.se = T,file="LAB/TW_models1.html", digits = 3,
+          digits.p = 3, digits.rsq = 3, digits.re = 3, show.est = T,
+          transform = NULL, string.est = "Estimate", show.ci = F)
+
+tab_model(M3,M4, show.stat = T,show.se = T,file="LAB/TW_models2.html", digits = 3,
+          digits.p = 3, digits.rsq = 3, digits.re = 3, show.est = T,
+          transform = NULL, string.est = "Estimate", show.ci = F)
+
 ## emeans post-hoc tests:
 library(emmeans)
+# FFD
+PH1= pairs(emmeans(M1, ~ Freq | Tracker), adjust = "holm")
 
-pairs(emmeans(M1, ~ Freq | Tracker), adjust = "holm")
+#SFD
+PH2= pairs(emmeans(M2, ~ Freq | Tracker), adjust = "holm")
 
-pairs(emmeans(M2, ~ Freq | Tracker), adjust = "holm")
+#GD
+PH3= pairs(emmeans(M3, ~ Freq | Tracker), adjust = "holm")
 
-pairs(emmeans(M3, ~ Freq | Tracker), adjust = "holm")
+# TVT
+PH4= pairs(emmeans(M4, ~ Freq | Tracker), adjust = "holm")
 
-pairs(emmeans(M4, ~ Freq | Tracker), adjust = "holm")
+
+library(ggeffects)
+library(ggplot2)
+library(dplyr)
+
+# Step 1: Create a list of models
+models <- list(M1 = M1, M2 = M2, M3 = M3, M4 = M4)
+
+# Step 2: Generate predicted values for Tracker × Freq interaction
+pred_list <- lapply(names(models), function(name) {
+  pred <- ggpredict(models[[name]], terms = c("Tracker", "Freq"))
+  pred$model <- name  # add model name for faceting
+  pred
+})
+
+# Step 3: Combine predictions into one data frame
+pred_all <- bind_rows(pred_list)
+pred_all$model[which(pred_all$model=="M1")]<- "FFD"
+pred_all$model[which(pred_all$model=="M2")]<- "SFD"
+pred_all$model[which(pred_all$model=="M3")]<- "GD"
+pred_all$model[which(pred_all$model=="M4")]<- "TVT"
+
+
+
+M_plot<- pred_all %>% ggplot(aes(x= group, y= predicted, color= x, fill= x, group= x))+
+  geom_line(size = 1) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.2, color = NA) +
+  scale_color_manual(values=pallete1[1:2])+
+  scale_fill_manual(values=pallete1[1:2])+
+  facet_wrap(~model, ncol = 2,scales = "free_y" )+
+  labs(x = "Frequency",
+       y = "Predicted duration (log ms)",
+       color = "Tracker",
+       fill = "Tracker")+
+  theme_classic(18)+
+  theme(
+    legend.position = "bottom",
+    strip.text = element_text(face = "bold", size = 12),
+    strip.background = element_blank() 
+  )
+
+ggsave(filename = 'LAB/Plots/Model_interaction.pdf', plot = M_plot,
+       width = 8, height = 7)
+ggsave(filename = 'LAB/Plots/Model_interaction.png', plot = M_plot,
+       width = 8, height = 7)
+
+
+
+# Corpus frequency- Single sentences --------------------------------------
+
+# webcam:
+corpus_web<- webcam%>% filter(Task_Name== 'Single_line_sentences')
+
+nsubs<- unique(corpus_web$sub)
+
+parsed_c_web<- NULL
+
+for(i in 1:length(nsubs)){
+  
+  cat(sprintf("subject %g \n", i))
+  
+  t<- subset(corpus_web, sub== nsubs[i])
+  
+  t<- t[, c('x', 'y', 'Trial_Id', 'time_start')]
+  colnames(t)<- c("x", "y", "trial", "time")
+  ke.result<- detect.fixations(t, smooth.coordinates = T,
+                               smooth.saccades = F)
+  ke.result<- subset(ke.result, event=='fixation')
+  ke.result$sub<- nsubs[i]
+  ke.result$event<- NULL
+  
+  parsed_c_web<- rbind(parsed_c_web, ke.result)
+  
+}
+
+
+# Eyelink:
+parsed_c_el<- NULL
+
+for(i in 1:length(nsubs)){
+  
+  cat(sprintf("subject %g \n", i))
+  
+  t<- subset(webfq, sub== nsubs[i])
+  
+  t<- t[, c('el_x', 'el_y', 'Trial_Id', 'time_start')]
+  colnames(t)<- c("x", "y", "trial", "time")
+  ke.result<- detect.fixations(t, smooth.coordinates = T,
+                               smooth.saccades = F)
+  ke.result<- subset(ke.result, event=='fixation')
+  ke.result$sub<- nsubs[i]
+  ke.result$event<- NULL
+  
+  parsed_c_el<- rbind(parsed_c_el, ke.result)
+  
+}
+
 
