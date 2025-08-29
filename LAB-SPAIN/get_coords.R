@@ -148,6 +148,15 @@ get_coords<- function(string, revert= F, SL= F){
     }
   }
   
+  library(dplyr)
+  
+  new_coords <- new_coords %>%
+    arrange(y1, x1) %>%                       # sort top->bottom, left->right
+    mutate(line = dense_rank(y1)) %>%     # 1,2,3,... for distinct y1 values
+    group_by(line) %>%
+    mutate(char_line = row_number()) %>%   # 1,2,3,... within each line
+    ungroup()
+  
   
   if(revert){
     
