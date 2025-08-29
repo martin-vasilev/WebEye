@@ -1,0 +1,151 @@
+---
+title: "My Title"
+shorttitle: "Short Title in Running Header"
+author:
+  - name: Jane Doe
+    corresponding: true
+    orcid: 0000-0000-0000-0001
+    email: janedoe@generic.edu
+    affiliations:
+      - name: Generic University
+        department: Department of Scholarly Studies
+        address: 1234 Capital St.
+        city: New York
+        region: NY
+        country: USA
+        postal-code: 12084-1234
+author-note:
+  status-changes: 
+    affiliation-change: ~
+    deceased: ~
+  disclosures:
+    study-registration: ~
+    data-sharing: ~
+    related-report: ~
+    conflict-of-interest: ~
+    financial-support: ~
+    gratitude: ~
+    authorship-agreements: ~
+abstract: "This document is a template."
+impact-statement: "This template helps you get started."
+keywords: [Keyword 1, Keyword 2, Keyword 3]
+bibliography: bibliography.bib
+format:
+  apaquarto-docx: default
+  apaquarto-html: default
+  apaquarto-typst: default
+  apaquarto-pdf:
+    documentmode: man
+---
+
+```{r}
+#| label: setup
+#| include: false
+library(conflicted)
+library(tidyverse)
+library(dplyr)
+library(qs2)
+library(gt)
+library(flextable)
+library(ftExtra)
+library(knitr)
+library(kableExtra)
+library(here)
+library(simr)
+# we only use papaja here for the R package citation functions (r_refs and cite_r)
+library(papaja)
+library(marginaleffects)
+conflicts_prefer(dplyr::filter, .quiet = TRUE)
+conflicts_prefer(dplyr::select, .quiet = TRUE)
+conflicts_prefer(flextable::separate_header, .quiet = TRUE)
+
+source("brms_effect_summary.R")
+#r_refs("r-references.bib")
+
+# do we still need these functions?
+
+# convenience function to format descriptive summary statistics as "mean (sd)"
+print_mean_sd <- function(datum, digits_mean = 0, digits_sd = 2){
+  str_glue("{mean(datum) %>% apa_num(digits = digits_mean)} ({(sd(datum)) %>% apa_num(digits = digits_sd)})")
+}
+
+# convenience function to format inferential summary statistics as "mean (se)"
+print_mean_se <- function(datum, digits_mean = 0, digits_se = 2){
+  str_glue("{mean(datum) %>% apa_num(digits = digits_mean)} ({(sd(datum)/sqrt(length(datum))) %>% apa_num(digits = digits_se)})")
+}
+
+# convenience function to format range summary statistics as "min -- max"
+print_range <- function(datum, digits_min = 2, digits_max = 2){
+  str_glue("({min(datum) %>% apa_num(digits = digits_min)} -- {max(datum) %>% apa_num(digits = digits_max)})")
+}
+
+print_mean_sd_range <- function(datum, digits_mean = 2, digits_sd = 2, digits_min = 0, digits_max = 0){
+  str_glue("{mean(datum) %>% apa_num(digits = digits_mean)} ({(sd(datum)) %>% apa_num(digits = digits_sd)}; {min(datum) %>% apa_num(digits = digits_min)} -- {max(datum) %>% apa_num(digits = digits_max)})")
+}
+```
+
+<!-- The introduction should not have a level-1 heading such as Introduction. -->
+
+This is my first paragraph. Any section headings in the introduction should be in levels 2--5.
+
+## Section in Introduction
+
+This is a reference [@cohen2003applied].
+
+# Method
+
+## Participants
+
+## Measures
+
+## Procedure
+
+# Results
+
+```{r}
+#| label: load-exp1-model-results
+#| echo: false
+#| message: false
+#| warning: false
+#| cache: true
+
+# load the model results
+blmm_target_FFD_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_target_FFD_exp1_gaussian.qs"))
+blmm_target_SFD_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_target_SFD_exp1_gaussian.qs"))
+blmm_target_GD_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_target_GD_exp1_gaussian.qs"))
+blmm_target_TVT_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_target_TVT_exp1_gaussian.qs"))
+
+brms_effect_summary(blmm_target_FFD_exp1_gaussian, "Freq1")
+
+avg_slopes(blmm_target_FFD_exp1_gaussian, variables = "Freq") 
+
+avg_slopes(blmm_target_FFD_exp1_gaussian, variables = "Freq", by = "Tracker") 
+
+pairs(emmeans(blmm_target_FFD_exp1_gaussian, ~ Freq | Tracker))
+
+pairs(emmeans(blmm_target_GD_exp1_gaussian, ~ Freq | Tracker))
+
+pairs(emmeans(blmm_target_SFD_exp1_gaussian, ~ Freq | Tracker))
+
+pairs(emmeans(blmm_target_TVT_exp1_gaussian, ~ Freq | Tracker))
+```
+
+
+
+# Discussion
+
+## Limitations and Future Directions
+
+## Conclusion
+
+# References
+
+<!-- References will auto-populate in the refs div below -->
+
+::: {#refs}
+:::
+
+# This Section Is an Appendix {#apx-a}
+
+
+# Another Appendix {#apx-b}

@@ -18,8 +18,8 @@ corpus_words_exp1 <- read_csv("LAB/data/corpus_fixation_data.csv") %>%
          sub = factor(sub))
 
 
-contrasts(target_words_exp1$Freq) <- contr.sum(2)
-contrasts(target_words_exp1$Tracker) <- contr.sum(2)
+contrasts(target_words_exp1$Freq) <- c(0.5,-.5) #contr.sum(2)
+contrasts(target_words_exp1$Tracker) <- c(0.5,-.5) #contr.sum(2)
 
 summary(target_words_exp1)
 
