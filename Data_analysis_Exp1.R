@@ -905,7 +905,7 @@ words_web_t %>%
                  GD_sd = sd(GD, na.rm = TRUE),
                  TVT_sd = sd(TVT, na.rm = TRUE))
 
-summary(M2<- lmer(log(GD) ~ Freq +(Freq|sub) +(Freq|item), data= words_web_t))
+#summary(M2<- lmer(log(GD) ~ Freq +(Freq|sub) +(Freq|item), data= words_web_t))
 
 
 ######### Eyelink data:
@@ -1236,13 +1236,13 @@ library(lmerTest)
 
 ## Models:
 
-summary(M1<- lmer(log(FFD)~ Freq*Tracker +(Freq+Tracker|sub)+(Freq|item), data= words_dat))
+summary(M1<- lmer(log(FFD)~ Freq*Tracker +(Freq+Tracker|sub)+(Freq+Tracker|item), data= words_dat))
 
 summary(M2<- lmer(log(SFD)~ Freq*Tracker +(Freq+Tracker|sub)+(Freq+Tracker|item), data= words_dat))
 
-summary(M3<- lmer(log(GD)~ Freq*Tracker +(Tracker|sub)+(Freq|item), data= words_dat))
+summary(M3<- lmer(log(GD)~ Freq*Tracker +(Freq+Tracker|sub)+(Freq|item), data= words_dat))
 
-summary(M4<- lmer(log(TVT)~ Freq*Tracker +(Freq+Tracker|sub)+(Tracker+Freq|item), data= words_dat))
+summary(M4<- lmer(log(TVT)~ Freq*Tracker +(Freq|sub)+(Freq|item), data= words_dat))
 
 
 library(sjPlot)
@@ -1562,7 +1562,7 @@ words_c_web_t<- words_c_web%>%
 (1-nrow(words_c_web_t)/nrow(words_c_web))*100
 
 
-summary(M5<- lmer(log(TVT) ~ scale(zipf)*scale(word_length) +(1|sub) +(1|item), 
+summary(M5<- lmer(log(SFD) ~ scale(zipf)*scale(word_length) +(1|sub) +(1|item), 
                   data= words_c_web_t))
 
 
