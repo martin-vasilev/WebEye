@@ -1,0 +1,6 @@
+﻿index,frec,prac_line1,char1,prac_line2,char2,question,answer,has_question,word_high,word_low
+1001,prac,No hemos llegado todavía,24,al parque de atracciones.,25,¿Han llegado ya?,NO,1,parque,parque
+1002,prac,Espero que este verano,22,sea algo más fresco.,20,,,0,verano,verano
+1003,prac,El niño no quería,17,quedarse en casa.,17,¿El niño quería salir?,SI,1,casa,casa
+1004,prac,Cuando suene la sirena,22,saldrán por la puerta.,22,,,0,sirena,sirena
+1005,prac,La pared está manchada,22,de pintura verde.,17,¿Estaba limpia?,NO,1,pintura,pintura
