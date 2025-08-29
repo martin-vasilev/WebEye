@@ -90,8 +90,6 @@ for(i in 1:length(folders)){ # for each subject
   ## load eyelink data:
   dataF<- readLines(paste(folder_dir, '/', sub,  '.asc', sep='')) # load asc file;
   
-  get_num<- function(string){as.numeric(unlist(gsub("[^0-9]", "", unlist(string)), ""))}
-  
   start_loc<- which(grepl('UNIX', dataF))
   start_stamp<- dataF[start_loc[1]]
   start<- as.numeric(unlist(strsplit(start_stamp, ' '))[3])
@@ -115,9 +113,6 @@ for(i in 1:length(folders)){ # for each subject
   sacc_samples<- sacc_samples[!grepl("PUPIL", sacc_samples)]
   sacc_samples<- sacc_samples[!grepl("EVENTS", sacc_samples)]
   sacc_samples<- sacc_samples[!grepl("SAMPLES", sacc_samples)]
-  
-  
-  
   
   
   
