@@ -536,7 +536,7 @@ ggsave(filename = 'LAB/Plots/error_magnitude.pdf', plot = figure2,
 library(saccades)
 
 # webcam:
-webfq<- webcam%>% filter(Task_Name== 'Freq_sentences')
+webfq<- webcam%>% filter(Task_Name== 'Frequency corpus')
 
 nsubs<- unique(webfq$sub)
 
@@ -1323,7 +1323,7 @@ ggsave(filename = 'LAB/Plots/Model_interaction.png', plot = M_plot,
 # Corpus frequency- Single sentences --------------------------------------
 
 # webcam:
-corpus_web<- webcam%>% filter(Task_Name== 'Single_line_sentences')
+corpus_web<- webcam%>% filter(Task_Name== 'Single-line corpus')
 
 nsubs<- unique(corpus_web$sub)
 
