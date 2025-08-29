@@ -3,6 +3,7 @@ library(lme4)
 library(lmerTest)
 library(cmdstanr)
 library(brms)
+library(qs2)
 
 
 target_words_exp1 <- read_csv("LAB/data/target_word_fixation_data.csv") %>%
@@ -86,7 +87,7 @@ blmm_target_FFD_exp1_gaussian <-
   brm(
     data = target_words_exp1,
     formula = bf(
-      FFD ~ Freq * Tracker  + (Freq * Tracker | sub) + (Freq * Tracker | item)),
+      log(FFD) ~ Freq * Tracker  + (Freq * Tracker | sub) + (Freq * Tracker | item)),
     warmup = 1000,
     iter = 5000,
     chains = 4,
