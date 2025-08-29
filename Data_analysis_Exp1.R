@@ -39,7 +39,7 @@ trial %>%
 # Sample correlations -----------------------------------------------------
 
 # load in webcam data:
-webcam <- read.csv("LAB/data/webcam_data.csv")
+webcam <- read_csv("LAB/data/webcam_data.csv.zip")
 table(webcam$Task_Name)
 
 
