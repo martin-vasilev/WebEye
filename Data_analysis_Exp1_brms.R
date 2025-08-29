@@ -38,18 +38,61 @@ summary(lmm_target_words_FFD)
 # brms
 
 
-blmm_rt_dist <-
+blmm_target_FFD_exp1 <-
   brm(
     data = target_words_exp1,
     formula = bf(
       FFD ~ Freq * Tracker  + (Freq * Tracker | sub) + (Freq * Tracker | item),
       beta ~ Freq * Tracker  + (Freq * Tracker | sub) + (Freq * Tracker | item)),
-    warmup = 10,
-    iter = 50,
+    warmup = 1000,
+    iter = 5000,
     chains = 4,
     prior = priors_beta,
     sample_prior = "yes",
     family = exgaussian(),
+    init = "0",
+    control = list(adapt_delta = 0.8),#, max_treedepth = 15),
+    cores = 4,
+    backend = "cmdstanr",
+    threads = threading(2),
+    silent = 0
+  )
+
+
+
+blmm_target_FFD_exp1_exgaussian <-
+  brm(
+    data = target_words_exp1,
+    formula = bf(
+      FFD ~ Freq * Tracker  + (Freq * Tracker | sub) + (Freq * Tracker | item),
+      beta ~ Freq * Tracker  + (Freq * Tracker | sub) + (Freq * Tracker | item)),
+    warmup = 1000,
+    iter = 5000,
+    chains = 4,
+    prior = priors_beta,
+    sample_prior = "yes",
+    family = exgaussian(),
+    init = "0",
+    control = list(adapt_delta = 0.8),#, max_treedepth = 15),
+    cores = 4,
+    backend = "cmdstanr",
+    threads = threading(2),
+    silent = 0
+  )
+
+
+
+blmm_target_FFD_exp1_gaussian <-
+  brm(
+    data = target_words_exp1,
+    formula = bf(
+      FFD ~ Freq * Tracker  + (Freq * Tracker | sub) + (Freq * Tracker | item)),
+    warmup = 1000,
+    iter = 5000,
+    chains = 4,
+    prior = priors_gaussian,
+    sample_prior = "yes",
+    family = gaussian(),
     init = "0",
     control = list(adapt_delta = 0.8),#, max_treedepth = 15),
     cores = 4,
