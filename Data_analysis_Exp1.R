@@ -488,7 +488,7 @@ Pscreen<- ggplot(grid_xy, aes(x = col, y = row)) +
 
 Pscreen
 
-
+library(ggpubr)
 figure2 <- ggarrange(P_density, Pscreen,
                     ncol = 1, nrow = 2)
 
@@ -1328,6 +1328,7 @@ corpus_web<- webcam%>% filter(Task_Name== 'Single-line corpus')
 nsubs<- unique(corpus_web$sub)
 
 parsed_c_web<- NULL
+library(saccades)
 
 for(i in 1:length(nsubs)){
   
@@ -1381,6 +1382,8 @@ parsed_c_web$wordID<- NA
 parsed_c_web$char<- NA
 parsed_c_web$char_num<- NA
 parsed_c_web$word_num<- NA
+parsed_c_web$line<- NA
+parsed_c_web$char_line<- NA
 
 library(stringr)
 
@@ -1413,6 +1416,8 @@ for(k in 1:length(nsubs)){ # for each subject...
         c$char[j]<- coords$char[loc]
         c$char_num[j]<- coords$char_num[loc]
         c$word_num[j]<- coords$word_num[loc]
+        c$line[j]<- coords$line[loc]
+        c$char_line[j]<- coords$char_line[loc]
         
         
       }
@@ -1430,7 +1435,6 @@ for(k in 1:length(nsubs)){ # for each subject...
 
 
 # Parse trial data to compute fixation duration metrics:
-
 nsubs<- unique(web_c_fix$sub)
 
 dat_c<- NULL
@@ -1490,6 +1494,100 @@ for(i in 1:length(nsubs)){
   } # end of item (j)
   
 }  #end of subject (i)
+
+
+
+## merge adjacent fixations under 80 ms that are next to each other (1 char)
+
+dat_new_c<- NULL
+
+nsubs<- unique(dat_c$sub)
+
+for(i in 1:length(nsubs)){
+  a<- subset(dat_c, sub== nsubs[i])
+  
+  nitems<- unique(a$trial)
+  
+  for(j in 1:length(nitems)){
+    b<- subset(a, trial==nitems[j])
+    b$remove<- NA
+    
+    for(k in 1:nrow(b)){
+      
+      if(b$dur[k]<80){
+        
+        if(!is.na(b$char_line[k])){
+          
+          # check if within 1 character of prev fixation
+          if(k>1){
+            if(!is.na(b$char_line[k-1])){
+              
+              if(abs(b$char_line[k]-b$char_line[k-1])<=1 & b$line[k]== b$line[k-1]){
+                b$remove[k]<- T
+                
+                # merge fixation with previous one:
+                cat(sprintf("Subject %g item %g: merging fixation %g (%g ms) with fixation %g (%g ms). New fixation %g is %g ms.\n\n",
+                            nsubs[i], nitems[j], k, b$dur[k], k-1, b$dur[k-1], k-1, b$dur[k]+b$dur[k-1]))
+                
+                b$dur[k-1]<- b$dur[k-1]+ b$dur[k] 
+              }
+              
+            }
+            
+            # check if within 1 character of next fixation
+            
+            if(k<nrow(b) & is.na(b$remove[k])){
+              
+              if(!is.na(b$char_line[k+1])){
+                
+                if(abs(b$char_line[k+1]-b$char_line[k])<=1 & b$line[k+1]== b$line[k]){
+                  
+                  b$remove[k]<- T
+                  
+                  # merge fixation with the next one:
+                  cat(sprintf("Subject %g item %g: merging fixation %g (%g ms) with fixation %g (%g ms). New fixation %g is %g ms.\n\n",
+                              nsubs[i], nitems[j], k, b$dur[k], k+1, b$dur[k+1], k+1, b$dur[k]+b$dur[k+1]))
+                  b$dur[k+1]<- b$dur[k+1]+ b$dur[k] 
+                }
+                
+                
+              }
+              
+            }
+            
+          }
+          
+        }
+        
+        
+      }
+    }
+    dat_new_c<- rbind(dat_new_c, b)
+    
+  }
+}
+
+table(dat_new_c$remove)
+dat<- dat_new_c %>% filter(is.na(remove))
+
+# percentage of < 80 ms fixations merged
+(1-nrow(dat)/ nrow(dat_new_c))*100
+
+
+out_L80<- which(dat$dur<80)
+
+# percentage of < 80ms fixations left unmerged:
+(length(out_L80)/nrow(dat_new_c))*100
+
+dat<- dat[-out_L80,]
+
+
+out<- which(dat$dur> 1000)
+
+# percentage of >1000 ms fixations discarded
+length(out)/nrow(dat_new_c)*100
+dat<- dat[-out,]
+
 
 
 
@@ -1554,16 +1652,18 @@ library(EMreading)
 words_c_web<- Frequency(words_c_web)
 words_c_web$word_length<- nchar(words_c_web$wordID)
 
-words_c_web_t<- words_c_web%>% 
-  filter(FFD>80 & FFD<1000)%>%
-  filter(GD>80 & GD<2000)%>%
-  filter(TVT>80 & TVT<3000)
+outall<- which(words_c_web$FFD>1000|words_c_web$SFD>1000 | words_c_web$GD>2000 | words_c_web$TVT> 3000)
 
-(1-nrow(words_c_web_t)/nrow(words_c_web))*100
+# percentange of words removed as outliers in reading measures:
+length(outall)/nrow(words_c_web)*100
+
+words_c_web<- words_c_web[-outall,]
+
+
 
 
 summary(M5<- lmer(log(SFD) ~ scale(zipf)*scale(word_length) +(1|sub) +(1|item), 
-                  data= words_c_web_t))
+                  data= words_c_web))
 
 
 ######### Eyelink data:
@@ -1573,6 +1673,8 @@ parsed_c_el$wordID<- NA
 parsed_c_el$char<- NA
 parsed_c_el$char_num<- NA
 parsed_c_el$word_num<- NA
+parsed_c_el$line<- NA
+parsed_c_el$char_line<- NA
 
 library(stringr)
 
@@ -1606,6 +1708,8 @@ for(k in 1:length(nsubs)){ # for each subject...
         c$char[j]<- coords$char[loc]
         c$char_num[j]<- coords$char_num[loc]
         c$word_num[j]<- coords$word_num[loc]
+        c$line[j]<- coords$line[loc]
+        c$char_line[j]<- coords$char_line[loc]
         
         
       }
@@ -1683,13 +1787,105 @@ for(i in 1:length(nsubs)){
 }  #end of subject (i)
 
 
-words_c_el<- NULL
-nsubs<- sort(unique(el_c_fix$sub))
+## merge adjacent fixations under 80 ms that are next to each other (1 char)
 
-el_c_fix<- el_c_fix %>%filter(dur>80 & dur<1000)
+dat_new_c<- NULL
+
+nsubs<- unique(dat_c$sub)
 
 for(i in 1:length(nsubs)){
   a<- subset(dat_c, sub== nsubs[i])
+  
+  nitems<- unique(a$trial)
+  
+  for(j in 1:length(nitems)){
+    b<- subset(a, trial==nitems[j])
+    b$remove<- NA
+    
+    for(k in 1:nrow(b)){
+      
+      if(b$dur[k]<80){
+        
+        if(!is.na(b$char_line[k])){
+          
+          # check if within 1 character of prev fixation
+          if(k>1){
+            if(!is.na(b$char_line[k-1])){
+              
+              if(abs(b$char_line[k]-b$char_line[k-1])<=1 & b$line[k]== b$line[k-1]){
+                b$remove[k]<- T
+                
+                # merge fixation with previous one:
+                cat(sprintf("Subject %g item %g: merging fixation %g (%g ms) with fixation %g (%g ms). New fixation %g is %g ms.\n\n",
+                            nsubs[i], nitems[j], k, b$dur[k], k-1, b$dur[k-1], k-1, b$dur[k]+b$dur[k-1]))
+                
+                b$dur[k-1]<- b$dur[k-1]+ b$dur[k] 
+              }
+              
+            }
+            
+            # check if within 1 character of next fixation
+            
+            if(k<nrow(b) & is.na(b$remove[k])){
+              
+              if(!is.na(b$char_line[k+1])){
+                
+                if(abs(b$char_line[k+1]-b$char_line[k])<=1 & b$line[k+1]== b$line[k]){
+                  
+                  b$remove[k]<- T
+                  
+                  # merge fixation with the next one:
+                  cat(sprintf("Subject %g item %g: merging fixation %g (%g ms) with fixation %g (%g ms). New fixation %g is %g ms.\n\n",
+                              nsubs[i], nitems[j], k, b$dur[k], k+1, b$dur[k+1], k+1, b$dur[k]+b$dur[k+1]))
+                  b$dur[k+1]<- b$dur[k+1]+ b$dur[k] 
+                }
+                
+                
+              }
+              
+            }
+            
+          }
+          
+        }
+        
+        
+      }
+    }
+    dat_new_c<- rbind(dat_new_c, b)
+    
+  }
+}
+
+table(dat_new_c$remove)
+dat<- dat_new_c %>% filter(is.na(remove))
+
+# percentage of < 80 ms fixations merged
+(1-nrow(dat)/ nrow(dat_new_c))*100
+
+
+out_L80<- which(dat$dur<80)
+
+# percentage of < 80ms fixations left unmerged:
+(length(out_L80)/nrow(dat_new_c))*100
+
+dat<- dat[-out_L80,]
+
+
+out<- which(dat$dur> 1000)
+
+# percentage of >1000 ms fixations discarded
+length(out)/nrow(dat_new_c)*100
+dat<- dat[-out,]
+
+
+
+
+words_c_el<- NULL
+nsubs<- sort(unique(dat$sub))
+
+for(i in 1:length(nsubs)){
+  a<- subset(dat, sub== nsubs[i])
   
   nitmes<- sort(unique(a$trial))
   
@@ -1745,19 +1941,21 @@ words_c_el<- Frequency(words_c_el)
 words_c_el$word_length<- nchar(words_c_el$wordID)
 
 
-words_c_el_t<- words_c_el%>%
-  filter(FFD>80 & FFD<1000)%>%
-  filter(GD>80 & GD<2000)%>%
-  filter(TVT>80 & TVT<3000)
+outall<- which(words_c_el$FFD>1000|words_c_el$SFD>1000 | words_c_el$GD>2000 | words_c_el$TVT> 3000)
 
-(1-nrow(words_c_el_t)/ nrow(words_c_el))*100
+# percentange of words removed as outliers in reading measures:
+length(outall)/nrow(words_c_el)*100
+
+if(length(outall)>0){
+  words_c_el<- words_c_el[-outall,]
+}
 
 
 # combine two target word data frames:
-words_c_web_t$Tracker<- "Webcam"
-words_c_el_t$Tracker<- "Eyelink"
+words_c_web$Tracker<- "Webcam"
+words_c_el$Tracker<- "Eyelink"
 
-words_corpus<- rbind(words_c_web_t, words_c_el_t)
+words_corpus<- rbind(words_c_web, words_c_el)
 write.csv(x = words_corpus, file = 'LAB/data/corpus_fixation_data.csv')
 
 
