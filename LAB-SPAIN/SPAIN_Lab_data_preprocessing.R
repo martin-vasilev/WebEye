@@ -200,10 +200,10 @@ for(i in 1:length(folders)){ # for each subject
         loc<- which(sacc_samples$unix_time== round(trial_ts$time[l])) 
         
         if(length(loc)>0){
-          trial_ts$el_x[l]<- (sacc_samples$V2[loc] + sacc_samples$V5[loc])/2
-          trial_ts$el_y[l]<- (sacc_samples$V3[loc] + sacc_samples$V6[loc])/2
-          trial_ts$el_pupil_left[l]<- sacc_samples$V4[loc]
-          trial_ts$el_pupil_right[l]<- sacc_samples$V7[loc]
+          trial_ts$el_x[l]<- sacc_samples$V5[loc] #(sacc_samples$V2[loc] + sacc_samples$V5[loc])/2
+          trial_ts$el_y[l]<- sacc_samples$V6[loc] #(sacc_samples$V3[loc] + sacc_samples$V6[loc])/2
+          #trial_ts$el_pupil_left[l]<- sacc_samples$V4[loc]
+          trial_ts$el_pupil[l]<- sacc_samples$V7[loc]
           trial_ts$el_time[l]<- sacc_samples$V1[loc]
         }
       }

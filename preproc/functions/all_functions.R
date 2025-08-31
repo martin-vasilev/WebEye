@@ -64,7 +64,9 @@ trial_info<- function(file, maxtrial, data){ # extracts information for processi
 }
 
 
-get_num<- function(string){as.numeric(unlist(gsub("[^0-9]", "", unlist(string)), ""))}
+get_num <- function(string) {
+  as.numeric(gsub("[^0-9]", "", string))
+}
 
 get_x<- function(string, where=2){as.numeric(unlist(strsplit(string, "\t"))[1:2])[where]}
 
