@@ -91,7 +91,7 @@ table(webcam$Task_Name)
 # remove samples within blinks:
 n_full<- nrow(webcam)
 
-webcam<- webcam %>% filter(conf>0 & el_pupil_right>0 & el_pupil_left>0)
+webcam<- webcam %>% filter(conf>0 & el_pupil>0)
 
 # samples removed due to blinks:
 perc_blinks= (1- nrow(webcam)/n_full)*100
@@ -176,6 +176,7 @@ P1<- ggplot(sub_correlations, aes(x = Dimension, y = corr,
 ggsave(filename = 'LAB-SPAIN/Plots/correlations.pdf', width = 10,
        height = 8, units = 'in')
 
+save(P1, file =  'LAB-SPAIN/Plots/correlations.Rda')
 
 # Bland-Altman plot -------------------------------------------------------
 
@@ -348,6 +349,10 @@ library(ggpubr)
 figure <- ggarrange(Plot_x, Plot_y,
                     ncol = 1, nrow = 2)
 
+figure_e3<- figure#+ ggtitle("Experiment 3")+theme(plot.title = element_text(hjust = 0.5))
+save(figure_e3, file= 'LAB-SPAIN/Plots/BA_combined.Rda')
+
+
 ggsave(filename = 'LAB-SPAIN/Plots/BA_combined.png', plot = figure,
        width = 10, height = 12, units = 'in')
 
@@ -357,7 +362,6 @@ ggsave(filename = 'LAB-SPAIN/Plots/BA_combined.pdf', plot = figure,
 
 
 # Subject-level accuracy --------------------------------------------------
-
 
 webcam$diff_x<- (webcam$x-webcam$el_x)*0.0187
 
