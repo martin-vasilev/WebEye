@@ -1,14 +1,14 @@
 ---
-title: "My Title"
-shorttitle: "Short Title in Running Header"
+title: "Webcam analysis"
+shorttitle: "Webcam analysis"
 author:
-  - name: Jane Doe
+  - name: First Author
     corresponding: true
     orcid: 0000-0000-0000-0001
     email: janedoe@generic.edu
     affiliations:
       - name: Generic University
-        department: Department of Scholarly Studies
+        department: Department
         address: 1234 Capital St.
         city: New York
         region: NY
@@ -16,16 +16,16 @@ author:
         postal-code: 12084-1234
 author-note:
   status-changes: 
-    affiliation-change: ~
-    deceased: ~
+    affiliation-change: null
+    deceased: null
   disclosures:
-    study-registration: ~
-    data-sharing: ~
-    related-report: ~
-    conflict-of-interest: ~
-    financial-support: ~
-    gratitude: ~
-    authorship-agreements: ~
+    study-registration: null
+    data-sharing: null
+    related-report: null
+    conflict-of-interest: null
+    financial-support: null
+    gratitude: null
+    authorship-agreements: null
 abstract: "This document is a template."
 impact-statement: "This template helps you get started."
 keywords: [Keyword 1, Keyword 2, Keyword 3]
@@ -36,6 +36,8 @@ format:
   apaquarto-typst: default
   apaquarto-pdf:
     documentmode: man
+editor_options: 
+  chunk_output_type: inline
 ---
 
 ```{r}
@@ -46,6 +48,7 @@ library(tidyverse)
 library(dplyr)
 library(qs2)
 library(gt)
+library(gtsummary)
 library(flextable)
 library(ftExtra)
 library(knitr)
@@ -66,22 +69,57 @@ source("brms_effect_summary.R")
 
 # convenience function to format descriptive summary statistics as "mean (sd)"
 print_mean_sd <- function(datum, digits_mean = 0, digits_sd = 2){
-  str_glue("{mean(datum) %>% apa_num(digits = digits_mean)} ({(sd(datum)) %>% apa_num(digits = digits_sd)})")
+  str_glue("{mean(datum) %>% format_value(digits = digits_mean)} ({(sd(datum)) %>% format_value(digits = digits_sd)})")
 }
 
 # convenience function to format inferential summary statistics as "mean (se)"
 print_mean_se <- function(datum, digits_mean = 0, digits_se = 2){
-  str_glue("{mean(datum) %>% apa_num(digits = digits_mean)} ({(sd(datum)/sqrt(length(datum))) %>% apa_num(digits = digits_se)})")
+  str_glue("{mean(datum) %>% format_value(digits = digits_mean)} ({(sd(datum)/sqrt(length(datum))) %>% format_value(digits = digits_se)})")
 }
 
 # convenience function to format range summary statistics as "min -- max"
 print_range <- function(datum, digits_min = 2, digits_max = 2){
-  str_glue("({min(datum) %>% apa_num(digits = digits_min)} -- {max(datum) %>% apa_num(digits = digits_max)})")
+  str_glue("({min(datum) %>% format_value(digits = digits_min)} -- {max(datum) %>% format_value(digits = digits_max)})")
 }
 
 print_mean_sd_range <- function(datum, digits_mean = 2, digits_sd = 2, digits_min = 0, digits_max = 0){
-  str_glue("{mean(datum) %>% apa_num(digits = digits_mean)} ({(sd(datum)) %>% apa_num(digits = digits_sd)}; {min(datum) %>% apa_num(digits = digits_min)} -- {max(datum) %>% apa_num(digits = digits_max)})")
+  str_glue("{mean(datum) %>% format_value(digits = digits_mean)} ({(sd(datum)) %>% format_value(digits = digits_sd)}; {min(datum) %>% format_value(digits = digits_min)} -- {max(datum) %>% format_value(digits = digits_max)})")
 }
+
+# format value for in-text statistics
+format_value <- function(value) {
+    if (is.na(value) || !is.numeric(value)) {
+      return(as.character(value))
+    }
+    # For numbers with small magnitude (but not zero), show significant digits
+    if (abs(value) < 0.01 && value != 0) {
+      # formatC with 'g' and digits=2 prints in a nice format, e.g., 0.0034
+      # signif() could also be used, but formatC is robust.
+      return(formatC(value, format = "g", digits = 2))
+    } else {
+      # For numbers >= 0.01 or exactly 0, round to 2 decimal places
+      return(format(round(value, 2), nsmall = 2))
+    }
+  }
+
+make_gtsummary_table_for_target_word_brm <- function(brmsfit) {
+  tbl_regression(brmsfit, exponentiate = FALSE, intercept = TRUE,label = list(`Freq` ~ "Frequency", `Tracker` ~ "Eye tracker", `factor(Freq):factor(Tracker(` ~ "Interaction"), show_single_row = any_of(c("Freq", "Tracker")),
+                 estimate_fun = ~style_sigfig(., digits = 3)) %>%
+    modify_table_styling(
+      columns = c(estimate, conf.low), # use `show_header_names()` to see underlying column names
+      rows = !(0 >= conf.low & 0 <= conf.high), #CrI does not include 0
+      text_format = "bold") %>%
+    modify_header(label = "**Variable**", estimate = "**b**", conf.low = "**CrI**") %>%
+    modify_abbreviation("CrI = 95% Credible Interval") %>%
+    remove_abbreviation("CI = Credible Interval")
+}
+
+library(sjPlot)
+
+
+library(modelsummary)
+
+
 ```
 
 <!-- The introduction should not have a level-1 heading such as Introduction. -->
@@ -100,7 +138,19 @@ This is a reference [@cohen2003applied].
 
 ## Procedure
 
+## Data analysis
+
+
+We analysed the data for the frequency corpus by fitting Bayesian linear mixed models using the *brms* package [@R-brms_a; @R-brms_b; @R-brms_c] in R^[The versions of R and all packages used are as follows: `r #papaja::cite_r("r-references.bib")`.]. These models included the word frequency condition (low, represented as -.5, vs. high, represen) as well as the eye-tracker. We included the maximum random effects structure [i.e., random intercepts and random slopes for condition, stimulus type, and their interaction over subjects and random intercepts and random slopes for condition over items, @barr2013]. We used a Gaussian distribution to model log-transformed fixation times (in ms) after excluding excessively short (\< 80 ms) and long fixation times (first fixation duration and single fixation duration \> 1,000 ms; gaze duration > 1,800 ms; total viewing time > 2,000). We used the default priors suggested by *brms* except for the coefficients for the fixed effects, for which we applied weakly informative priors of $\mu \sim N(0,1)$ in order to rule out improbably large effect sizes. Each model was fitted using four chains with 5000 iterations each with 1000 warmup iterations. The models converged successfully (all $\hat{R}$s = 1.00). We report the mean, the estimates (b) and the 95% Bayesian Credible Intervals (95% CrIs) based on the posterior distribution of each model parameter. In order to simplify the interpretation of the posterior distribution, we highlight whether 0 is not a credible value for its coefficient (i.e., if it is not part of the 95% CrI). Additionally, we report the proportion of the posterior distribution on the same side of 0 (i.e., the proportion of the posterior distribution that is greater than 0 or less than 0). We always report the greater proportion (e.g., if 49% of the posterior distribution is \< 0 and 51 % is \> 0 we report .51). We also report the ratio of the two proportions (with the greater proportion always in the numerator), which effectively corresponds to a Bayes Factor for the directional hypothesis b \> 0 or b \< 0, respectively. Finally, we report the Bayes Factor (BF) calculated using the Savage-Dickey density ratio which tests the evidence for the point-null hypothesis b = 0. These measures all provide complementary information about the effect in question. We interpret BF values of 3-10 as moderate evidence, 10-30 as strong evidence, and \>30 as very strong evidence for the effect [@jeffreys1961].
+
+
 # Results
+
+## Frequency-corpus
+
+
+
+
 
 ```{r}
 #| label: load-exp1-model-results
@@ -109,28 +159,163 @@ This is a reference [@cohen2003applied].
 #| warning: false
 #| cache: true
 
+# load the fixation time measures
+target_words_exp1 <- read_csv(here("LAB/data/target_word_fixation_data.csv")) %>%
+  mutate(Freq = factor(Freq, levels = c("low", "high")),
+         Tracker = factor(Tracker, levels = c("Webcam", "Eyelink")),
+         item = factor(item),
+         sub = factor(sub))
+
+corpus_words_exp1 <- read_csv(here("LAB/data/corpus_fixation_data.csv")) %>%
+  mutate(Tracker = factor(Tracker, levels = c("Eyelink", "Webcam")),
+         item = factor(item),
+         sub = factor(sub))
+
+
+
 # load the model results
 blmm_target_FFD_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_target_FFD_exp1_gaussian.qs"))
 blmm_target_SFD_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_target_SFD_exp1_gaussian.qs"))
 blmm_target_GD_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_target_GD_exp1_gaussian.qs"))
 blmm_target_TVT_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_target_TVT_exp1_gaussian.qs"))
 
-brms_effect_summary(blmm_target_FFD_exp1_gaussian, "Freq1")
+# prepare effect summaries
+blmm_target_FFD_exp1_gaussian_Freq1_effect <- brms_effect_summary(blmm_target_FFD_exp1_gaussian, "Freq1")
+blmm_target_FFD_exp1_gaussian_Tracker1_effect <- brms_effect_summary(blmm_target_FFD_exp1_gaussian, "Tracker1")
+blmm_target_FFD_exp1_gaussian_interaction_effect <- brms_effect_summary(blmm_target_FFD_exp1_gaussian, "Freq1:Tracker1")
 
-avg_slopes(blmm_target_FFD_exp1_gaussian, variables = "Freq") 
+blmm_target_GD_exp1_gaussian_Freq1_effect <- brms_effect_summary(blmm_target_GD_exp1_gaussian, "Freq1")
+blmm_target_GD_exp1_gaussian_Tracker1_effect <- brms_effect_summary(blmm_target_GD_exp1_gaussian, "Tracker1")
+blmm_target_GD_exp1_gaussian_interaction_effect <- brms_effect_summary(blmm_target_GD_exp1_gaussian, "Freq1:Tracker1")
 
-avg_slopes(blmm_target_FFD_exp1_gaussian, variables = "Freq", by = "Tracker") 
+blmm_target_SFD_exp1_gaussian_Freq1_effect <- brms_effect_summary(blmm_target_SFD_exp1_gaussian, "Freq1")
+blmm_target_SFD_exp1_gaussian_Tracker1_effect <- brms_effect_summary(blmm_target_SFD_exp1_gaussian, "Tracker1")
+blmm_target_SFD_exp1_gaussian_interaction_effect <- brms_effect_summary(blmm_target_SFD_exp1_gaussian, "Freq1:Tracker1")
 
-pairs(emmeans(blmm_target_FFD_exp1_gaussian, ~ Freq | Tracker))
+blmm_target_TVT_exp1_gaussian_Freq1_effect <- brms_effect_summary(blmm_target_TVT_exp1_gaussian, "Freq1")
+blmm_target_TVT_exp1_gaussian_Tracker1_effect <- brms_effect_summary(blmm_target_TVT_exp1_gaussian, "Tracker1")
+blmm_target_TVT_exp1_gaussian_interaction_effect <- brms_effect_summary(blmm_target_TVT_exp1_gaussian, "Freq1:Tracker1")
 
-pairs(emmeans(blmm_target_GD_exp1_gaussian, ~ Freq | Tracker))
+# save avg slopes calculations for testing the marginal effect of frequency by tracker
 
-pairs(emmeans(blmm_target_SFD_exp1_gaussian, ~ Freq | Tracker))
+marginal_effects_FFD <- avg_slopes(blmm_target_FFD_exp1_gaussian, variables = "Freq", by = "Tracker") 
 
-pairs(emmeans(blmm_target_TVT_exp1_gaussian, ~ Freq | Tracker))
+#pairs(emmeans(blmm_target_FFD_exp1_gaussian, ~ Freq | Tracker))
+
+#pairs(emmeans(blmm_target_GD_exp1_gaussian, ~ Freq | Tracker))
+
+marginal_effects_GD <- avg_slopes(blmm_target_GD_exp1_gaussian, variables = "Freq", by = "Tracker") 
+
+# pairs(emmeans(blmm_target_SFD_exp1_gaussian, ~ Freq | Tracker))
+
+marginal_effects_SFD <- avg_slopes(blmm_target_SFD_exp1_gaussian, variables = "Freq", by = "Tracker") 
+
+# pairs(emmeans(blmm_target_TVT_exp1_gaussian, ~ Freq | Tracker))
+
+ marginal_effects_TVT <- avg_slopes(blmm_target_TVT_exp1_gaussian, variables = "Freq", by = "Tracker") 
 ```
 
 
+```{r}
+#| label: tbl-exp1-target-word-means
+#| echo: false
+#| message: false
+#| after-caption-space: 0pt
+#| tbl-cap: Accuracy as well as means and standard deviations of correct response times (in s) by flanker condition and grammatical gender of the target word in Experiment 1.
+
+
+# Calculate means and standard deviations for correct RTs
+target_words_exp1_means_table <- target_words_exp1 %>%
+  #filter(FFD > 80 & FFD < 1500) %>%
+  group_by(Tracker, Freq) %>%
+  summarise(
+    mean_FFD = mean(FFD, na.rm = TRUE),
+    sd_FFD = sd(FFD, na.rm = TRUE),
+    mean_SFD = mean(SFD, na.rm = TRUE),
+    sd_SFD = sd(SFD, na.rm = TRUE),
+    mean_GD = mean(GD, na.rm = TRUE),
+    sd_GD = sd(GD, na.rm = TRUE),
+    mean_TVT = mean(TVT, na.rm = TRUE),
+    sd_TVT = sd(TVT, na.rm = TRUE),
+    #N = n() # N here is the number of correct trials within the RT filter
+  ) %>%
+  ungroup()
+
+# use gt to make a table
+
+target_words_exp1_means_table %>%
+  gt(rowname_col = "Tracker") %>%
+  cols_label(
+   starts_with("mean") ~ "Mean",
+   starts_with("sd") ~ "SD",
+   "Freq" ~ "Frequency"
+  ) %>%
+  tab_spanner( # Add spanner columns for fixation time measures
+    label = "FFD",
+    columns = ends_with("FFD")
+  ) %>%
+  tab_spanner(
+    label = "SFD",
+    columns = ends_with("SFD")
+  ) %>%
+  tab_spanner(
+    label = "GD",
+    columns = ends_with("GD")
+  ) %>%
+  tab_spanner(
+    label = "TVT",
+    columns = ends_with("TVT")
+  ) %>%
+  fmt_number(
+    columns = everything(),
+    decimals = 0
+  ) %>%
+  tab_stubhead(label = "Tracker") %>%
+  tab_source_note(source_note = md("Note: *FFD* = first fixation duration; *SFD* = single fixation duration; *GD* = gaze duration; *TVT* = total viewing time; SD = standard deviation. All means and standard deviations are reported in milliseconds (ms)."))
+                
+```
+
+
+@tbl-eyelink-exp1-target-word-brms shows the results of the Bayesian linear mixed model for response time, while @tbl-exp1-brms-acc-model shows the results of the Bayesian generalized linear mixed model for accuracy.
+
+
+```{r}
+#| label: tbl-eyelink-exp1-target-word-brms-gtsummary
+#| echo: false
+#| message: false
+#| warning: false
+#| cache: false
+#| after-caption-space: 0pt
+#| tbl-cap: "Coefficients and 95% credible intervals from Bayesian linear mixed models fitted to first fixation duration (FFD), single fixation duration (SFD), gaze duration (GD), and total viewing time (TVT) on target words in Experiment 1. Coefficients for which the 95% Credible Interval does not include zero are shown in **bold**."
+
+make_gtsummary_table_for_target_word_brm <- function(brmsfit) {
+  tbl_regression(brmsfit, exponentiate = FALSE, intercept = TRUE, label = list(Freq ~ "Frequency", sub ~ "Interaction", Tracker ~ "Eye tracker"), show_single_row = c(Freq, Tracker, sub), include = c("Freq", "Tracker", "sub"),
+                 estimate_fun = ~style_sigfig(., digits = 3)) %>%
+    modify_table_styling(
+      columns = c(estimate, conf.low), # use `show_header_names()` to see underlying column names
+      rows = !(0 >= conf.low & 0 <= conf.high), #CrI does not include 0
+      text_format = "bold") %>%
+    modify_header(label = "**Variable**", estimate = "**b**", conf.low = "**CI**") #%>%
+    #modify_abbreviation("CrI = 95% Credible Interval") %>%
+    #remove_abbreviation("CI = Credible Interval"
+    
+}
+
+gtsummary_target_FFD_exp1_gaussian <- make_gtsummary_table_for_target_word_brm(blmm_target_FFD_exp1_gaussian)
+
+gtsummary_target_SFD_exp1_gaussian <- make_gtsummary_table_for_target_word_brm(blmm_target_SFD_exp1_gaussian)
+
+gtsummary_target_GD_exp1_gaussian <- make_gtsummary_table_for_target_word_brm(blmm_target_GD_exp1_gaussian)
+
+gtsummary_target_TVT_exp1_gaussian <- make_gtsummary_table_for_target_word_brm(blmm_target_TVT_exp1_gaussian)
+
+all_models_table <- tbl_merge(tbls = list(gtsummary_target_FFD_exp1_gaussian, gtsummary_target_SFD_exp1_gaussian, gtsummary_target_GD_exp1_gaussian, gtsummary_target_TVT_exp1_gaussian), tab_spanner = c("FFD", "SFD", "GD", "TVT")) %>% as_gt() %>% cols_hide(contains("Group"))
+
+all_models_table
+```
+In all fixation time measures, there was a main effect of word frequency, such that low-frequency words elicited longer fixation times than high-frequency words (FFD: `r `blmm_target_FFD_exp1_gaussian_Freq1_effect`; SFD>: `r blmm_target_SFD_exp1_gaussian_Freq1_effect`; GD: `r blmm_target_GD_exp1_gaussian_Freq1_effect`; TVT: `r blmm_target_TVT_exp1_gaussian_Freq1_effect`). There was also a main effect of eye-tracker, such that fixation times were longer when recorded with the Webcam compared to the Eyelink (FFD: `r blmm_target_FFD_exp1_gaussian_Tracker1_effect`; SFD: `r blmm_target_SFD_exp1_gaussian_Tracker1_effect`; GD: `r blmm_target_GD_exp1_gaussian_Tracker1_effect`; TVT: `r blmm_target_TVT_exp1_gaussian_Tracker1_effect`). Importantly, there was no credible interaction between word frequency and eye-tracker in any of the fixation time measures (FFD: `r blmm_target_FFD_exp1_gaussian_interaction_effect`; SFD: `r blmm_target_SFD_exp1_gaussian_interaction_effect`; GD: `r blmm_target_GD_exp1_gaussian_interaction_effect`; TVT: `r blmm_target_TVT_exp1_gaussian_interaction_effect`), suggesting that the frequency effect was present in both the Eyelink and the webcam data. We used the average slopes method [@marginaleffects] to test the marginal effect of word frequency for the Eyelink and the webcam data separately. In FFD, the effect of word frequency was credible for both the Eyelink (b = `r marginal_effects_FFD$estimate[marginal_effects_FFD$Tracker == "Eyelink"] %>% format_value()`, 95% CrI = [`r marginal_effects_FFD$conf.low[marginal_effects_FFD$Tracker == "Eyelink"] %>% format_value()`, `r marginal_effects_FFD$conf.high[marginal_effects_FFD$Tracker == "Eyelink"] %>% format_value()`] and the webcam (b = `r marginal_effects_FFD$estimate[marginal_effects_FFD$Tracker == "Webcam"] %>% format_value()`, 95% CrI = [`r marginal_effects_FFD$conf.low[marginal_effects_FFD$Tracker == "Webcam"] %>% format_value()`, `r marginal_effects_FFD$conf.high[marginal_effects_FFD$Tracker == "Webcam"] %>% format_value()`]. In SFD, the effect of word frequency was credible for the Eyelink (b = `r marginal_effects_SFD$estimate[marginal_effects_SFD$Tracker == "Eyelink"] %>% format_value()`, 95% CrI = [`r marginal_effects_SFD$conf.low[marginal_effects_SFD$Tracker == "Eyelink"] %>% format_value()`, `r marginal_effects_SFD$conf.high[marginal_effects_SFD$Tracker == "Eyelink"] %>% format_value()`] but the credible interval for the effect in the webcam data narrowly included 0 (b = `r marginal_effects_SFD$estimate[marginal_effects_SFD$Tracker == "Webcam"] %>% format_value()`, 95% CrI = [`r marginal_effects_SFD$conf.low[marginal_effects_SFD$Tracker == "Webcam"] %>% format_value()`, `r marginal_effects_SFD$conf.high[marginal_effects_SFD$Tracker == "Webcam"] %>% format_value()`]. In GD, the effect of word frequency was also credible the Eyelink (b = `r marginal_effects_GD$estimate[marginal_effects_GD$Tracker == "Eyelink"] %>% format_value()`, 95% CrI = [`r marginal_effects_GD$conf.low[marginal_effects_GD$Tracker == "Eyelink"] %>% format_value()`, `r marginal_effects_GD$conf.high[marginal_effects_GD$Tracker == "Eyelink"] %>% format_value()`] but the CI for the effect in the webcam data again narrowly included 0 (b = `r marginal_effects_GD$estimate[marginal_effects_GD$Tracker == "Webcam"] %>% format_value()`, 95% CrI = [`r marginal_effects_GD$conf.low[marginal_effects_GD$Tracker == "Webcam"] %>% format_value()`, `r marginal_effects_GD$conf.high[marginal_effects_GD$Tracker == "Webcam"] %>% format_value()`]. We see the same in TVT, where the effect of word frequency was credible for both Eyelink (b = `r marginal_effects_TVT$estimate[marginal_effects_TVT$Tracker == "Eyelink"] %>% format_value()`, 95% CrI = [`r marginal_effects_TVT$conf.low[marginal_effects_TVT$Tracker == "Eyelink"] %>% format_value()`, `r marginal_effects_TVT$conf.high[marginal_effects_TVT$Tracker == "Eyelink"] %>% format_value()`] but not the webcam data (b = `r marginal_effects_TVT$estimate[marginal_effects_TVT$Tracker == "Webcam"] %>% format_value()`, 95% CrI = [`r marginal_effects_TVT$conf.low[marginal_effects_TVT$Tracker == "Webcam"] %>% format_value()`, `r marginal_effects_TVT$conf.high[marginal_effects_TVT$Tracker == "Webcam"] %>% format_value()`]. In Experiment 1, we see that the webcam data show effects that are qualitatively similar to those observed in the Eyelink data. However, due to the large amount of noise in the webcam data, it is difficult to draw clear conclusions from these data on their own.
+
+# Experiment 3
 
 # Discussion
 

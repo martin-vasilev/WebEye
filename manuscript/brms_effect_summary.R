@@ -247,3 +247,14 @@ brms_effect_summary <- function(model, coefficient_name) {
   
   return(output_string)
 }
+
+
+#' Summarize Effect Size, and Credible Interval from marginaleffects::avg_slopes output
+#' 
+#' This function extracts the estimate and 95% credible interval (CrI) from the output of the avg_slopes function from
+#' the marginaleffects package. It formats the results using LaTeX math delimiters.
+#' 
+#' @param avg_slopes_output A data frame output from the avg_slopes function.
+#' @param coefficient_name A string specifying the name of the coefficient to summarize (e.g., "x", "conditiontreatment").
+#' Must match the names in the `term` column of the avg_slopes output.
+#' 

@@ -212,5 +212,11 @@ blmm_target_TVT_exp1_gaussian <-
 
 qs_save(blmm_target_TVT_exp1_gaussian, "LAB/models/brms/blmm_target_TVT_exp1_gaussian.qs")
 
+# Corpus analysis
 
+contrasts(corpus_words_exp1$Tracker) <- c(-.5,.5)
+ctr <- function(x) scale(x, scale = FALSE)
 
+lmm_corpus_words_FFD <- lmer(FFD ~ ctr(zipf) * Tracker + (Tracker+zipf  | sub) + (1 | item),
+                         data = corpus_words_exp1)
+summary(lmm_corpus_words_FFD)
