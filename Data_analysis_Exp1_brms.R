@@ -425,4 +425,184 @@ qs_save(blmm_corpus_TVT_exp1_gaussian, "LAB/models/brms/blmm_corpus_TVT_exp1_gau
 
 # same models, but with word length (len) plus interaction with zipf and tracker
 
+blmm_corpus_FFD_exp1_exgaussian_len <-
+  brm(
+    # exclude first and last words
+    data = corpus_words_exp1 %>% filter(position != "first" & position != "last"),
+    formula = bf(
+      FFD ~ ctr(zipf) * ctr(len) * Tracker  + (ctr(zipf) * ctr(len) * Tracker | sub) + (Tracker | item),
+      beta ~ ctr(zipf) * ctr(len) * Tracker  + (ctr(zipf) * ctr(len) * Tracker | sub) + (Tracker | item)),
+    warmup = 1000,
+    iter = 5000,
+    chains = 4,
+    prior = priors_beta,
+    sample_prior = "yes",
+    family = exgaussian(),
+    init = "0",
+    control = list(adapt_delta = 0.8),#, max_treedepth = 15),
+    cores = 4,
+    backend = "cmdstanr",
+    threads = threading(2),
+    silent = 0
+  )
 
+qs_save(blmm_corpus_FFD_exp1_exgaussian_len, "LAB/models/brms/blmm_corpus_FFD_exp1_exgaussian_len.qs")
+# gaussian
+
+blmm_corpus_FFD_exp1_gaussian_len <- 
+  brm(
+    data = corpus_words_exp1 %>% filter(position != "first" & position != "last"),
+    formula = bf(
+      log(FFD) ~ ctr(zipf) * ctr(len) * Tracker + (Tracker*ctr(len)*ctr(zipf)  | sub) + (Tracker | word_code)),
+    warmup = 1000,
+    iter = 5000,
+    chains = 4,
+    prior = priors_gaussian,
+    sample_prior = "yes",
+    family = gaussian(),
+    #init = "0",
+    control = list(adapt_delta = 0.8),#, max_treedepth = 15),
+    cores = 4,
+    backend = "cmdstanr",
+    threads = threading(2),
+    silent = 0
+  )
+qs_save(blmm_corpus_FFD_exp1_gaussian_len, "LAB/models/brms/blmm_corpus_FFD_exp1_gaussian_len.qs")
+
+# GD, with len
+
+blmm_corpus_GD_exp1_exgaussian_len <-
+  brm(
+    data = corpus_words_exp1 %>% filter(position != "first" & position != "last"),
+    formula = bf(
+      GD ~ ctr(zipf) * ctr(len) * Tracker  + (ctr(zipf) * ctr(len) * Tracker | sub) + (1 | item),
+      beta ~ ctr(zipf) * ctr(len) * Tracker  + (ctr(zipf) * ctr(len) * Tracker | sub) + (1 | item)),
+    warmup = 1000,
+    iter = 5000,
+    chains = 4,
+    prior = priors_beta,
+    sample_prior = "yes",
+    family = exgaussian(),
+    init = "0",
+    control = list(adapt_delta = 0.8),#, max_treedepth = 15),
+    cores = 4,
+    backend = "cmdstanr",
+    threads = threading(2),
+    silent = 0
+  )
+
+qs_save(blmm_corpus_GD_exp1_exgaussian_len, "LAB/models/brms/blmm_corpus_GD_exp1_exgaussian_len.qs")
+
+#gaussian
+
+blmm_corpus_GD_exp1_gaussian_len <- 
+  brm(
+    data = corpus_words_exp1 %>% filter(position != "first" & position != "last"),
+    formula = bf(
+      log(GD) ~ ctr(zipf) * ctr(len) * Tracker + (Tracker*ctr(len)*ctr(zipf)  | sub) + (Tracker | word_code)),
+    warmup = 1000,
+    iter = 5000,
+    chains = 4,
+    prior = priors_gaussian,
+    sample_prior = "yes",
+    family = gaussian(),
+    #init = "0",
+    control = list(adapt_delta = 0.8),#, max_treedepth = 15),
+    cores = 4,
+    backend = "cmdstanr",
+    threads = threading(2),
+    silent = 0
+  )
+
+qs_save(blmm_corpus_GD_exp1_gaussian_len, "LAB/models/brms/blmm_corpus_GD_exp1_gaussian_len.qs")
+# SFD, with len
+
+blmm_corpus_SFD_exp1_exgaussian_len <-
+  brm(
+    data = corpus_words_exp1 %>% filter(position != "first" & position != "last"),
+    formula = bf(
+      SFD ~ ctr(zipf) * ctr(len) * Tracker  + (ctr(zipf) * ctr(len) * Tracker | sub) + (1 | item),
+      beta ~ ctr(zipf) * ctr(len) * Tracker  + (ctr(zipf) * ctr(len) * Tracker | sub) + (1 | item)),
+    warmup = 1000,
+    iter = 5000,
+    chains = 4,
+    prior = priors_beta,
+    sample_prior = "yes",
+    family = exgaussian(),
+    init = "0",
+    control = list(adapt_delta = 0.8),#, max_treedepth = 15),
+    cores = 4,
+    backend = "cmdstanr",
+    threads = threading(2),
+    silent = 0
+  )
+
+qs_save(blmm_corpus_SFD_exp1_exgaussian_len, "LAB/models/brms/blmm_corpus_SFD_exp1_exgaussian_len.qs")
+# gaussian
+
+blmm_corpus_SFD_exp1_gaussian_len <- 
+  brm(
+    data = corpus_words_exp1 %>% filter(position != "first" & position != "last"),
+    formula = bf(
+      log(SFD) ~ ctr(zipf) * ctr(len) * Tracker + (Tracker*ctr(len)*ctr(zipf)  | sub) + (Tracker | word_code)),
+    warmup = 1000,
+    iter = 5000,
+    chains = 4,
+    prior = priors_gaussian,
+    sample_prior = "yes",
+    family = gaussian(),
+    #init = "0",
+    control = list(adapt_delta = 0.8),#, max_treedepth = 15),
+    cores = 4,
+    backend = "cmdstanr",
+    threads = threading(2),
+    silent = 0
+  )
+
+qs_save(blmm_corpus_SFD_exp1_gaussian_len, "LAB/models/brms/blmm_corpus_SFD_exp1_gaussian_len.qs")
+
+# TVT, with len
+
+blmm_corpus_TVT_exp1_exgaussian_len <-
+  brm(
+    data = corpus_words_exp1 %>% filter(position != "first" & position != "last"),
+    formula = bf(
+      TVT ~ ctr(zipf) * ctr(len) * Tracker  + (ctr(zipf) * ctr(len) * Tracker | sub) + (1 | item),
+      beta ~ ctr(zipf) * ctr(len) * Tracker  + (ctr(zipf) * ctr(len) * Tracker | sub) + (1 | item)),
+    warmup = 1000,
+    iter = 5000,
+    chains = 4,
+    prior = priors_beta,
+    sample_prior = "yes",
+    family = exgaussian(),
+    init = "0",
+    control = list(adapt_delta = 0.8),#, max_treedepth = 15),
+    cores = 4,
+    backend = "cmdstanr",
+    threads = threading(2),
+    silent = 0
+  )
+
+qs_save(blmm_corpus_TVT_exp1_exgaussian_len, "LAB/models/brms/blmm_corpus_TVT_exp1_exgaussian_len.qs")
+#gaussian
+
+blmm_corpus_TVT_exp1_gaussian_len <- 
+  brm(
+    data = corpus_words_exp1 %>% filter(position != "first" & position != "last"),
+    formula = bf(
+      log(TVT) ~ ctr(zipf) * ctr(len) * Tracker + (Tracker*ctr(len)*ctr(zipf)  | sub) + (Tracker | word_code)),
+    warmup = 1000,
+    iter = 5000,
+    chains = 4,
+    prior = priors_gaussian,
+    sample_prior = "yes",
+    family = gaussian(),
+    #init = "0",
+    control = list(adapt_delta = 0.8),#, max_treedepth = 15),
+    cores = 4,
+    backend = "cmdstanr",
+    threads = threading(2),
+    silent = 0
+  )
+
+qs_save(blmm_corpus_TVT_exp1_gaussian_len, "LAB/models/brms/blmm_corpus_TVT_exp1_gaussian_len.qs")
