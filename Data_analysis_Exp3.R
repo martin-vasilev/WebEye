@@ -1308,6 +1308,15 @@ words_dat<- rbind(words_web_t, words_el_t)
 write.csv(x = words_dat, file = 'LAB-SPAIN/data/target_word_fixation_data.csv')
 
 
+### save all words in the sentence:
+words_web$Tracker<- "Webcam"
+words_el$Tracker<- "Eyelink"
+
+all_words_dat<- rbind(words_web, words_el)
+all_words_dat$word_length<- nchar(all_words_dat$wordID)
+write.csv(all_words_dat, 'LAB-SPAIN/data/all_words_fixation_data.csv')
+
+
 # generate descriptive statistics:
 library(gtsummary)
 library(dplyr)
