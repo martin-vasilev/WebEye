@@ -606,3 +606,77 @@ blmm_corpus_TVT_exp1_gaussian_len <-
   )
 
 qs_save(blmm_corpus_TVT_exp1_gaussian_len, "LAB/models/brms/blmm_corpus_TVT_exp1_gaussian_len.qs")
+
+
+####### Report results for paper:
+
+target_words_exp1_means_table <- target_words_exp1 %>%
+  #filter(FFD > 80 & FFD < 1500) %>%
+  group_by(Tracker, Freq) %>%
+  summarise(
+    mean_FFD = mean(FFD, na.rm = TRUE),
+    sd_FFD = sd(FFD, na.rm = TRUE),
+    mean_SFD = mean(SFD, na.rm = TRUE),
+    sd_SFD = sd(SFD, na.rm = TRUE),
+    mean_GD = mean(GD, na.rm = TRUE),
+    sd_GD = sd(GD, na.rm = TRUE),
+    mean_TVT = mean(TVT, na.rm = TRUE),
+    sd_TVT = sd(TVT, na.rm = TRUE),
+    #N = n() # N here is the number of correct trials within the RT filter
+  ) %>%
+  ungroup()
+
+
+target_words_exp1_means_table[,3:10]<- round(target_words_exp1_means_table[,3:10])
+
+
+# load the model results
+blmm_target_FFD_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_target_FFD_exp1_gaussian.qs"))
+blmm_target_SFD_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_target_SFD_exp1_gaussian.qs"))
+blmm_target_GD_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_target_GD_exp1_gaussian.qs"))
+blmm_target_TVT_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_target_TVT_exp1_gaussian.qs"))
+
+summary(blmm_target_FFD_exp1_gaussian)
+
+library(sjPlot)
+
+tab_model(blmm_target_FFD_exp1_gaussian,
+          blmm_target_SFD_exp1_gaussian,
+          blmm_target_GD_exp1_gaussian,
+          blmm_target_TVT_exp1_gaussian,
+          show.stat = T,show.se = F, file="LAB/models/Freq_models.html",
+          digits = 2, show.ngroups = T,
+          digits.p = 2, digits.rsq = 2, digits.re = 2, show.est = T,
+          transform = NULL, string.est = "Estimate", show.ci = 0.95)
+
+#sjPlot::tab_model(blmm_target_FFD_exp1_gaussian)
+
+
+
+library(tidybayes)
+library(ggdist)
+
+get_variables(blmm_target_FFD_exp1_gaussian)
+
+Posterior1<-bm1 %>%
+  spread_draws(b_Intercept, b_W1lenshort,b_W2lenshort, `b_W1lenshort:W2lenshort`) %>%
+  pivot_longer(cols = 5:7, names_to = 'condition', values_to = 'value')%>%
+  # mutate(condition_mean = b_Intercept + value) %>%
+  mutate(condition= as.factor(condition),
+         condition= fct_relevel(condition,"b_W1lenshort:W2lenshort",
+                                "b_W2lenshort", "b_W1lenshort"))%>%
+  ggplot(aes(y = condition, x = value)) +
+  geom_vline(xintercept = 0, linetype=2)+
+  stat_halfeye(color= 'darkred', alpha=0.75)+
+  theme_bw(26)+
+  scale_y_discrete(label = c('Word 1 length x\nWord 2 length',
+                             'Word 2 length\n(short vs long)',
+                             'Word 1 length\n(short vs long)'))+
+  labs(x= "Regression slope estimate [b]", y= "Condition", 
+       title = 'Return-sweep landing positions')+
+  theme(plot.title = element_text(hjust = 0.5))#,
+#axis.title.y=element_blank(),
+#axis.text.y=element_blank(),
+#axis.ticks.y=element_blank())
+
+

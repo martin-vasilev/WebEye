@@ -101,7 +101,7 @@ sub_correlations$Task_Name[which(sub_correlations$Task_Name=='Single_line_senten
 fun_mean <- function(x, rounding= 2){
   return(data.frame(y=mean(x),label= paste("M= ", round(mean(x,na.rm=T), rounding), sep= '')))}
 
-P1<- ggplot(sub_correlations, aes(x = Dimension, y = corr, 
+P1_cor<- ggplot(sub_correlations, aes(x = Dimension, y = corr, 
                                   color= Dimension, fill= Dimension)) + 
   facet_wrap(~Task_Name)+
   ggdist::stat_halfeye(
@@ -138,10 +138,28 @@ P1<- ggplot(sub_correlations, aes(x = Dimension, y = corr,
         strip.text = element_text(face="bold"))+
   stat_summary(fun = mean, geom="point",colour="black", size=4) +
   stat_summary(fun.data = fun_mean, geom="text", vjust=-1.15,
-               hjust= 0.75, colour="black", size= 7);P1
+               hjust= 0.75, colour="black", size= 7);P1_cor
 
-ggsave(filename = 'LAB/Plots/correlations.pdf', width = 10,
+ggsave(plot = P1_cor, filename = 'LAB/Plots/correlations.pdf', width = 10,
        height = 8, units = 'in')
+
+
+load('LAB-SPAIN/Plots/correlations.Rda')
+
+P1<- P1+ ggtitle('Experiment 3')+theme(plot.title = element_text(hjust = 0.5))
+P1_cor<- P1_cor+ ggtitle('Experiment 1')+theme(plot.title = element_text(hjust = 0.5))
+
+# combine the two plots:
+library(ggpubr)
+figure_corr <- ggarrange(P1_cor, P1,
+                    ncol = 2, nrow = 1, widths = c(1.8, 1))
+
+ggsave(filename = 'LAB/Plots/correlations_combined.png', plot = figure_corr,
+       width = 16, height = 10, units = 'in')
+
+ggsave(filename = 'LAB/Plots/correlations_combined.pdf', plot = figure_corr,
+       width = 16, height = 10, units = 'in', device = cairo_pdf)
+
 
 
 # Bland-Altman plot -------------------------------------------------------
@@ -319,11 +337,28 @@ library(ggpubr)
 figure <- ggarrange(Plot_x, Plot_y,
                     ncol = 1, nrow = 2)
 
-ggsave(filename = 'LAB/Plots/BA_combined.png', plot = figure,
-       width = 10, height = 12, units = 'in')
+#figure_e1<- figure+ ggtitle("Experiment 1")+theme(plot.title = element_text(size = 20, face = "bold", hjust = 0.5))
+figure_e1<- figure
 
-ggsave(filename = 'LAB/Plots/BA_combined.pdf', plot = figure,
-       width = 10, height = 12, units = 'in', device = cairo_pdf)
+load('LAB-SPAIN/Plots/BA_combined.Rda')
+
+figure_e1 <- ggarrange(text_grob("Experiment 1", size = 30),
+                       figure_e1,
+                               ncol = 1, heights = c(0.1, 1))
+
+figure_e3 <- ggarrange(text_grob("Experiment 3", size = 30),
+                       figure_e3,
+                       ncol = 1, heights = c(0.1, 1))
+
+figure_f <- ggarrange(figure_e1, figure_e3,
+                    ncol = 2, nrow = 1, widths = c(1.4, 1))
+
+
+ggsave(filename = 'LAB/Plots/BA_combined.png', plot = figure_f,
+       width = 16, height = 12, units = 'in')
+
+ggsave(filename = 'LAB/Plots/BA_combined.pdf', plot = figure_f,
+       width = 16, height = 12, units = 'in', device = cairo_pdf)
 
 
 
@@ -1236,13 +1271,13 @@ library(lmerTest)
 
 ## Models:
 
-summary(M1<- lmer(log(FFD)~ Freq*Tracker +(Freq+Tracker|sub)+(Freq+Tracker|item), data= words_dat))
+summary(M1<- lmerTest::lmer(log(FFD)~ Freq*Tracker +(Freq+Tracker|sub)+(Freq+Tracker|item), data= words_dat))
 
-summary(M2<- lmer(log(SFD)~ Freq*Tracker +(Freq+Tracker|sub)+(Freq+Tracker|item), data= words_dat))
+summary(M2<- lmerTest::lmer(log(SFD)~ Freq*Tracker +(Freq+Tracker|sub)+(Freq+Tracker|item), data= words_dat))
 
-summary(M3<- lmer(log(GD)~ Freq*Tracker +(Freq+Tracker|sub)+(Freq|item), data= words_dat))
+summary(M3<- lmerTest::lmer(log(GD)~ Freq*Tracker +(Freq+Tracker|sub)+(Freq|item), data= words_dat))
 
-summary(M4<- lmer(log(TVT)~ Freq*Tracker +(Freq|sub)+(Freq|item), data= words_dat))
+summary(M4<- lmerTest::lmer(log(TVT)~ Freq*Tracker +(Freq|sub)+(Freq|item), data= words_dat))
 
 
 library(sjPlot)
