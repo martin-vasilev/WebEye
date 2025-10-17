@@ -230,28 +230,33 @@ qs_save(blmm_target_TVT_exp3_gaussian, "LAB-SPAIN/models/brms/blmm_target_TVT_ex
 ## corpus analysis
 
 # add column indicating which word (from column word_num) is the final word in the sentence (contains a ".")
-corpus_words_exp3 <- corpus_words_exp1 %>% mutate(position = case_when(grepl("\\.$", wordID) & word_num == max(word_num) ~ "last",
+corpus_words_exp3 <- corpus_words_exp3 %>% mutate(position = case_when(grepl("\\.$", wordID) & word_num == max(word_num) ~ "last",
                                                                        word_num == 1 ~ "first",
                                                                        TRUE ~ "middle"),
                                                   # make a word code uniquely identifying each word, combining item and word_num
                                                   word_code = paste(item, word_num, sep = "_"),
                                                   len = nchar(wordID))
 
-contrasts(corpus_words_exp1$Tracker) <- c(-.5,.5)
+exp3_word_frequency_data <- read_tsv("LAB-SPAIN/spanish_corpus_words_with_frequencies_espal.txt") %>% select(word,frq,zipf,num_letters)
+
+corpus_words_exp3 <- corpus_words_exp3 %>%
+  left_join(exp3_word_frequency_data, by = c("wordID" = "word"))
+
+contrasts(corpus_words_exp3$Tracker) <- c(-.5,.5)
 ctr <- function(x) scale(x, scale = FALSE)
 
 lmm_corpus_words_FFD <- lmer(FFD ~ ctr(zipf) * ctr(len) * Tracker + (1 | sub) + (1 | word_code),
                              # exclude first and last word in a sentence and fixations < 80 ms and >800 ms
-                             data = corpus_words_exp1 %>% filter(position != "first" & position != "last")) #& FFD > 80 & FFD < 800))
+                             data = corpus_words_exp3 %>% filter(position != "first" & position != "last")) #& FFD > 80 & FFD < 800))
 summary(lmm_corpus_words_FFD)
 
 
 # brms model for FFD
 
-blmm_corpus_FFD_exp1_exgaussian <-
+blmm_corpus_FFD_exp3_exgaussian <-
   brm(
     # exclu
-    data = corpus_words_exp1 %>% filter(position != "first" & position != "last"),
+    data = corpus_words_exp3 %>% filter(position != "first" & position != "last"),
     formula = bf(
       FFD ~ ctr(zipf) * Tracker  + (ctr(zipf) * Tracker | sub) + (Tracker | item),
       beta ~ ctr(zipf) * Tracker  + (ctr(zipf) * Tracker | sub) + (Tracker | item)),
@@ -269,13 +274,14 @@ blmm_corpus_FFD_exp1_exgaussian <-
     silent = 0
   )
 
-qs_save(blmm_corpus_FFD_exp1_exgaussian, "LAB/models/brms/blmm_corpus_FFD_exp1_exgaussian.qs")
+
+qs_save(blmm_corpus_FFD_exp3_exgaussian, "LAB/models/brms/blmm_corpus_FFD_exp3_exgaussian.qs")
 
 # gaussian brms
 
-blmm_corpus_FFD_exp1_gaussian <- 
+blmm_corpus_FFD_exp3_gaussian <- 
   brm(
-    data = corpus_words_exp1 %>% filter(position != "first" & position != "last"),
+    data = corpus_words_exp3 %>% filter(position != "first" & position != "last"),
     formula = bf(
       log(FFD) ~ ctr(zipf) * Tracker + (Tracker+ctr(zipf)  | sub) + (Tracker | word_code)),
     warmup = 1000,
@@ -291,13 +297,13 @@ blmm_corpus_FFD_exp1_gaussian <-
     threads = threading(2),
     silent = 0
   )
-qs_save(blmm_corpus_FFD_exp1_gaussian, "LAB/models/brms/blmm_corpus_FFD_exp1_gaussian.qs") 
+qs_save(blmm_corpus_FFD_exp3_gaussian, "LAB/models/brms/blmm_corpus_FFD_exp3_gaussian.qs") 
 
 # GD
 
-blmm_corpus_GD_exp1_exgaussian <-
+blmm_corpus_GD_exp3_exgaussian <-
   brm(
-    data = corpus_words_exp1,
+    data = corpus_words_exp3,
     formula = bf(
       GD ~ ctr(zipf) * Tracker  + (ctr(zipf) * Tracker | sub) + (1 | item),
       beta ~ ctr(zipf) * Tracker  + (ctr(zipf) * Tracker | sub) + (1 | item)),
@@ -317,13 +323,13 @@ blmm_corpus_GD_exp1_exgaussian <-
 
 
 
-qs_save(blmm_corpus_GD_exp1_exgaussian, "LAB/models/brms/blmm_corpus_GD_exp1_exgaussian.qs")
+qs_save(blmm_corpus_GD_exp3_exgaussian, "LAB/models/brms/blmm_corpus_GD_exp3_exgaussian.qs")
 
 # gaussian
 
-blmm_corpus_GD_exp1_gaussian <- 
+blmm_corpus_GD_exp3_gaussian <- 
   brm(
-    data = corpus_words_exp1 %>% filter(position != "first" & position != "last"),
+    data = corpus_words_exp3 %>% filter(position != "first" & position != "last"),
     formula = bf(
       log(GD) ~ ctr(zipf) * Tracker + (Tracker+ctr(zipf)  | sub) + (Tracker | word_code)),
     warmup = 1000,
@@ -340,13 +346,13 @@ blmm_corpus_GD_exp1_gaussian <-
     silent = 0
   )
 
-qs_save(blmm_corpus_GD_exp1_gaussian, "LAB/models/brms/blmm_corpus_GD_exp1_gaussian.qs")
+qs_save(blmm_corpus_GD_exp3_gaussian, "LAB/models/brms/blmm_corpus_GD_exp3_gaussian.qs")
 
 # SFD
 
-blmm_corpus_SFD_exp1_exgaussian <-
+blmm_corpus_SFD_exp3_exgaussian <-
   brm(
-    data = corpus_words_exp1 %>% filter(position != "first" & position != "last"),
+    data = corpus_words_exp3 %>% filter(position != "first" & position != "last"),
     formula = bf(
       SFD ~ ctr(zipf) * Tracker  + (ctr(zipf) * Tracker | sub) + (1 | item),
       beta ~ ctr(zipf) * Tracker  + (ctr(zipf) * Tracker | sub) + (1 | item)),
@@ -366,13 +372,13 @@ blmm_corpus_SFD_exp1_exgaussian <-
 
 
 
-qs_save(blmm_corpus_SFD_exp1_exgaussian, "LAB/models/brms/blmm_corpus_SFD_exp1_exgaussian.qs")
+qs_save(blmm_corpus_SFD_exp3_exgaussian, "LAB/models/brms/blmm_corpus_SFD_exp3_exgaussian.qs")
 
 # gaussian
 
-blmm_corpus_SFD_exp1_gaussian <- 
+blmm_corpus_SFD_exp3_gaussian <- 
   brm(
-    data = corpus_words_exp1 %>% filter(position != "first" & position != "last"),
+    data = corpus_words_exp3 %>% filter(position != "first" & position != "last"),
     formula = bf(
       log(SFD) ~ ctr(zipf) * Tracker + (Tracker+ctr(zipf)  | sub) + (Tracker | word_code)),
     warmup = 1000,
@@ -389,13 +395,13 @@ blmm_corpus_SFD_exp1_gaussian <-
     silent = 0
   )
 
-qs_save(blmm_corpus_SFD_exp1_gaussian, "LAB/models/brms/blmm_corpus_SFD_exp1_gaussian.qs")
+qs_save(blmm_corpus_SFD_exp3_gaussian, "LAB/models/brms/blmm_corpus_SFD_exp3_gaussian.qs")
 
 # TVT
 
-blmm_corpus_TVT_exp1_exgaussian <-
+blmm_corpus_TVT_exp3_exgaussian <-
   brm(
-    data = corpus_words_exp1 %>% filter(position != "first" & position != "last"),
+    data = corpus_words_exp3 %>% filter(position != "first" & position != "last"),
     formula = bf(
       TVT ~ ctr(zipf) * Tracker  + (ctr(zipf) * Tracker | sub) + (1 | item),
       beta ~ ctr(zipf) * Tracker  + (ctr(zipf) * Tracker | sub) + (1 | item)),
@@ -413,13 +419,13 @@ blmm_corpus_TVT_exp1_exgaussian <-
     silent = 0
   )
 
-qs_save(blmm_corpus_TVT_exp1_exgaussian, "LAB/models/brms/blmm_corpus_TVT_exp1_exgaussian.qs")
+qs_save(blmm_corpus_TVT_exp3_exgaussian, "LAB/models/brms/blmm_corpus_TVT_exp3_exgaussian.qs")
 
 # gaussian
 
-blmm_corpus_TVT_exp1_gaussian <- 
+blmm_corpus_TVT_exp3_gaussian <- 
   brm(
-    data = corpus_words_exp1 %>% filter(position != "first" & position != "last"),
+    data = corpus_words_exp3 %>% filter(position != "first" & position != "last"),
     formula = bf(
       log(TVT) ~ ctr(zipf) * Tracker + (Tracker+ctr(zipf)  | sub) + (Tracker | word_code)),
     warmup = 1000,
@@ -436,14 +442,14 @@ blmm_corpus_TVT_exp1_gaussian <-
     silent = 0
   )
 
-qs_save(blmm_corpus_TVT_exp1_gaussian, "LAB/models/brms/blmm_corpus_TVT_exp1_gaussian.qs")
+qs_save(blmm_corpus_TVT_exp3_gaussian, "LAB/models/brms/blmm_corpus_TVT_exp3_gaussian.qs")
 
 # same models, but with word length (len) plus interaction with zipf and tracker
 
-blmm_corpus_FFD_exp1_exgaussian_len <-
+blmm_corpus_FFD_exp3_exgaussian_len <-
   brm(
     # exclude first and last words
-    data = corpus_words_exp1 %>% filter(position != "first" & position != "last"),
+    data = corpus_words_exp3 %>% filter(position != "first" & position != "last"),
     formula = bf(
       FFD ~ ctr(zipf) * ctr(len) * Tracker  + (ctr(zipf) * ctr(len) * Tracker | sub) + (Tracker | item),
       beta ~ ctr(zipf) * ctr(len) * Tracker  + (ctr(zipf) * ctr(len) * Tracker | sub) + (Tracker | item)),
@@ -461,12 +467,12 @@ blmm_corpus_FFD_exp1_exgaussian_len <-
     silent = 0
   )
 
-qs_save(blmm_corpus_FFD_exp1_exgaussian_len, "LAB/models/brms/blmm_corpus_FFD_exp1_exgaussian_len.qs")
+qs_save(blmm_corpus_FFD_exp3_exgaussian_len, "LAB/models/brms/blmm_corpus_FFD_exp3_exgaussian_len.qs")
 # gaussian
 
-blmm_corpus_FFD_exp1_gaussian_len <- 
+blmm_corpus_FFD_exp3_gaussian_len <- 
   brm(
-    data = corpus_words_exp1 %>% filter(position != "first" & position != "last"),
+    data = corpus_words_exp3 %>% filter(position != "first" & position != "last"),
     formula = bf(
       log(FFD) ~ ctr(zipf) * ctr(len) * Tracker + (Tracker*ctr(len)*ctr(zipf)  | sub) + (Tracker | word_code)),
     warmup = 1000,
@@ -482,13 +488,13 @@ blmm_corpus_FFD_exp1_gaussian_len <-
     threads = threading(2),
     silent = 0
   )
-qs_save(blmm_corpus_FFD_exp1_gaussian_len, "LAB/models/brms/blmm_corpus_FFD_exp1_gaussian_len.qs")
+qs_save(blmm_corpus_FFD_exp3_gaussian_len, "LAB/models/brms/blmm_corpus_FFD_exp3_gaussian_len.qs")
 
 # GD, with len
 
-blmm_corpus_GD_exp1_exgaussian_len <-
+blmm_corpus_GD_exp3_exgaussian_len <-
   brm(
-    data = corpus_words_exp1 %>% filter(position != "first" & position != "last"),
+    data = corpus_words_exp3 %>% filter(position != "first" & position != "last"),
     formula = bf(
       GD ~ ctr(zipf) * ctr(len) * Tracker  + (ctr(zipf) * ctr(len) * Tracker | sub) + (1 | item),
       beta ~ ctr(zipf) * ctr(len) * Tracker  + (ctr(zipf) * ctr(len) * Tracker | sub) + (1 | item)),
@@ -506,13 +512,13 @@ blmm_corpus_GD_exp1_exgaussian_len <-
     silent = 0
   )
 
-qs_save(blmm_corpus_GD_exp1_exgaussian_len, "LAB/models/brms/blmm_corpus_GD_exp1_exgaussian_len.qs")
+qs_save(blmm_corpus_GD_exp3_exgaussian_len, "LAB/models/brms/blmm_corpus_GD_exp3_exgaussian_len.qs")
 
 #gaussian
 
-blmm_corpus_GD_exp1_gaussian_len <- 
+blmm_corpus_GD_exp3_gaussian_len <- 
   brm(
-    data = corpus_words_exp1 %>% filter(position != "first" & position != "last"),
+    data = corpus_words_exp3 %>% filter(position != "first" & position != "last"),
     formula = bf(
       log(GD) ~ ctr(zipf) * ctr(len) * Tracker + (Tracker*ctr(len)*ctr(zipf)  | sub) + (Tracker | word_code)),
     warmup = 1000,
@@ -529,12 +535,12 @@ blmm_corpus_GD_exp1_gaussian_len <-
     silent = 0
   )
 
-qs_save(blmm_corpus_GD_exp1_gaussian_len, "LAB/models/brms/blmm_corpus_GD_exp1_gaussian_len.qs")
+qs_save(blmm_corpus_GD_exp3_gaussian_len, "LAB/models/brms/blmm_corpus_GD_exp3_gaussian_len.qs")
 # SFD, with len
 
-blmm_corpus_SFD_exp1_exgaussian_len <-
+blmm_corpus_SFD_exp3_exgaussian_len <-
   brm(
-    data = corpus_words_exp1 %>% filter(position != "first" & position != "last"),
+    data = corpus_words_exp3 %>% filter(position != "first" & position != "last"),
     formula = bf(
       SFD ~ ctr(zipf) * ctr(len) * Tracker  + (ctr(zipf) * ctr(len) * Tracker | sub) + (1 | item),
       beta ~ ctr(zipf) * ctr(len) * Tracker  + (ctr(zipf) * ctr(len) * Tracker | sub) + (1 | item)),
@@ -552,12 +558,12 @@ blmm_corpus_SFD_exp1_exgaussian_len <-
     silent = 0
   )
 
-qs_save(blmm_corpus_SFD_exp1_exgaussian_len, "LAB/models/brms/blmm_corpus_SFD_exp1_exgaussian_len.qs")
+qs_save(blmm_corpus_SFD_exp3_exgaussian_len, "LAB/models/brms/blmm_corpus_SFD_exp3_exgaussian_len.qs")
 # gaussian
 
-blmm_corpus_SFD_exp1_gaussian_len <- 
+blmm_corpus_SFD_exp3_gaussian_len <- 
   brm(
-    data = corpus_words_exp1 %>% filter(position != "first" & position != "last"),
+    data = corpus_words_exp3 %>% filter(position != "first" & position != "last"),
     formula = bf(
       log(SFD) ~ ctr(zipf) * ctr(len) * Tracker + (Tracker*ctr(len)*ctr(zipf)  | sub) + (Tracker | word_code)),
     warmup = 1000,
@@ -574,13 +580,13 @@ blmm_corpus_SFD_exp1_gaussian_len <-
     silent = 0
   )
 
-qs_save(blmm_corpus_SFD_exp1_gaussian_len, "LAB/models/brms/blmm_corpus_SFD_exp1_gaussian_len.qs")
+qs_save(blmm_corpus_SFD_exp3_gaussian_len, "LAB/models/brms/blmm_corpus_SFD_exp3_gaussian_len.qs")
 
 # TVT, with len
 
-blmm_corpus_TVT_exp1_exgaussian_len <-
+blmm_corpus_TVT_exp3_exgaussian_len <-
   brm(
-    data = corpus_words_exp1 %>% filter(position != "first" & position != "last"),
+    data = corpus_words_exp3 %>% filter(position != "first" & position != "last"),
     formula = bf(
       TVT ~ ctr(zipf) * ctr(len) * Tracker  + (ctr(zipf) * ctr(len) * Tracker | sub) + (1 | item),
       beta ~ ctr(zipf) * ctr(len) * Tracker  + (ctr(zipf) * ctr(len) * Tracker | sub) + (1 | item)),
@@ -598,12 +604,12 @@ blmm_corpus_TVT_exp1_exgaussian_len <-
     silent = 0
   )
 
-qs_save(blmm_corpus_TVT_exp1_exgaussian_len, "LAB/models/brms/blmm_corpus_TVT_exp1_exgaussian_len.qs")
+qs_save(blmm_corpus_TVT_exp3_exgaussian_len, "LAB/models/brms/blmm_corpus_TVT_exp3_exgaussian_len.qs")
 #gaussian
 
-blmm_corpus_TVT_exp1_gaussian_len <- 
+blmm_corpus_TVT_exp3_gaussian_len <- 
   brm(
-    data = corpus_words_exp1 %>% filter(position != "first" & position != "last"),
+    data = corpus_words_exp3 %>% filter(position != "first" & position != "last"),
     formula = bf(
       log(TVT) ~ ctr(zipf) * ctr(len) * Tracker + (Tracker*ctr(len)*ctr(zipf)  | sub) + (Tracker | word_code)),
     warmup = 1000,
@@ -620,5 +626,5 @@ blmm_corpus_TVT_exp1_gaussian_len <-
     silent = 0
   )
 
-qs_save(blmm_corpus_TVT_exp1_gaussian_len, "LAB/models/brms/blmm_corpus_TVT_exp1_gaussian_len.qs")
+qs_save(blmm_corpus_TVT_exp3_gaussian_len, "LAB/models/brms/blmm_corpus_TVT_exp3_gaussian_len.qs")
 

@@ -1,3 +1,4 @@
+library(here)
 library(tidyverse)
 library(lme4)
 library(lmerTest)
@@ -631,10 +632,10 @@ target_words_exp1_means_table[,3:10]<- round(target_words_exp1_means_table[,3:10
 
 
 # load the model results
-blmm_target_FFD_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_target_FFD_exp1_gaussian.qs"))
-blmm_target_SFD_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_target_SFD_exp1_gaussian.qs"))
-blmm_target_GD_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_target_GD_exp1_gaussian.qs"))
-blmm_target_TVT_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_target_TVT_exp1_gaussian.qs"))
+#blmm_target_FFD_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_target_FFD_exp1_gaussian.qs"))
+#blmm_target_SFD_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_target_SFD_exp1_gaussian.qs"))
+#blmm_target_GD_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_target_GD_exp1_gaussian.qs"))
+#blmm_target_TVT_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_target_TVT_exp1_gaussian.qs"))
 
 summary(blmm_target_FFD_exp1_gaussian)
 
@@ -658,7 +659,7 @@ library(ggdist)
 
 get_variables(blmm_target_FFD_exp1_gaussian)
 
-Posterior1<-bm1 %>%
+Posterior1<-blmm_target_FFD_exp1_gaussian %>%
   spread_draws(b_Intercept, b_W1lenshort,b_W2lenshort, `b_W1lenshort:W2lenshort`) %>%
   pivot_longer(cols = 5:7, names_to = 'condition', values_to = 'value')%>%
   # mutate(condition_mean = b_Intercept + value) %>%
