@@ -275,7 +275,7 @@ blmm_corpus_FFD_exp3_exgaussian <-
   )
 
 
-qs_save(blmm_corpus_FFD_exp3_exgaussian, "LAB/models/brms/blmm_corpus_FFD_exp3_exgaussian.qs")
+qs_save(blmm_corpus_FFD_exp3_exgaussian, "LAB-SPAIN/models/brms/blmm_corpus_FFD_exp3_exgaussian.qs")
 
 # gaussian brms
 
@@ -297,7 +297,7 @@ blmm_corpus_FFD_exp3_gaussian <-
     threads = threading(2),
     silent = 0
   )
-qs_save(blmm_corpus_FFD_exp3_gaussian, "LAB/models/brms/blmm_corpus_FFD_exp3_gaussian.qs") 
+qs_save(blmm_corpus_FFD_exp3_gaussian, "LAB-SPAIN/models/brms/blmm_corpus_FFD_exp3_gaussian.qs") 
 
 # GD
 
@@ -323,7 +323,7 @@ blmm_corpus_GD_exp3_exgaussian <-
 
 
 
-qs_save(blmm_corpus_GD_exp3_exgaussian, "LAB/models/brms/blmm_corpus_GD_exp3_exgaussian.qs")
+qs_save(blmm_corpus_GD_exp3_exgaussian, "LAB-SPAIN/models/brms/blmm_corpus_GD_exp3_exgaussian.qs")
 
 # gaussian
 
@@ -346,7 +346,7 @@ blmm_corpus_GD_exp3_gaussian <-
     silent = 0
   )
 
-qs_save(blmm_corpus_GD_exp3_gaussian, "LAB/models/brms/blmm_corpus_GD_exp3_gaussian.qs")
+qs_save(blmm_corpus_GD_exp3_gaussian, "LAB-SPAIN/models/brms/blmm_corpus_GD_exp3_gaussian.qs")
 
 # SFD
 
@@ -372,7 +372,7 @@ blmm_corpus_SFD_exp3_exgaussian <-
 
 
 
-qs_save(blmm_corpus_SFD_exp3_exgaussian, "LAB/models/brms/blmm_corpus_SFD_exp3_exgaussian.qs")
+qs_save(blmm_corpus_SFD_exp3_exgaussian, "LAB-SPAIN/models/brms/blmm_corpus_SFD_exp3_exgaussian.qs")
 
 # gaussian
 
@@ -395,7 +395,7 @@ blmm_corpus_SFD_exp3_gaussian <-
     silent = 0
   )
 
-qs_save(blmm_corpus_SFD_exp3_gaussian, "LAB/models/brms/blmm_corpus_SFD_exp3_gaussian.qs")
+qs_save(blmm_corpus_SFD_exp3_gaussian, "LAB-SPAIN/models/brms/blmm_corpus_SFD_exp3_gaussian.qs")
 
 # TVT
 
@@ -419,7 +419,7 @@ blmm_corpus_TVT_exp3_exgaussian <-
     silent = 0
   )
 
-qs_save(blmm_corpus_TVT_exp3_exgaussian, "LAB/models/brms/blmm_corpus_TVT_exp3_exgaussian.qs")
+qs_save(blmm_corpus_TVT_exp3_exgaussian, "LAB-SPAIN/models/brms/blmm_corpus_TVT_exp3_exgaussian.qs")
 
 # gaussian
 
@@ -442,7 +442,7 @@ blmm_corpus_TVT_exp3_gaussian <-
     silent = 0
   )
 
-qs_save(blmm_corpus_TVT_exp3_gaussian, "LAB/models/brms/blmm_corpus_TVT_exp3_gaussian.qs")
+qs_save(blmm_corpus_TVT_exp3_gaussian, "LAB-SPAIN/models/brms/blmm_corpus_TVT_exp3_gaussian.qs")
 
 # same models, but with word length (len) plus interaction with zipf and tracker
 
@@ -467,7 +467,7 @@ blmm_corpus_FFD_exp3_exgaussian_len <-
     silent = 0
   )
 
-qs_save(blmm_corpus_FFD_exp3_exgaussian_len, "LAB/models/brms/blmm_corpus_FFD_exp3_exgaussian_len.qs")
+qs_save(blmm_corpus_FFD_exp3_exgaussian_len, "LAB-SPAIN/models/brms/blmm_corpus_FFD_exp3_exgaussian_len.qs")
 # gaussian
 
 blmm_corpus_FFD_exp3_gaussian_len <- 
@@ -488,7 +488,7 @@ blmm_corpus_FFD_exp3_gaussian_len <-
     threads = threading(2),
     silent = 0
   )
-qs_save(blmm_corpus_FFD_exp3_gaussian_len, "LAB/models/brms/blmm_corpus_FFD_exp3_gaussian_len.qs")
+qs_save(blmm_corpus_FFD_exp3_gaussian_len, "LAB-SPAIN/models/brms/blmm_corpus_FFD_exp3_gaussian_len.qs")
 
 # GD, with len
 
@@ -512,7 +512,7 @@ blmm_corpus_GD_exp3_exgaussian_len <-
     silent = 0
   )
 
-qs_save(blmm_corpus_GD_exp3_exgaussian_len, "LAB/models/brms/blmm_corpus_GD_exp3_exgaussian_len.qs")
+qs_save(blmm_corpus_GD_exp3_exgaussian_len, "LAB-SPAIN/models/brms/blmm_corpus_GD_exp3_exgaussian_len.qs")
 
 #gaussian
 
@@ -535,7 +535,7 @@ blmm_corpus_GD_exp3_gaussian_len <-
     silent = 0
   )
 
-qs_save(blmm_corpus_GD_exp3_gaussian_len, "LAB/models/brms/blmm_corpus_GD_exp3_gaussian_len.qs")
+qs_save(blmm_corpus_GD_exp3_gaussian_len, "LAB-SPAIN/models/brms/blmm_corpus_GD_exp3_gaussian_len.qs")
 # SFD, with len
 
 blmm_corpus_SFD_exp3_exgaussian_len <-
@@ -558,7 +558,7 @@ blmm_corpus_SFD_exp3_exgaussian_len <-
     silent = 0
   )
 
-qs_save(blmm_corpus_SFD_exp3_exgaussian_len, "LAB/models/brms/blmm_corpus_SFD_exp3_exgaussian_len.qs")
+qs_save(blmm_corpus_SFD_exp3_exgaussian_len, "LAB-SPAIN/models/brms/blmm_corpus_SFD_exp3_exgaussian_len.qs")
 # gaussian
 
 blmm_corpus_SFD_exp3_gaussian_len <- 
@@ -580,7 +580,7 @@ blmm_corpus_SFD_exp3_gaussian_len <-
     silent = 0
   )
 
-qs_save(blmm_corpus_SFD_exp3_gaussian_len, "LAB/models/brms/blmm_corpus_SFD_exp3_gaussian_len.qs")
+qs_save(blmm_corpus_SFD_exp3_gaussian_len, "LAB-SPAIN/models/brms/blmm_corpus_SFD_exp3_gaussian_len.qs")
 
 # TVT, with len
 
@@ -604,7 +604,7 @@ blmm_corpus_TVT_exp3_exgaussian_len <-
     silent = 0
   )
 
-qs_save(blmm_corpus_TVT_exp3_exgaussian_len, "LAB/models/brms/blmm_corpus_TVT_exp3_exgaussian_len.qs")
+qs_save(blmm_corpus_TVT_exp3_exgaussian_len, "LAB-SPAIN/models/brms/blmm_corpus_TVT_exp3_exgaussian_len.qs")
 #gaussian
 
 blmm_corpus_TVT_exp3_gaussian_len <- 
@@ -626,5 +626,5 @@ blmm_corpus_TVT_exp3_gaussian_len <-
     silent = 0
   )
 
-qs_save(blmm_corpus_TVT_exp3_gaussian_len, "LAB/models/brms/blmm_corpus_TVT_exp3_gaussian_len.qs")
+qs_save(blmm_corpus_TVT_exp3_gaussian_len, "LAB-SPAIN/models/brms/blmm_corpus_TVT_exp3_gaussian_len.qs")
 
