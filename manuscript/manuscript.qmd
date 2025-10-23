@@ -62,6 +62,8 @@ conflicts_prefer(dplyr::filter, .quiet = TRUE)
 conflicts_prefer(dplyr::select, .quiet = TRUE)
 conflicts_prefer(flextable::separate_header, .quiet = TRUE)
 
+ctr <- function(x) scale(x, scale = FALSE)
+
 source("brms_effect_summary.R")
 #r_refs("r-references.bib")
 
@@ -315,7 +317,157 @@ all_models_table
 ```
 In all fixation time measures, there was a main effect of word frequency, such that low-frequency words elicited longer fixation times than high-frequency words (FFD: `r `blmm_target_FFD_exp1_gaussian_Freq1_effect`; SFD>: `r blmm_target_SFD_exp1_gaussian_Freq1_effect`; GD: `r blmm_target_GD_exp1_gaussian_Freq1_effect`; TVT: `r blmm_target_TVT_exp1_gaussian_Freq1_effect`). There was also a main effect of eye-tracker, such that fixation times were longer when recorded with the Webcam compared to the Eyelink (FFD: `r blmm_target_FFD_exp1_gaussian_Tracker1_effect`; SFD: `r blmm_target_SFD_exp1_gaussian_Tracker1_effect`; GD: `r blmm_target_GD_exp1_gaussian_Tracker1_effect`; TVT: `r blmm_target_TVT_exp1_gaussian_Tracker1_effect`). Importantly, there was no credible interaction between word frequency and eye-tracker in any of the fixation time measures (FFD: `r blmm_target_FFD_exp1_gaussian_interaction_effect`; SFD: `r blmm_target_SFD_exp1_gaussian_interaction_effect`; GD: `r blmm_target_GD_exp1_gaussian_interaction_effect`; TVT: `r blmm_target_TVT_exp1_gaussian_interaction_effect`), suggesting that the frequency effect was present in both the Eyelink and the webcam data. We used the average slopes method [@marginaleffects] to test the marginal effect of word frequency for the Eyelink and the webcam data separately. In FFD, the effect of word frequency was credible for both the Eyelink (b = `r marginal_effects_FFD$estimate[marginal_effects_FFD$Tracker == "Eyelink"] %>% format_value()`, 95% CrI = [`r marginal_effects_FFD$conf.low[marginal_effects_FFD$Tracker == "Eyelink"] %>% format_value()`, `r marginal_effects_FFD$conf.high[marginal_effects_FFD$Tracker == "Eyelink"] %>% format_value()`] and the webcam (b = `r marginal_effects_FFD$estimate[marginal_effects_FFD$Tracker == "Webcam"] %>% format_value()`, 95% CrI = [`r marginal_effects_FFD$conf.low[marginal_effects_FFD$Tracker == "Webcam"] %>% format_value()`, `r marginal_effects_FFD$conf.high[marginal_effects_FFD$Tracker == "Webcam"] %>% format_value()`]. In SFD, the effect of word frequency was credible for the Eyelink (b = `r marginal_effects_SFD$estimate[marginal_effects_SFD$Tracker == "Eyelink"] %>% format_value()`, 95% CrI = [`r marginal_effects_SFD$conf.low[marginal_effects_SFD$Tracker == "Eyelink"] %>% format_value()`, `r marginal_effects_SFD$conf.high[marginal_effects_SFD$Tracker == "Eyelink"] %>% format_value()`] but the credible interval for the effect in the webcam data narrowly included 0 (b = `r marginal_effects_SFD$estimate[marginal_effects_SFD$Tracker == "Webcam"] %>% format_value()`, 95% CrI = [`r marginal_effects_SFD$conf.low[marginal_effects_SFD$Tracker == "Webcam"] %>% format_value()`, `r marginal_effects_SFD$conf.high[marginal_effects_SFD$Tracker == "Webcam"] %>% format_value()`]. In GD, the effect of word frequency was also credible the Eyelink (b = `r marginal_effects_GD$estimate[marginal_effects_GD$Tracker == "Eyelink"] %>% format_value()`, 95% CrI = [`r marginal_effects_GD$conf.low[marginal_effects_GD$Tracker == "Eyelink"] %>% format_value()`, `r marginal_effects_GD$conf.high[marginal_effects_GD$Tracker == "Eyelink"] %>% format_value()`] but the CI for the effect in the webcam data again narrowly included 0 (b = `r marginal_effects_GD$estimate[marginal_effects_GD$Tracker == "Webcam"] %>% format_value()`, 95% CrI = [`r marginal_effects_GD$conf.low[marginal_effects_GD$Tracker == "Webcam"] %>% format_value()`, `r marginal_effects_GD$conf.high[marginal_effects_GD$Tracker == "Webcam"] %>% format_value()`]. We see the same in TVT, where the effect of word frequency was credible for both Eyelink (b = `r marginal_effects_TVT$estimate[marginal_effects_TVT$Tracker == "Eyelink"] %>% format_value()`, 95% CrI = [`r marginal_effects_TVT$conf.low[marginal_effects_TVT$Tracker == "Eyelink"] %>% format_value()`, `r marginal_effects_TVT$conf.high[marginal_effects_TVT$Tracker == "Eyelink"] %>% format_value()`] but not the webcam data (b = `r marginal_effects_TVT$estimate[marginal_effects_TVT$Tracker == "Webcam"] %>% format_value()`, 95% CrI = [`r marginal_effects_TVT$conf.low[marginal_effects_TVT$Tracker == "Webcam"] %>% format_value()`, `r marginal_effects_TVT$conf.high[marginal_effects_TVT$Tracker == "Webcam"] %>% format_value()`]. In Experiment 1, we see that the webcam data show effects that are qualitatively similar to those observed in the Eyelink data. However, due to the large amount of noise in the webcam data, it is difficult to draw clear conclusions from these data on their own.
 
+## Corpus-style analysis
+
+```{r}
+#| label: load-exp1-corpus-model-results
+#| echo: false
+#| message: false
+#| warning: false
+#| cache: true
+
+# load the model results
+
+blmm_corpus_FFD_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_corpus_FFD_exp1_gaussian.qs"))
+blmm_corpus_SFD_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_corpus_SFD_exp1_gaussian.qs"))
+blmm_corpus_GD_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_corpus_GD_exp1_gaussian.qs"))
+blmm_corpus_TVT_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_corpus_TVT_exp1_gaussian.qs"))
+
+# prepare effect summaries
+blmm_corpus_FFD_exp1_gaussian_freq_effect <- brms_effect_summary(blmm_corpus_FFD_exp1_gaussian, "ctrzipf")
+blmm_corpus_FFD_exp1_gaussian_Tracker1_effect <- brms_effect_summary(blmm_corpus_FFD_exp1_gaussian, "Tracker1")
+blmm_corpus_FFD_exp1_gaussian_interaction_effect <- brms_effect_summary(blmm_corpus_SFD_exp1_gaussian, "ctrzipf:Tracker1")
+
+blmm_corpus_SFD_exp1_gaussian_freq_effect <- brms_effect_summary(blmm_corpus_SFD_exp1_gaussian, "ctrzipf")
+blmm_corpus_SFD_exp1_gaussian_Tracker1_effect <- brms_effect_summary(blmm_corpus_SFD_exp1_gaussian, "Tracker1")
+blmm_corpus_SFD_exp1_gaussian_interaction_effect <- brms_effect_summary(blmm_corpus_SFD_exp1_gaussian, "ctrzipf:Tracker1")
+
+blmm_corpus_GD_exp1_gaussian_freq_effect <- brms_effect_summary(blmm_corpus_GD_exp1_gaussian, "ctrzipf")
+blmm_corpus_GD_exp1_gaussian_Tracker1_effect <- brms_effect_summary(blmm_corpus_GD_exp1_gaussian, "Tracker1")
+blmm_corpus_GD_exp1_gaussian_interaction_effect <- brms_effect_summary(blmm_corpus_GD_exp1_gaussian, "ctrzipf:Tracker1")
+
+blmm_corpus_TVT_exp1_gaussian_freq_effect <- brms_effect_summary(blmm_corpus_TVT_exp1_gaussian, "ctrzipf")
+blmm_corpus_TVT_exp1_gaussian_Tracker1_effect <- brms_effect_summary(blmm_corpus_TVT_exp1_gaussian, "Tracker1")
+blmm_corpus_TVT_exp1_gaussian_interaction_effect <- brms_effect_summary(blmm_corpus_TVT_exp1_gaussian, "ctrzipf:Tracker1")
+
+# save avg slopes calculations for testing the marginal effect of frequency by tracker
+
+marginal_effects_corpus_FFD <- avg_slopes(blmm_corpus_FFD_exp1_gaussian, variables = "zipf", by = "Tracker")
+marginal_effects_corpus_GD <- avg_slopes(blmm_corpus_GD_exp1_gaussian, variables = "zipf", by = "Tracker")
+marginal_effects_corpus_SFD <- avg_slopes(blmm_corpus_SFD_exp1_gaussian, variables = "zipf", by = "Tracker")
+marginal_effects_corpus_TVT <- avg_slopes(blmm_corpus_TVT_exp1_gaussian, variables = "zipf", by = "Tracker")
+```
+
 # Experiment 3
+
+```{r}
+#| label: load-exp3-model-results
+#| echo: false
+#| message: false
+#| warning: false
+#| cache: true
+
+# load the fixation time measures
+target_words_exp3 <- read_csv(here("LAB-SPAIN/data/target_word_fixation_data.csv")) %>%
+  mutate(Freq = factor(Freq, levels = c("low", "high")),
+         Tracker = factor(Tracker, levels = c("Webcam", "Eyelink")),
+         item = factor(item),
+         sub = factor(sub))
+
+corpus_words_exp3 <- read_csv(here("LAB-SPAIN/data/all_words_fixation_data.csv")) %>%
+  mutate(Tracker = factor(Tracker, levels = c("Eyelink", "Webcam")),
+         item = factor(item),
+         sub = factor(sub))
+
+corpus_words_exp3 <- corpus_words_exp3 %>% 
+  mutate(position = case_when(grepl("\\.$", wordID) & word_num == max(word_num) ~ "last", 
+                              word_num == 1 ~ "first", 
+                              TRUE ~ "middle"),
+# make a word code uniquely identifying each word, combining item and word_num
+word_code = paste(item, word_num, sep = "_"), len = nchar(wordID))
+
+exp3_word_frequency_data <- read_tsv(here("LAB-SPAIN/spanish_corpus_words_with_frequencies_espal.txt")) %>% select(word,frq,zipf,num_letters)
+
+corpus_words_exp3 <- corpus_words_exp3 %>%
+  left_join(exp3_word_frequency_data, by = c("wordID" = "word"))
+
+
+
+
+# load the model results
+blmm_target_FFD_exp3_gaussian <- qs_read(here("LAB-SPAIN", "models", "brms", "blmm_target_FFD_exp3_gaussian.qs"))
+blmm_target_SFD_exp3_gaussian <- qs_read(here("LAB-SPAIN", "models", "brms", "blmm_target_SFD_exp3_gaussian.qs"))
+blmm_target_GD_exp3_gaussian <- qs_read(here("LAB-SPAIN", "models", "brms", "blmm_target_GD_exp3_gaussian.qs"))
+blmm_target_TVT_exp3_gaussian <- qs_read(here("LAB-SPAIN", "models", "brms", "blmm_target_TVT_exp3_gaussian.qs"))
+
+# prepare effect summaries
+blmm_target_FFD_exp3_gaussian_Freq1_effect <- brms_effect_summary(blmm_target_FFD_exp3_gaussian, "Freq1")
+blmm_target_FFD_exp3_gaussian_Tracker1_effect <- brms_effect_summary(blmm_target_FFD_exp3_gaussian, "Tracker1")
+blmm_target_FFD_exp3_gaussian_interaction_effect <- brms_effect_summary(blmm_target_FFD_exp3_gaussian, "Freq1:Tracker1")
+
+blmm_target_GD_exp3_gaussian_Freq1_effect <- brms_effect_summary(blmm_target_GD_exp3_gaussian, "Freq1")
+blmm_target_GD_exp3_gaussian_Tracker1_effect <- brms_effect_summary(blmm_target_GD_exp3_gaussian, "Tracker1")
+blmm_target_GD_exp3_gaussian_interaction_effect <- brms_effect_summary(blmm_target_GD_exp3_gaussian, "Freq1:Tracker1")
+
+blmm_target_SFD_exp3_gaussian_Freq1_effect <- brms_effect_summary(blmm_target_SFD_exp3_gaussian, "Freq1")
+blmm_target_SFD_exp3_gaussian_Tracker1_effect <- brms_effect_summary(blmm_target_SFD_exp3_gaussian, "Tracker1")
+blmm_target_SFD_exp3_gaussian_interaction_effect <- brms_effect_summary(blmm_target_SFD_exp3_gaussian, "Freq1:Tracker1")
+
+blmm_target_TVT_exp3_gaussian_Freq1_effect <- brms_effect_summary(blmm_target_TVT_exp3_gaussian, "Freq1")
+blmm_target_TVT_exp3_gaussian_Tracker1_effect <- brms_effect_summary(blmm_target_TVT_exp3_gaussian, "Tracker1")
+blmm_target_TVT_exp3_gaussian_interaction_effect <- brms_effect_summary(blmm_target_TVT_exp3_gaussian, "Freq1:Tracker1")
+
+# save avg slopes calculations for testing the marginal effect of frequency by tracker
+
+marginal_effects_FFD_exp3 <- avg_slopes(blmm_target_FFD_exp3_gaussian, variables = "Freq", by = "Tracker")
+marginal_effects_GD_exp3 <- avg_slopes(blmm_target_GD_exp3_gaussian, variables = "Freq", by = "Tracker")
+marginal_effects_SFD_exp3 <- avg_slopes(blmm_target_SFD_exp3_gaussian, variables = "Freq", by = "Tracker")
+marginal_effects_TVT_exp3 <- avg_slopes(blmm_target_TVT_exp3_gaussian, variables = "Freq", by = "Tracker")
+
+```
+
+
+## Corpus-style analysis
+
+```{r}
+#| label: load-exp3-corpus-model-results
+#| echo: false
+#| message: false
+#| warning: false
+#| cache: true
+
+# load the model results
+
+blmm_corpus_FFD_exp3_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_corpus_FFD_exp3_gaussian.qs"))
+blmm_corpus_SFD_exp3_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_corpus_SFD_exp3_gaussian.qs"))
+blmm_corpus_GD_exp3_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_corpus_GD_exp3_gaussian.qs"))
+blmm_corpus_TVT_exp3_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_corpus_TVT_exp3_gaussian.qs"))
+
+# prepare effect summaries
+blmm_corpus_FFD_exp3_gaussian_freq_effect <- brms_effect_summary(blmm_corpus_FFD_exp1_gaussian, "ctrzipf")
+blmm_corpus_FFD_exp1_gaussian_Tracker1_effect <- brms_effect_summary(blmm_corpus_FFD_exp1_gaussian, "Tracker1")
+blmm_corpus_FFD_exp1_gaussian_interaction_effect <- brms_effect_summary(blmm_corpus_SFD_exp1_gaussian, "ctrzipf:Tracker1")
+
+blmm_corpus_SFD_exp1_gaussian_freq_effect <- brms_effect_summary(blmm_corpus_SFD_exp1_gaussian, "ctrzipf")
+blmm_corpus_SFD_exp1_gaussian_Tracker1_effect <- brms_effect_summary(blmm_corpus_SFD_exp1_gaussian, "Tracker1")
+blmm_corpus_SFD_exp1_gaussian_interaction_effect <- brms_effect_summary(blmm_corpus_SFD_exp1_gaussian, "ctrzipf:Tracker1")
+
+blmm_corpus_GD_exp1_gaussian_freq_effect <- brms_effect_summary(blmm_corpus_GD_exp1_gaussian, "ctrzipf")
+blmm_corpus_GD_exp1_gaussian_Tracker1_effect <- brms_effect_summary(blmm_corpus_GD_exp1_gaussian, "Tracker1")
+blmm_corpus_GD_exp1_gaussian_interaction_effect <- brms_effect_summary(blmm_corpus_GD_exp1_gaussian, "ctrzipf:Tracker1")
+
+blmm_corpus_TVT_exp1_gaussian_freq_effect <- brms_effect_summary(blmm_corpus_TVT_exp1_gaussian, "ctrzipf")
+blmm_corpus_TVT_exp1_gaussian_Tracker1_effect <- brms_effect_summary(blmm_corpus_TVT_exp1_gaussian, "Tracker1")
+blmm_corpus_TVT_exp1_gaussian_interaction_effect <- brms_effect_summary(blmm_corpus_TVT_exp1_gaussian, "ctrzipf:Tracker1")
+
+# save avg slopes calculations for testing the marginal effect of frequency by tracker
+
+marginal_effects_corpus_FFD <- avg_slopes(blmm_corpus_FFD_exp1_gaussian, variables = "zipf", by = "Tracker")
+marginal_effects_corpus_GD <- avg_slopes(blmm_corpus_GD_exp1_gaussian, variables = "zipf", by = "Tracker")
+marginal_effects_corpus_SFD <- avg_slopes(blmm_corpus_SFD_exp1_gaussian, variables = "zipf", by = "Tracker")
+marginal_effects_corpus_TVT <- avg_slopes(blmm_corpus_TVT_exp1_gaussian, variables = "zipf", by = "Tracker")
+```
+
 
 # Discussion
 
