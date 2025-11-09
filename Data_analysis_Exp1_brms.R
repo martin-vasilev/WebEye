@@ -4,6 +4,7 @@ library(lmerTest)
 library(cmdstanr)
 library(brms)
 library(qs2)
+library(here)
 
 
 target_words_exp1 <- read_csv("LAB/data/target_word_fixation_data.csv") %>%
@@ -637,13 +638,12 @@ blmm_target_GD_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_targ
 blmm_target_TVT_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_target_TVT_exp1_gaussian.qs"))
 
 summary(blmm_target_FFD_exp1_gaussian)
+summary(blmm_target_SFD_exp1_gaussian)
 
 library(sjPlot)
 
 tab_model(blmm_target_FFD_exp1_gaussian,
           blmm_target_SFD_exp1_gaussian,
-          blmm_target_GD_exp1_gaussian,
-          blmm_target_TVT_exp1_gaussian,
           show.stat = T,show.se = F, file="LAB/models/Freq_models.html",
           digits = 2, show.ngroups = T,
           digits.p = 2, digits.rsq = 2, digits.re = 2, show.est = T,
