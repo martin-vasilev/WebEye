@@ -1,4 +1,4 @@
-﻿word	frq	zipf	num_letters	
+word	frq	zipf	num_letters	
 minerales	2.230813	3.348463	9	
 valiosos	2.386451	3.377753	8	
 las	4810.239416	6.682167	3	
@@ -618,5 +618,5 @@ emociones	21.155972	4.325433	9
 ni	988.023016	5.994767	2	
 azul	72.784585	4.862039	4	
 tu	3942.388460	6.595759	2	
-esperabamos
-tiposde
+
+
