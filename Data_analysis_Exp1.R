@@ -1271,7 +1271,7 @@ library(lmerTest)
 
 ## Models:
 
-summary(M1<- lmerTest::lmer(log(FFD)~ Freq*Tracker +(Freq+Tracker|sub)+(Freq+Tracker|item), data= words_dat))
+summary(M1<- lmerTest::lmer(log(FFD)~ Freq*Tracker +(Tracker|sub)+(Freq+Tracker|item), data= words_dat))
 
 summary(M2<- lmerTest::lmer(log(SFD)~ Freq*Tracker +(Freq+Tracker|sub)+(Freq+Tracker|item), data= words_dat))
 
