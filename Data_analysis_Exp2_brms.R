@@ -629,9 +629,6 @@ target_words_exp2_means_table <- target_words_exp2 %>%
   ungroup()
 
 
-target_words_exp2_means_table[,3:10]<- round(target_words_exp2_means_table[,3:10])
-
-
 # load the model results
 #blmm_target_FFD_exp2_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_target_FFD_exp2_gaussian.qs"))
 #blmm_target_SFD_exp2_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_target_SFD_exp2_gaussian.qs"))
@@ -652,33 +649,3 @@ tab_model(blmm_target_FFD_exp2_gaussian,
           transform = NULL, string.est = "Estimate", show.ci = 0.95)
 
 #sjPlot::tab_model(blmm_target_FFD_exp2_gaussian)
-
-
-
-library(tidybayes)
-library(ggdist)
-
-get_variables(blmm_target_FFD_exp2_gaussian)
-
-Posterior1<-blmm_target_FFD_exp2_gaussian %>%
-  spread_draws(b_Intercept, b_W1lenshort,b_W2lenshort, `b_W1lenshort:W2lenshort`) %>%
-  pivot_longer(cols = 5:7, names_to = 'condition', values_to = 'value')%>%
-  # mutate(condition_mean = b_Intercept + value) %>%
-  mutate(condition= as.factor(condition),
-         condition= fct_relevel(condition,"b_W1lenshort:W2lenshort",
-                                "b_W2lenshort", "b_W1lenshort"))%>%
-  ggplot(aes(y = condition, x = value)) +
-  geom_vline(xintercept = 0, linetype=2)+
-  stat_halfeye(color= 'darkred', alpha=0.75)+
-  theme_bw(26)+
-  scale_y_discrete(label = c('Word 1 length x\nWord 2 length',
-                             'Word 2 length\n(short vs long)',
-                             'Word 1 length\n(short vs long)'))+
-  labs(x= "Regression slope estimate [b]", y= "Condition", 
-       title = 'Return-sweep landing positions')+
-  theme(plot.title = element_text(hjust = 0.5))#,
-#axis.title.y=element_blank(),
-#axis.text.y=element_blank(),
-#axis.ticks.y=element_blank())
-
-
