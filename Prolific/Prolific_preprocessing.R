@@ -593,7 +593,7 @@ for(i in 1:length(nsubs)){
         t<- data.frame('sub'= c$sub[1], 'item'= c$trial[1], 'Freq'= c$Freq[1],
                        'word_num'= nwords[k], 'wordID'= d$wordID[1],
                        'target'= d$target_word[1], 'FFD'= FFD,
-                       'SFD'= SFD, 'GD'= GD, 'TVT'= TVT)
+                       'SFD'= SFD, 'GD'= GD, 'TVT'= TVT, 'corpus'= d$corpus[1])
         
         
         words_web<- rbind(words_web, t)
@@ -608,7 +608,7 @@ for(i in 1:length(nsubs)){
   
 }
 
-words_web_t<- words_web%>% filter(target== 'Yes')
+words_web_t<- words_web%>% filter(target== 'Yes' & corpus== "Frequency corpus")
 
 outall<- which(words_web_t$FFD>1000|words_web_t$SFD>1000 | words_web_t$GD>2000 | words_web_t$TVT> 3000)
 
@@ -616,6 +616,32 @@ outall<- which(words_web_t$FFD>1000|words_web_t$SFD>1000 | words_web_t$GD>2000 |
 length(outall)/nrow(words_web_t)*100
 
 words_web_t<- words_web_t[-outall,]
+
+# save dataset:
+write.csv(words_web_t, 'Prolific/data/target_word_frequency_dat.csv')
+
+
+## single line corpus data:
+words_web_c<- words_web%>% filter(corpus== "Single-line corpus")
+
+outall<- which(words_web_c$FFD>1000|words_web_c$SFD>1000 | words_web_c$GD>2000 | words_web_c$TVT> 3000)
+
+# percentange of words removed as outliers in reading measures:
+length(outall)/nrow(words_web_c)*100
+
+if(length(outall)>0){
+  words_web_c<- words_web_c[-outall,]
+}
+
+library(EMreading)
+words_web_c<- Frequency(words_web_c)
+words_web_c$word_length<- nchar(words_web_c$wordID)
+
+
+# save dataset:
+write.csv(words_web_c, 'Prolific/data/single_line_corpus_dat.csv')
+
+
 
 
 words_web_t %>%  group_by(Freq)%>%
@@ -640,13 +666,13 @@ contrasts(words_web_t$Freq)<- c(-1, 1)
 library(lmerTest)
 
 
-summary(M1<- lmer(log(FFD)~ Freq +(Freq|sub)+(Freq|item), data= words_web_t))
+summary(M1<- lmer(log(FFD)~ Freq +(Freq|sub)+(1|item), data= words_web_t))
 
-summary(M2<- lmer(log(SFD)~ Freq +(Freq|sub)+(Freq|item), data= words_web_t))
+summary(M2<- lmer(log(SFD)~ Freq +(Freq|sub)+(1|item), data= words_web_t))
 
-summary(M3<- lmer(log(GD)~ Freq +(Freq|sub)+(Freq|item), data= words_web_t))
+summary(M3<- lmer(log(GD)~ Freq +(Freq|sub)+(1|item), data= words_web_t))
 
-summary(M4<- lmer(log(TVT)~ Freq +(Freq|sub)+(Freq|item), data= words_web_t))
+summary(M4<- lmer(log(TVT)~ Freq +(Freq|sub)+(1|item), data= words_web_t))
 
 
 
