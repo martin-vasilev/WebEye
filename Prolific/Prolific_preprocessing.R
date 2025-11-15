@@ -5,171 +5,277 @@ options(scipen=999)
 
 library(readr)
 library(tidyverse)
+library(readxl)
+
+freq <- read_excel("corpus/Corpus_fq.xlsx", sheet = 'Frequency')
+freq<- freq[1:120,]
+single_sent <- read_excel("corpus/Corpus_fq.xlsx", sheet = 'Single sentences')
+
 
 # load data folders:
 folders<- list.dirs('Prolific/prolific_raw_data/')
 folders<- folders[2:length(folders)]
 
-eye_data<- NULL
+if(!file.exists('Prolific/data/eye_data_raw.csv')){
+  
+  eye_data<- NULL
+  trial_data<- NULL
+  
+  for(i in 1:length(folders)){ # for each subject folder
+    
+    # open files:
+    folder_dir<- folders[i]
+    
+    # get study list
+    list<- substr(folder_dir, nchar(folder_dir), nchar(folder_dir))
+    
+    # trial info data:
+    trials <- suppressMessages(read_csv(paste(folder_dir, '/trials.csv', sep='')))
+    trials<- subset(trials, Task_Name== 'sentence'|Task_Name== 'sentence_DC' )
+    
+    # info:
+    info<- suppressMessages(read_csv(paste(folder_dir, '/sessions.csv', sep='')))
+    
+    year<- info$Start_Time
+    year<- as.numeric(substr(year, 1, 4))
+    
+    ## screen settings for subject:
+    scr_width<- info$Screen_Width_In_Pixels
+    scr_height<- info$Screen_Height_In_Pixels
+    
+    #scr_width/scr_height
+    
+    native_width<- 800
+    native_height<- 450
+    
+    width_multiplier<- scr_width/native_width
+    height_multiplier<- scr_height/native_height
+    
+    # timeseries (i.e., eye-tracking data):
+    ts<- suppressWarnings(suppressMessages(read_csv(paste(folder_dir, '/timeseries.csv', sep=''))))
+    ts<- subset(ts, Task_Name== 'sentence' |Task_Name== 'sentence_DC')
+    
+    ts$list<- list
+    
+    tasks<- unique(trials$Task_Name)
+    
+    
+    for(j in 1:length(tasks)){ # for each task
+      
+      task_trials<- subset(trials, Task_Name== tasks[j])
+      task_ts<- subset(ts, Task_Name== tasks[j])
+      
+      task_trials$question_accuracy<-NA
+      
+      if(tasks[j]== "sentence_DC" & year== 2024){
+        cat(sprintf('Subject %g task %s skipped\n', 
+                        info$Exp_Subject_Id, tasks[j]))
+        next
 
-for(i in 1:length(folders)){ # for each subject folder
-  
-  # open files:
-  folder_dir<- folders[i]
-  
-  # get study list
-  list<- substr(folder_dir, nchar(folder_dir), nchar(folder_dir))
-  
-  # trial info data:
-  trials <- read_csv(paste(folder_dir, '/trials.csv', sep=''))
-  trials<- subset(trials, Task_Name== 'sentence')#|Task_Name== 'sentence_DC' )
-  
-  # info:
-  info<- read_csv(paste(folder_dir, '/sessions.csv', sep=''))
-  
-  ## screen settings for subject:
-  scr_width<- info$Screen_Width_In_Pixels
-  scr_height<- info$Screen_Height_In_Pixels
-  
-  #scr_width/scr_height
-  
-  native_width<- 800
-  native_height<- 450
-  
-  width_multiplier<- scr_width/native_width
-  height_multiplier<- scr_height/native_height
-  
-  # timeseries (i.e., eye-tracking data):
-  ts<- read_csv(paste(folder_dir, '/timeseries.csv', sep=''))
-  ts<- subset(ts, Task_Name== 'sentence')#|Task_Name== 'sentence_DC')
-  
-  ts$list<- list
-  
-  tasks<- unique(trials$Task_Name)
-  
-  for(j in 1:length(tasks)){ # for each task
-    
-    task_trials<- subset(trials, Task_Name== tasks[j])
-    task_ts<- subset(ts, Task_Name== tasks[j])
-    
-    for(k in 1:nrow(task_trials)){ # for each trial...
-      
-      start_time<- task_trials$trial_start[k]
-      end_time<- task_trials$trial_end[k]
-      
-      trial_ts<- subset(task_ts, Trial_Id== task_trials$Trial_Id[k] & variable_name== 'gaze_data') 
-      
-      
-      if(list=='A' | list== 'C'){
-        trial_ts$Frequency<- task_trials$Frequency[k]
-        trial_ts$Preview<- task_trials$Preview[k]
-        
-      }else{ # frequency labels are reversed for list B (difficult to change on website)
-        trial_ts$Frequency<- ifelse(task_trials$Frequency[k]=='low', 'high', ifelse(task_trials$Frequency[k]=='high', 'low', NA))
-        trial_ts$Preview<- ifelse(task_trials$Preview[k]== 'valid', 'invalid', ifelse(task_trials$Preview[k]== 'invalid', 'valid', NA))
       }
       
-
-      trial_ts$x<- NA
-      trial_ts$y<- NA
-      trial_ts$time<- NA
-      trial_ts$conf<- NA
-    
-      
-      for(l in 1:nrow(trial_ts)){
+      for(k in 1:nrow(task_trials)){ # for each trial...
         
-        # take eye-tracking data as string
-        string<- as.numeric(unlist(strsplit(trial_ts$value[l], ',')))
+        start_time<- task_trials$trial_start[k]
+        end_time<- task_trials$trial_end[k]
         
-        if(length(string)==1){ # if no data, go to next sample
-          next
+        if(is.na(start_time) | is.na(end_time)){
+          stop('Missing trial times')
         }
         
-        trial_ts$x[l]<- string[1]#*width_multiplier # change to native width
-        trial_ts$y[l]<- string[2]#*height_multiplier # change to native height
-        trial_ts$time[l]<- string[3]
-        trial_ts$conf[l]<- string[4]
+        trial_ts<- subset(task_ts, Trial_Id== task_trials$Trial_Id[k] & variable_name== 'gaze_data') 
         
-      }
+        
+        if(list=='A' | list== 'C'){
+          trial_ts$Frequency<- task_trials$Frequency[k]
+          
+        }else{ # frequency labels are reversed for list B (difficult to change on website)
+          trial_ts$Frequency<- ifelse(task_trials$Frequency[k]=='low', 'high', ifelse(task_trials$Frequency[k]=='high', 'low', NA))
+        }
+        
+        
+        # calculate accuracy
+        if(task_trials$Task_Name[k]== 'sentence'){ # frequency corpus
+          loc<- which(freq$Study_ID== task_trials$Trial_Id[k])[1]
+          item<- freq[loc, ]
+          
+          if(task_trials$question_answer[k]== item$Question_answer){
+            task_trials$question_accuracy[k]<- 1
+          }else{
+            task_trials$question_accuracy[k]<- 0
+          }
+          
+        }else{ # single line corpus:
+          loc<- which(single_sent$Study_ID== task_trials$Trial_Id[k])
+          item<- single_sent[loc, ]
+          
+          if(task_trials$question_answer[k]== item$Question_answ){
+            task_trials$question_accuracy[k]<- 1
+          }else{
+            task_trials$question_accuracy[k]<- 0
+          }
+          
+        }
+        
+        trial_ts$x<- NA
+        trial_ts$y<- NA
+        trial_ts$time<- NA
+        trial_ts$conf<- NA
+        
+        
+        for(l in 1:nrow(trial_ts)){
+          
+          # take eye-tracking data as string
+          string<- as.numeric(unlist(strsplit(trial_ts$value[l], ',')))
+          
+          if(length(string)==1){ # if no data, go to next sample
+            next
+          }
+          
+          trial_ts$x[l]<- string[1]#*width_multiplier # change to native width
+          trial_ts$y[l]<- string[2]#*height_multiplier # change to native height
+          trial_ts$time[l]<- string[3]
+          trial_ts$conf[l]<- string[4]
+          
+        }
+        
+        # remove variables we don't need:
+        trial_ts$value<- NULL
+        trial_ts$variable_name<- NULL
+        trial_ts$Block_Name <- NULL
+        trial_ts$Block_Nr<- NULL
+        trial_ts$Task_Nr<- NULL
+        trial_ts$Session_Nr<- NULL
+        trial_ts$Preview<- NULL
+        trial_ts$Rec_Session_Id<- NULL
+        trial_ts$Session_Nr<- NULL
+        
+        
+        ## take only data when the sentence was read:
+        trial_ts<- subset(trial_ts, time>= start_time & time<end_time)
+        
+        # standardise timestamps relative to screen start time:
+        trial_ts$time<- trial_ts$time- start_time
+        
+        # calculate time difference from previous sample:
+        trial_ts<- trial_ts %>%
+          mutate(time_diff = time - dplyr::lag(time))
+        
+        # save data:
+        eye_data<- rbind(eye_data, trial_ts)
+        
+        
+      } # end of k (each trial)
+        
+      # save trial data:
+      task_trials<- task_trials[, c('Rec_Session_Id', 'Trial_Nr',
+                    'Trial_Id', 'Task_Name', 'question_accuracy',
+                    'trial_start', 'trial_end')]
+      trial_data<- rbind(trial_data, task_trials)
       
-      # remove variables we don't need:
-      trial_ts$value<- NULL
-      trial_ts$variable_name<- NULL
-      trial_ts$Block_Name <- NULL
-      trial_ts$Block_Nr<- NULL
-      trial_ts$Task_Nr<- NULL
-      trial_ts$Session_Nr<- NULL
-      trial_ts$Preview<- NULL
-      trial_ts$Rec_Session_Id<- NULL
-      trial_ts$Session_Nr<- NULL
+      } # end of j (task)
       
+    cat(sprintf('Subject %g \n', 
+                i))
       
-      ## take only data when the sentence was read:
-      trial_ts<- subset(trial_ts, time>= start_time & time<end_time)
-      
-      # standardise timestamps relative to screen start time:
-      trial_ts$time<- trial_ts$time- start_time
-      
-      # calculate time difference from previous sample:
-      trial_ts<- trial_ts %>%
-        mutate(time_diff = time - lag(time))
-      
-      eye_data<- rbind(eye_data, trial_ts)
-      
-      
-    }
-    
-    
-  }
-  
+    } # end of i (subject)
+
+  write.csv(eye_data, 'Prolific/data/eye_data_raw.csv')
+  write.csv(trial_data, 'Prolific/data/trial_data.csv')
+  } else{
+  eye_data <- read.csv("Prolific/data/eye_data_raw.csv")
+  trial_data<- read.csv("Prolific/data/trial_data.csv")
 }
 
 
-write.csv(eye_data, 'Prolific/eye_data_raw.csv')
+## average accuracy
+library(tidyverse)
+
+mean(trial_data$question_accuracy)*100
+sd(trial_data$question_accuracy)*100
+
+# accuracy per subject:
+sub_means<- trial_data %>% 
+  group_by(Rec_Session_Id)%>%
+  summarise(Mean= mean(question_accuracy))
+
+# range:
+range(sub_means$Mean)*100
 
 
-
+#### Parse samples into saccades:
 library(saccades)
 
 
 # Frequency corpus:
-webfq<- eye_data
+webfq<- eye_data #subset(eye_data, Task_Name== "sentence")
 
 nsubs<- unique(webfq$Exp_Subject_Id)
 
 parsed_web<- NULL
 
+
 for(i in 1:length(nsubs)){
   
   cat(sprintf("subject %g \n", i))
   
-  t<- subset(webfq, Exp_Subject_Id== nsubs[i])
+  s<- subset(webfq, Exp_Subject_Id== nsubs[i])
+  ntasks<- unique(s$Task_Name)
   
-  freq<- t %>%
-    distinct(Trial_Id, .keep_all = TRUE)%>%
-    select(Trial_Id, Frequency)
-  
-  colnames(freq)<- c('trial', 'Freq')
-  
-  t<- t[, c('x', 'y', 'Trial_Id', 'time')]
-  colnames(t)<- c("x", "y", "trial", "time")
-  ke.result<- detect.fixations(t, smooth.coordinates = T,
-                               smooth.saccades = F, lambda = 3)
-  ke.result<- subset(ke.result, event=='fixation')
-  ke.result$sub<- nsubs[i]
-  ke.result$event<- NULL
-  
-  ke.result<- ke.result %>% inner_join(freq, by= 'trial')
-  
-  parsed_web<- rbind(parsed_web, ke.result)
-  
+  for (j in 1:length(ntasks)){
+    
+    t<- subset(s, Task_Name== ntasks[j])
+    
+    if(ntasks[j]=='sentence'){
+      freq<- t %>%
+        distinct(Trial_Id, .keep_all = TRUE)%>%
+        select(Trial_Id, Frequency)
+      
+      colnames(freq)<- c('trial', 'Freq')
+      
+      t<- t[, c('x', 'y', 'Trial_Id', 'time')]
+      colnames(t)<- c("x", "y", "trial", "time")
+      ke.result<- detect.fixations(t, smooth.coordinates = T,
+                                   smooth.saccades = F, lambda = 3)
+      ke.result<- subset(ke.result, event=='fixation')
+      ke.result$sub<- nsubs[i]
+      ke.result$event<- NULL
+      
+      ke.result<- ke.result %>% inner_join(freq, by= 'trial')
+      ke.result$corpus= "Frequency corpus"
+      parsed_web<- rbind(parsed_web, ke.result)
+      
+    }else{
+      
+      t<- t[, c('x', 'y', 'Trial_Id', 'time')]
+      colnames(t)<- c("x", "y", "trial", "time")
+      ke.result<- detect.fixations(t, smooth.coordinates = T,
+                                   smooth.saccades = F, lambda = 3)
+      ke.result<- subset(ke.result, event=='fixation')
+      ke.result$sub<- nsubs[i]
+      ke.result$event<- NULL
+      ke.result$Freq= NA
+      ke.result$corpus= "Single-line corpus"
+      parsed_web<- rbind(parsed_web, ke.result)
+      
+    }
+    
+
+  }
+
 }
 
+median(parsed_web$dur)
+
+median(log(parsed_web$dur))
+hist(log(parsed_web$dur))
 
 
 library(readr)
 Corpus_fq <- read_csv("LAB/Corpus_fq.csv")
 Corpus_fq<- Corpus_fq[1:120,]
+Corpus_sent <- read_csv("corpus/Corpus_sent.csv")
+
 source('preproc/functions/get_coords.R')
 
 web_fix<- NULL
@@ -186,49 +292,76 @@ library(stringr)
 for(k in 1:length(nsubs)){ # for each subject...
   
   a<- subset(parsed_web, sub== nsubs[k])
-  nitems<- unique(a$trial)
+  ntasks<- unique(a$corpus)
   
-  for(i in 1:length(nitems)){ # for each item...
+  for(l in 1:length(ntasks)){
+    n<- subset(a, corpus== ntasks[l])
+    nitems<- unique(n$trial) 
     
-    c<- subset(a, trial== nitems[i])
-    
-    freq<- ifelse(c$Freq[1]== 'low', 'LF', 'HF')
-    
-    sent<-Corpus_fq$line_breaks[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
-    coords<- get_coords(sent, revert = T)
-    
-    target<- Corpus_fq$`Target (N)`[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
-    
-    for(j in 1:nrow(c)){ # for each fixation
+    for(i in 1:length(nitems)){ # for each item...
       
-      ### map webcam samples:
+      c<- subset(n, trial== nitems[i])
       
-      loc<- which(coords$x1<= c$x[j] & coords$x2>= c$x[j] & coords$y1<= c$y[j] & coords$y2>= c$y[j])
-      
-      if(length(loc)>0){
-        c$wordID[j]<- str_trim(coords$wordID[loc])
-        c$char[j]<- coords$char[loc]
-        c$char_num[j]<- coords$char_num[loc]
-        c$word_num[j]<- coords$word_num[loc]
-        c$line[j]<- coords$line[loc]
-        c$char_line[j]<- coords$char_line[loc]
+      if(c$corpus[1]== "Frequency corpus"){
         
-        if(!is.na(coords$wordID[loc])){
-          if(c$wordID[j]== target){
-            c$target_word[j]<- "Yes"
-          }else{
-            c$target_word[j]<- "No"
-          }
-        }
+        freq<- ifelse(c$Freq[1]== 'low', 'LF', 'HF')
         
+        sent<-Corpus_fq$line_breaks[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
+        coords<- get_coords(sent, revert = F)
+        
+        target<- Corpus_fq$`Target (N)`[which(Corpus_fq$Study_ID== nitems[i] & Corpus_fq$`Frequency type`== freq)[1]]
+        
+      }else{ # single line sentence corpus
+        
+        sent<-Corpus_sent$Sentence[which(Corpus_sent$Study_ID== nitems[i])]
+        
+        coords<- get_coords(sent, revert = F)
+        
+        # sentence is on a single line so y dimension is not important
+        # we set the y limits of the text box to the screen size
+        coords$y1<- 1
+        coords$y2<- 450
         
       }
       
-    } # end of j (fixations)
+            
+      for(j in 1:nrow(c)){ # for each fixation
+        
+        ### map webcam samples:
+        
+        loc<- which(coords$x1<= c$x[j] & coords$x2>= c$x[j] & coords$y1<= c$y[j] & coords$y2>= c$y[j])
+        
+        if(length(loc)>0){
+          c$wordID[j]<- str_trim(coords$wordID[loc])
+          c$char[j]<- coords$char[loc]
+          c$char_num[j]<- coords$char_num[loc]
+          c$word_num[j]<- coords$word_num[loc]
+          c$line[j]<- coords$line[loc]
+          c$char_line[j]<- coords$char_line[loc]
+          
+          if(!is.na(coords$wordID[loc])){
+            if(c$wordID[j]== target){
+              c$target_word[j]<- "Yes"
+            }else{
+              c$target_word[j]<- "No"
+            }
+          }
+          
+          
+        }
+        
+      } # end of j (fixations)
+      
+      web_fix<- rbind(web_fix, c)
+      
+    } # end of i (items)
     
-    web_fix<- rbind(web_fix, c)
     
-  } # end of i (items)
+    
+  } # end of task...
+  
+  
+  #nitems<- unique(a$trial)
   
   cat(k); cat(' ')
   
@@ -237,121 +370,135 @@ for(k in 1:length(nsubs)){ # for each subject...
 
 
 # Parse trial data to compute fixation duration metrics:
-
 nsubs<- unique(web_fix$sub)
 
 dat<- NULL
 
-for(i in 1:length(nsubs)){
+for(i in 1:length(nsubs)){ # for each subject
   a<- subset(web_fix, sub== nsubs[i])
   
-  nitems<- unique(a$trial)
+  ntasks<- unique(a$corpus)
   
-  for(j in 1:length(nitems)){
-    b<- subset(a, trial== nitems[j])
+  for(l in 1:length(ntasks)){ #for each task
+    c<- subset(a, corpus== ntasks[l])
+    nitems<- unique(c$trial)
     
-    b$regress<- NA
-    
-    max_word<- 1
-    
-    max_fixated<- max(b$word_num, na.rm=T)
-    
-    if(max_fixated<0){
-      dat<- rbind(dat, b)
-      next
-    }
-    
-    terminated<- rep(0, max_fixated)
-    
-    for(k in 1:nrow(b)){
+    for(j in 1:length(nitems)){ # for each item in task
       
-      if(!is.na(b$word_num[k])){
-        if(b$word_num[k]>= max_word & terminated[b$word_num[k]]==0){
-          b$regress[k]<- 0
-        }else{
-          b$regress[k]<- 1
-        }
-        # 
-        # # check for cases where readers return to word before progressing:
-        # if(b$word_num[k]== max_word){
-        #  which(b[1:k,]$regress) 
-        # }
+      b<- subset(c, trial== nitems[j])
+      
+      b$regress<- NA
+      
+      max_word<- 1
+      
+      max_fixated<- max(b$word_num, na.rm=T)
+      
+      if(max_fixated<0){
+        dat<- rbind(dat, b)
+        next
+      }
+      
+      terminated<- rep(0, max_fixated)
+      
+      for(k in 1:nrow(b)){
         
-        
-        if(b$word_num[k]> max_word){
-          max_word<- b$word_num[k]
-          terminated[1:(b$word_num[k]-1)]<- 1
+        if(!is.na(b$word_num[k])){
+          if(b$word_num[k]>= max_word & terminated[b$word_num[k]]==0){
+            b$regress[k]<- 0
+          }else{
+            b$regress[k]<- 1
+          }
+          # 
+          # # check for cases where readers return to word before progressing:
+          # if(b$word_num[k]== max_word){
+          #  which(b[1:k,]$regress) 
+          # }
+          
+          
+          if(b$word_num[k]> max_word){
+            max_word<- b$word_num[k]
+            terminated[1:(b$word_num[k]-1)]<- 1
+          }
+          
+          if(b$word_num[k]< max_word){
+            terminated[max_word]<- 1
+          }
+          
         }
         
-        if(b$word_num[k]< max_word){
-          terminated[max_word]<- 1
-        }
         
       }
       
+      dat<- rbind(dat, b)
       
-    }
+    } # end of item (j)
     
-    dat<- rbind(dat, b)
     
-  } # end of item (j)
+  } # end of task (l)
+  
   
 }  #end of subject (i)
 
 
-### merge adjacent fixations under 80 ms that are next to each other (1 char)
 
+### merge adjacent fixations under 80 ms that are next to each other (1 char)
 dat_new<- NULL
 
 nsubs<- unique(dat$sub)
 
 for(i in 1:length(nsubs)){
   a<- subset(dat, sub== nsubs[i])
+  ntasks<- unique(a$corpus)
   
-  nitems<- unique(a$trial)
-  
-  for(j in 1:length(nitems)){
-    b<- subset(a, trial==nitems[j])
-    b$remove<- NA
+  for(l in 1:length(ntasks)){
+    c<- subset(a, corpus== ntasks[l])
+    nitems<- unique(c$trial)
     
-    for(k in 1:nrow(b)){
+    
+    for(j in 1:length(nitems)){
+      b<- subset(c, trial==nitems[j])
+      b$remove<- NA
       
-      if(b$dur[k]<80){
+      for(k in 1:nrow(b)){
         
-        if(!is.na(b$char_line[k])){
+        if(b$dur[k]<80){
           
-          # check if within 1 character of prev fixation
-          if(k>1){
-            if(!is.na(b$char_line[k-1])){
-              
-              if(abs(b$char_line[k]-b$char_line[k-1])<=1 & b$line[k]== b$line[k-1]){
-                b$remove[k]<- T
-                
-                # merge fixation with previous one:
-                cat(sprintf("Subject %g item %g: merging fixation %g (%g ms) with fixation %g (%g ms). New fixation %g is %g ms.\n\n",
-                            nsubs[i], nitems[j], k, b$dur[k], k-1, b$dur[k-1], k-1, b$dur[k]+b$dur[k-1]))
-                
-                b$dur[k-1]<- b$dur[k-1]+ b$dur[k] 
-              }
-              
-            }
+          if(!is.na(b$char_line[k])){
             
-            # check if within 1 character of next fixation
-            
-            if(k<nrow(b) & is.na(b$remove[k])){
-              
-              if(!is.na(b$char_line[k+1])){
+            # check if within 1 character of prev fixation
+            if(k>1){
+              if(!is.na(b$char_line[k-1])){
                 
-                if(abs(b$char_line[k+1]-b$char_line[k])<=1 & b$line[k+1]== b$line[k]){
-                  
+                if(abs(b$char_line[k]-b$char_line[k-1])<=1 & b$line[k]== b$line[k-1]){
                   b$remove[k]<- T
                   
-                  # merge fixation with the next one:
+                  # merge fixation with previous one:
                   cat(sprintf("Subject %g item %g: merging fixation %g (%g ms) with fixation %g (%g ms). New fixation %g is %g ms.\n\n",
-                              nsubs[i], nitems[j], k, b$dur[k], k+1, b$dur[k+1], k+1, b$dur[k]+b$dur[k+1]))
-                  b$dur[k+1]<- b$dur[k+1]+ b$dur[k] 
+                              nsubs[i], nitems[j], k, b$dur[k], k-1, b$dur[k-1], k-1, b$dur[k]+b$dur[k-1]))
+                  
+                  b$dur[k-1]<- b$dur[k-1]+ b$dur[k] 
                 }
                 
+              }
+              
+              # check if within 1 character of next fixation
+              
+              if(k<nrow(b) & is.na(b$remove[k])){
+                
+                if(!is.na(b$char_line[k+1])){
+                  
+                  if(abs(b$char_line[k+1]-b$char_line[k])<=1 & b$line[k+1]== b$line[k]){
+                    
+                    b$remove[k]<- T
+                    
+                    # merge fixation with the next one:
+                    cat(sprintf("Subject %g item %g: merging fixation %g (%g ms) with fixation %g (%g ms). New fixation %g is %g ms.\n\n",
+                                nsubs[i], nitems[j], k, b$dur[k], k+1, b$dur[k+1], k+1, b$dur[k]+b$dur[k+1]))
+                    b$dur[k+1]<- b$dur[k+1]+ b$dur[k] 
+                  }
+                  
+                  
+                }
                 
               }
               
@@ -359,14 +506,18 @@ for(i in 1:length(nsubs)){
             
           }
           
+          
         }
-        
-        
       }
-    }
-    dat_new<- rbind(dat_new, b)
+      dat_new<- rbind(dat_new, b)
+      
+    } # end of item loop
+    
     
   }
+  
+
+
 }
 
 table(dat_new$remove)
@@ -393,58 +544,66 @@ dat<- dat[-out,]
 
 
 words_web<- NULL
-nsubs<- sort(unique(dat$sub))
-
-#web_fix<- web_fix %>%filter(dur>80 & dur<1000)
+nsubs<- unique(dat$sub)
 
 for(i in 1:length(nsubs)){
+  
   a<- subset(dat, sub== nsubs[i])
+  ntasks<- unique(a$corpus)
   
-  nitmes<- sort(unique(a$trial))
-  
-  for(j in 1:length(nitems)){
-    b<- subset(a, trial== nitems[j])
+  for(l in 1:length(ntasks)){
     
-    nwords<- sort(unique(b$word_num))
+    b<- subset(a, corpus== ntasks[l])
+    nitems<- unique(b$trial)
     
-    if(length(nwords)==0){
-      next
-    }
-    
-    for(k in 1:length(nwords)){
+    for(j in 1:length(nitems)){
       
-      c<- subset(b, word_num== nwords[k])
+      c<- subset(b, trial== nitems[j])
       
-      TVT<- NA
-      FFD<- NA
-      SFD<- NA
-      GD<- NA
+      nwords<- sort(unique(c$word_num))
       
-      p1<- subset(c, regress==0)
-      p2<- subset(c, regress==1)
-      
-      TVT<- sum(c$dur)
-      
-      if(nrow(p1)>0){
-        GD<- sum(p1$dur)
-        FFD<- p1$dur[1]
-        
-        if(nrow(p1)==1){
-          SFD<- FFD
-        }
-        
+      if(length(nwords)==0){
+        next
       }
       
-      t<- data.frame('sub'= b$sub[1], 'item'= b$trial[1], 'Freq'= b$Freq[1],
-                     'word_num'= nwords[k], 'wordID'= c$wordID[1],
-                     'target'= c$target_word[1], 'FFD'= FFD,
-                     'SFD'= SFD, 'GD'= GD, 'TVT'= TVT)
+      for(k in 1:length(nwords)){
+        
+        d<- subset(c, word_num== nwords[k])
+        
+        TVT<- NA
+        FFD<- NA
+        SFD<- NA
+        GD<- NA
+        
+        p1<- subset(d, regress==0)
+        p2<- subset(d, regress==1)
+        
+        TVT<- sum(d$dur)
+        
+        if(nrow(p1)>0){
+          GD<- sum(p1$dur)
+          FFD<- p1$dur[1]
+          
+          if(nrow(p1)==1){
+            SFD<- FFD
+          }
+          
+        }
+        
+        t<- data.frame('sub'= c$sub[1], 'item'= c$trial[1], 'Freq'= c$Freq[1],
+                       'word_num'= nwords[k], 'wordID'= d$wordID[1],
+                       'target'= d$target_word[1], 'FFD'= FFD,
+                       'SFD'= SFD, 'GD'= GD, 'TVT'= TVT)
+        
+        
+        words_web<- rbind(words_web, t)
+        
+      } # end of word
       
-      
-      words_web<- rbind(words_web, t)
-      
-    }
-  }
+    } # end of item
+    
+    
+  }# end of task
   
   
 }
