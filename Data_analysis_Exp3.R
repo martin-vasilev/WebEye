@@ -383,7 +383,7 @@ sub= sub %>%
   pivot_longer(cols = 2:3, names_to = 'Dimension', values_to = 'error')
 
 
-P_density=sub %>%
+P_density_E3=sub %>%
   ggplot(aes(x = error, fill = Dimension)) +
   geom_density(alpha = 0.4) +
   geom_rug(aes(color = Dimension), sides = "b", alpha = 0.6) +
@@ -393,16 +393,18 @@ P_density=sub %>%
     panel.spacing = unit(2, "lines") # increase spacing between facets
   )+ geom_vline(xintercept = 0,linetype = 2)+
   labs(x= 'Error (Webcam - Eyelink) in deg', y= "Density",
-       title = "a) Mean error per subject and screen dimension (°)")+
+       title = "b) Experiment 3")+
+      # title = "c) Mean error per subject and screen dimension (°)- Experiment 3")+
   theme(panel.grid = element_blank(),
-        plot.title.position = "plot")
+        plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.5))
 
+save(P_density_E3, file= 'LAB-SPAIN/Plots/Subject_acc_density.Rda')
 
 ggsave(filename = 'LAB-SPAIN/Plots/Subject_acc_density.pdf',
-       plot = P_density, width = 10, height = 7, units = 'in')
+       plot = P_density_E3, width = 10, height = 7, units = 'in')
 ggsave(filename = 'LAB-SPAIN/Plots/Subject_acc_density.png',
-       plot = P_density, width = 10, height = 7, units = 'in')
-
+       plot = P_density_E3, width = 10, height = 7, units = 'in')
 
 
 
@@ -495,7 +497,7 @@ grid_xy <- grid_xy %>%
   )
 
 # --- 8. Plot heatmap + arrows + labels ---
-Pscreen<- ggplot(grid_xy, aes(x = col, y = row)) +
+Pscreen_E3<- ggplot(grid_xy, aes(x = col, y = row)) +
   geom_tile(aes(fill = mag), color = "white") +
   
   geom_segment(aes(xend = xend, yend = yend),
@@ -513,16 +515,19 @@ Pscreen<- ggplot(grid_xy, aes(x = col, y = row)) +
   
   coord_fixed(ratio = 1080/1920) +
   labs(x = NULL, y = NULL, fill = "Magnitude (°)",
-       title = "b) Mean directional error per screen section",
+       #title = "b) Mean directional error per screen section- Experiment 3",
+       title = "b) Experiment 3",
        subtitle = "Arrows = direction of error; tile colour = combined error magnitude (°) across x and y;\n labels = mean x/y error (°)") +
   theme_minimal(18) +
   theme(panel.grid = element_blank(),
-        plot.title.position = "plot")
+        plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.5))
 
-Pscreen
+Pscreen_E3
 
+save(Pscreen_E3, file= 'LAB-SPAIN/Plots/screen_error.Rda')
 
-figure2 <- ggarrange(P_density, Pscreen,
+figure2 <- ggarrange(P_density_E3, Pscreen_E3,
                     ncol = 1, nrow = 2)
 
 ggsave(filename = 'LAB-SPAIN/Plots/error_magnitude.png', plot = figure2,
@@ -532,6 +537,7 @@ ggsave(filename = 'LAB-SPAIN/Plots/error_magnitude.pdf', plot = figure2,
        width = 12, height = 14, units = 'in', device = cairo_pdf)
 
 
+save(figure2, file = 'LAB-SPAIN/Plots/error_magnitude.Rda')
 
 
 # Target word lexical frequency analysis ----------------------------------

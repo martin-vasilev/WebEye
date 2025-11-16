@@ -385,7 +385,7 @@ sub= sub %>%
   pivot_longer(cols = 3:4, names_to = 'Dimension', values_to = 'error')
 
 
-P_density=sub %>%
+P_density_E1=sub %>%
   ggplot(aes(x = error, fill = Dimension)) +
   geom_density(alpha = 0.4) +
   geom_rug(aes(color = Dimension), sides = "b", alpha = 0.6) +
@@ -395,15 +395,21 @@ P_density=sub %>%
     panel.spacing = unit(2, "lines") # increase spacing between facets
   )+ geom_vline(xintercept = 0,linetype = 2)+
   labs(x= 'Error (Webcam - Eyelink) in deg', y= "Density",
-       title = "a) Mean error per subject and screen dimension (°)")+
+       title= "a) Experiment 1")+
+       #title = "a) Mean error per subject and screen dimension (°)- Experiment 1")+
   theme(panel.grid = element_blank(),
-        plot.title.position = "plot")
+        plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.5))
+
+load('LAB-SPAIN/Plots/Subject_acc_density.Rda')
+figure_subj <- ggarrange(P_density_E1, P_density_E3,
+                     ncol = 1, nrow = 2)
 
 
 ggsave(filename = 'LAB/Plots/Subject_acc_density.pdf',
-       plot = P_density, width = 10, height = 7, units = 'in')
+       plot = figure_subj, width = 10, height = 10, units = 'in')
 ggsave(filename = 'LAB/Plots/Subject_acc_density.png',
-       plot = P_density, width = 10, height = 7, units = 'in')
+       plot = figure_subj, width = 10, height = 10, units = 'in')
 
 
 
@@ -497,7 +503,7 @@ grid_xy <- grid_xy %>%
   )
 
 # --- 8. Plot heatmap + arrows + labels ---
-Pscreen<- ggplot(grid_xy, aes(x = col, y = row)) +
+Pscreen_E1<- ggplot(grid_xy, aes(x = col, y = row)) +
   geom_tile(aes(fill = mag), color = "white") +
   
   geom_segment(aes(xend = xend, yend = yend),
@@ -515,55 +521,33 @@ Pscreen<- ggplot(grid_xy, aes(x = col, y = row)) +
   
   coord_fixed(ratio = 1080/1920) +
   labs(x = NULL, y = NULL, fill = "Magnitude (°)",
-       title = "b) Mean directional error per screen section",
+       title= "a) Experiment 1",
+  #     title = "b) Mean directional error per screen section- Experiment 1",
        subtitle = "Arrows = direction of error; tile colour = combined error magnitude (°) across x and y;\n labels = mean x/y error (°)") +
   theme_minimal(18) +
   theme(panel.grid = element_blank(),
-        plot.title.position = "plot")
+        plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.5))
 
-Pscreen
+Pscreen_E1
+
+load('LAB-SPAIN/Plots/screen_error.Rda')
 
 library(ggpubr)
-figure2 <- ggarrange(P_density, Pscreen,
+figure3 <- ggarrange(Pscreen_E1, Pscreen_E3,
                     ncol = 1, nrow = 2)
 
-ggsave(filename = 'LAB/Plots/error_magnitude.png', plot = figure2,
-       width = 12, height = 14, units = 'in')
+ggsave(filename = 'LAB/Plots/error_magnitude.png', plot = figure3,
+       width = 16, height = 14, units = 'in')
 
-ggsave(filename = 'LAB/Plots/error_magnitude.pdf', plot = figure2,
-       width = 12, height = 14, units = 'in', device = cairo_pdf)
+ggsave(filename = 'LAB/Plots/error_magnitude.pdf', plot = figure3,
+       width = 16, height = 14, units = 'in', device = cairo_pdf)
 
 
 
 
 # Target word lexical frequency analysis ----------------------------------
 
-# web_target<- subset(webcam, web_target_word== "Yes")
-# el_target<- subset(webcam, el_target_word== "Yes")
-# 
-# web<- web_target %>% 
-#   group_by(sub, Trial_Id, Freq, web_wordID) %>%
-#   summarise(TVT= sum(time_diff, na.rm = T))%>%
-#   filter(TVT>80 & TVT<=2000)
-# 
-# web %>% 
-#   group_by(Freq) %>%
-#   summarise(M= mean(TVT), SD= mean(TVT))
-# 
-# library(lme4)
-# 
-# summary(M1<- lmer(log(TVT) ~ Freq +(Freq|sub) +(Freq|Trial_Id), data= web))
-# 
-# el<- el_target %>% 
-#   group_by(sub, Trial_Id, Freq, web_wordID) %>%
-#   summarise(TVT= sum(time_diff, na.rm = T))%>%
-#   filter(TVT>80 & TVT<=2000)
-# 
-# el %>% 
-#   group_by(Freq) %>%
-#   summarise(M= mean(TVT), SD= mean(TVT))
-# 
-# summary(M2<- lmer(log(TVT) ~ Freq +(Freq|sub) +(1|Trial_Id), data= el))
 
 #library("devtools")
 #install_github("tmalsburg/saccades/saccades", dependencies=TRUE)
@@ -1247,6 +1231,28 @@ words_el_t$Tracker<- "Eyelink"
 
 words_dat<- rbind(words_web_t, words_el_t)
 write.csv(x = words_dat, file = 'LAB/data/target_word_fixation_data.csv')
+
+
+### combine for corpus-based analysis (Freq corpus):
+
+words_web$Tracker<- "Webcam"
+words_el$Tracker<- "Eyelink"
+
+corpus_freq<- rbind(words_web, words_el)
+corpus_freq$corpus<- "Frequency sentences"
+
+corpus_freq<- Frequency(corpus_freq)
+corpus_freq$word_length<- nchar(corpus_freq$wordID)
+
+colnames(corpus_freq)
+corpus_freq<- corpus_freq[,c(1:10,13,14,15,11,12)]
+
+all<- which(corpus_freq$FFD>1000|corpus_freq$SFD>1000 | corpus_freq$GD>2000 | corpus_freq$TVT> 3000)
+
+length(all)/nrow(corpus_freq)*100
+
+corpus_freq<- corpus_freq[-all,]
+
 
 
 # generate descriptive statistics:
@@ -1991,6 +1997,14 @@ words_c_web$Tracker<- "Webcam"
 words_c_el$Tracker<- "Eyelink"
 
 words_corpus<- rbind(words_c_web, words_c_el)
+words_corpus$corpus<- "Single-line sentences"
+words_corpus$item<- words_corpus$item+100
+
+corpus_freq$target<- NULL
+corpus_freq$Freq<- NULL
+
+corpus_final<- rbind(corpus_freq, words_corpus)
+
 write.csv(x = words_corpus, file = 'LAB/data/corpus_fixation_data.csv')
 
 

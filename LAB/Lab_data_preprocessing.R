@@ -62,16 +62,21 @@ for(i in 1:length(folders)){ # for each subject
     
     ## re-map frequency (for B lists):
     
-    if(list=="B" & !is.na(trials$Frequency[o])){
-      if(trials$Frequency[o]== 'high'){
-        trials$Frequency[o]<- 'low'
-      }else{
-        if(trials$Frequency[o]== 'low'){
-          trials$Frequency[o]<- 'high'
-        }
-      }
+    if(!is.na(trials$Frequency[o])){
       
+      if(list=="B"| list=="D"){
+        if(trials$Frequency[o]== 'high'){
+          trials$Frequency[o]<- 'low'
+        }else{
+          if(trials$Frequency[o]== 'low'){
+            trials$Frequency[o]<- 'high'
+          }
+        }
+        
+      }
     }
+    
+
     
     # calculate accuracy
     if(trials$Task_Name[o]== 'sentence'){ # frequency corpus
@@ -125,7 +130,9 @@ for(i in 1:length(folders)){ # for each subject
   ## load eyelink data:
   dataF<- readLines(paste(folder_dir, '/', sub,  '.asc', sep='')) # load asc file;
   
-  get_num<- function(string){as.numeric(unlist(gsub("[^0-9]", "", unlist(string)), ""))}
+  get_num <- function(string) {
+    as.numeric(gsub("[^0-9]", "", string))
+  }
   
   start_loc<- which(grepl('UNIX', dataF))
   start_stamp<- dataF[start_loc[1]]
@@ -278,7 +285,7 @@ sacc_samples$lag<- NULL
       
       # calculate time difference from previous sample:
       trial_ts<- trial_ts %>%
-        mutate(time_diff = time_start - lag(time_start))
+        mutate(time_diff = time_start - dplyr::lag(time_start))
       
       
       for(l in 1:nrow(trial_ts)){
