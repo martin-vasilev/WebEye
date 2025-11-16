@@ -2005,7 +2005,7 @@ corpus_freq$Freq<- NULL
 
 corpus_final<- rbind(corpus_freq, words_corpus)
 
-write.csv(x = words_corpus, file = 'LAB/data/corpus_fixation_data.csv')
+write.csv(x = corpus_final, file = 'LAB/data/corpus_fixation_data.csv')
 
 
 
