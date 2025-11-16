@@ -230,9 +230,9 @@ qs_save(blmm_target_TVT_exp3_gaussian, "LAB-SPAIN/models/brms/blmm_target_TVT_ex
 ## corpus analysis
 
 # add column indicating which word (from column word_num) is the final word in the sentence (contains a ".")
-corpus_words_exp3 <- corpus_words_exp3 %>% mutate(position = case_when(grepl("\\.$", wordID) & word_num == max(word_num) ~ "last",
-                                                                       word_num == 1 ~ "first",
-                                                                       TRUE ~ "middle"),
+corpus_words_exp3 <- corpus_words_exp3 %>% group_by(sub, item) %>% mutate(position = case_when(grepl("\\.$", wordID) & word_num == max(word_num) ~ "last",
+                                                                                               word_num == 1 ~ "first",
+                                                                                               TRUE ~ "middle"),
                                                   # make a word code uniquely identifying each word, combining item and word_num
                                                   word_code = paste(item, word_num, sep = "_"),
                                                   len = nchar(wordID))

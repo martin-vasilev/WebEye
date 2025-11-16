@@ -268,7 +268,7 @@ target_words_exp1_means_table %>%
 #| warning: false
 #| cache: true
 #| after-caption-space: 0pt
-#| tbl-cap: "Coefficient estimates and 95% credible intervals (in square brackets) from Bayesian linear mixed models fitted to first fixation duration (FFD), single fixation duration (SFD), gaze duration (GD), and total viewing time (TVT) on target words in Experiment 1 (Gaussian models)."
+#| tbl-cap: "Coefficient estimates and 95% credible intervals (in square brackets) from Bayesian linear mixed models fitted to first fixation duration (FFD), single fixation duration (SFD), gaze duration (GD), and total viewing time (TVT) on target words in Experiment 1."
 
 coef_map <- c("b_Intercept" = "Intercept",
               "b_Freq1" = "Frequency",
@@ -287,7 +287,7 @@ modelsummary(models = list(FFD = blmm_target_FFD_exp1_gaussian, SFD = blmm_targe
              output = "gt") |>  gt::fmt_markdown(columns = c("FFD", "SFD", "GD", "TVT"))
 ```
 
-Overall, low-frequency words elicited longer fixation times than high-frequency words across all measures (FFD: `r blmm_target_FFD_exp1_gaussian_mu_Freq1_effect`; SFD: `r blmm_target_SFD_exp1_gaussian_mu_Freq1_effect`; GD: `r blmm_target_GD_exp1_gaussian_mu_Freq1_effect`; TVT: `r blmm_target_TVT_exp1_gaussian_mu_Freq1_effect`). Fixation times were also longer with the Webcam than with the Eyelink (FFD: `r blmm_target_FFD_exp1_gaussian_mu_Tracker1_effect`; SFD: `r blmm_target_SFD_exp1_gaussian_mu_Tracker1_effect`; GD: `r blmm_target_GD_exp1_gaussian_mu_Tracker1_effect`; TVT: `r blmm_target_TVT_exp1_gaussian_mu_Tracker1_effect`). Importantly, the Frequency × Tracker interaction was not credibly different from 0 (FFD: `r blmm_target_FFD_exp1_gaussian_mu_interaction_effect`; SFD: `r blmm_target_SFD_exp1_gaussian_mu_interaction_effect`; GD: `r blmm_target_GD_exp1_gaussian_mu_interaction_effect`; TVT: `r blmm_target_TVT_exp1_gaussian_mu_interaction_effect`), indicating that the frequency effect was comparable across devices.
+Overall, low-frequency words elicited longer fixation times than high-frequency words across all measures (FFD: `r blmm_target_FFD_exp1_gaussian_mu_Freq1_effect`; SFD: `r blmm_target_SFD_exp1_gaussian_mu_Freq1_effect`; GD: `r blmm_target_GD_exp1_gaussian_mu_Freq1_effect`; TVT: `r blmm_target_TVT_exp1_gaussian_mu_Freq1_effect`). Fixation times were also longer with the Webcam than with the Eyelink (FFD: `r blmm_target_FFD_exp1_gaussian_mu_Tracker1_effect`; SFD: `r blmm_target_SFD_exp1_gaussian_mu_Tracker1_effect`; GD: `r blmm_target_GD_exp1_gaussian_mu_Tracker1_effect`; TVT: `r blmm_target_TVT_exp1_gaussian_mu_Tracker1_effect`). This is likely due to a systematic difference in the saccade and fixation detection algorithms. Importantly, the Frequency × Tracker interaction was not credibly different from 0 (FFD: `r blmm_target_FFD_exp1_gaussian_mu_interaction_effect`; SFD: `r blmm_target_SFD_exp1_gaussian_mu_interaction_effect`; GD: `r blmm_target_GD_exp1_gaussian_mu_interaction_effect`; TVT: `r blmm_target_TVT_exp1_gaussian_mu_interaction_effect`), indicating that the frequency effect was comparable across devices.
 
 The absence of an interaction between frequency and tracker is not positive evidence for a frequency effect in the Webcam data on its own. We calculated posterior distributions for the estimated marginal means of the difference between low and high frequency target words and found that the 95% credible intervals for these differences in the Webcam data included 0, while the credible intervals for the Eyelink data excluded 0 in FFD (`r marginal_effects_string_exp1_target_FFD`), SFD (`r marginal_effects_string_exp1_target_SFD`), GD (`r marginal_effects_string_exp1_target_GD`), and TVT (`r marginal_effects_string_exp1_target_TVT`), although the CI for the latter included 0 very narrowly. This indicates that, while the webcam data is consistent with a frequency effect of a similar magnitude to that observed with the Eyelink, the evidence is not sufficiently strong to confirm the presence of frequency effect based on the Webcam data alone using the criterion of the 95% credible interval excluding 0. We assume that this is due to the higher amount of noise in the Webcam data.
 
@@ -329,7 +329,7 @@ marginal_effects_string_exp1_corpus_TVT <- format_contrast_string(marginal_effec
 #| warning: false
 #| cache: true
 #| after-caption-space: 0pt
-#| tbl-cap: "Coefficient estimates and 95% credible intervals (in square brackets) from Bayesian linear mixed models fitted to first fixation duration (FFD), single fixation duration (SFD), gaze duration (GD), and total viewing time (TVT) on all words (except for the first and last in each sentence) in Experiment 1 (Gaussian models)."
+#| tbl-cap: "Coefficient estimates and 95% credible intervals (in square brackets) from Bayesian linear mixed models fitted to first fixation duration (FFD), single fixation duration (SFD), gaze duration (GD), and total viewing time (TVT) on all words (except for the first and last in each sentence) in Experiment 1."
 
 coef_map_corpus <- c("b_Intercept" = "Intercept",
               "b_ctrzipf" = "Zipf frequency",
@@ -348,7 +348,7 @@ modelsummary(models = list(FFD = blmm_corpus_FFD_exp1_gaussian, SFD = blmm_corpu
              output = "gt") |>  gt::fmt_markdown(columns = c("FFD", "SFD", "GD", "TVT"))
 ```
 
-As expected we observed a frequency effect in that a higher Zipf frequency (i.e., more frequent words) was associated with shorter fixation times across all measures (FFD: `r brms_effect_summary(blmm_corpus_FFD_exp1_gaussian, "ctrzipf")`; SFD: `r brms_effect_summary(blmm_corpus_SFD_exp1_gaussian, "ctrzipf")`; GD: `r brms_effect_summary(blmm_corpus_GD_exp1_gaussian, "ctrzipf")`; TVT: `r brms_effect_summary(blmm_corpus_TVT_exp1_gaussian, "ctrzipf")`). We again observed longer mean fixation times with the Webcam than with the Eyelink (FFD: `r brms_effect_summary(blmm_corpus_FFD_exp1_gaussian, "Tracker1")`; SFD: `r brms_effect_summary(blmm_corpus_SFD_exp1_gaussian, "Tracker1")`; GD: `r brms_effect_summary(blmm_corpus_GD_exp1_gaussian, "Tracker1")`; TVT: `r brms_effect_summary(blmm_corpus_TVT_exp1_gaussian, "Tracker1")`). There were no credible Frequency × Tracker interactions (FFD: `r brms_effect_summary(blmm_corpus_FFD_exp1_gaussian, "ctrzipf:Tracker1")`; SFD: `r brms_effect_summary(blmm_corpus_SFD_exp1_gaussian, "ctrzipf:Tracker1")`; GD: `r brms_effect_summary(blmm_corpus_GD_exp1_gaussian, "ctrzipf:Tracker1")`; TVT: `r brms_effect_summary(blmm_corpus_TVT_exp1_gaussian, "ctrzipf:Tracker1")`). To present the frequency slope within each device directly, we summarized the Zipf effect (slope) by tracker using `emtrends` from the `emmeans` package. We found consistent evidence for the frequency effect in all measures for the Eyelink and the Webcam in FFD (`r marginal_effects_string_exp1_corpus_FFD`), SFD (`r marginal_effects_string_exp1_corpus_SFD`), and GD (`r marginal_effects_string_exp1_corpus_GD`). In TVT, the 95% CI for the Webcam data narrowly included 0 (`r marginal_effects_string_exp1_corpus_TVT`). This demonstrates that, when there is sufficient data, the frequency effect can be detected even in the noisier Webcam data.
+As expected we observed a frequency effect in that a higher Zipf frequency (i.e., more frequent words) was associated with shorter fixation times across all measures (FFD: `r brms_effect_summary(blmm_corpus_FFD_exp1_gaussian, "ctrzipf")`; SFD: `r brms_effect_summary(blmm_corpus_SFD_exp1_gaussian, "ctrzipf")`; GD: `r brms_effect_summary(blmm_corpus_GD_exp1_gaussian, "ctrzipf")`; TVT: `r brms_effect_summary(blmm_corpus_TVT_exp1_gaussian, "ctrzipf")`). We again observed longer mean fixation times with the Webcam than with the Eyelink (FFD: `r brms_effect_summary(blmm_corpus_FFD_exp1_gaussian, "Tracker1")`; SFD: `r brms_effect_summary(blmm_corpus_SFD_exp1_gaussian, "Tracker1")`; GD: `r brms_effect_summary(blmm_corpus_GD_exp1_gaussian, "Tracker1")`; TVT: `r brms_effect_summary(blmm_corpus_TVT_exp1_gaussian, "Tracker1")`). There were no credible Frequency × Tracker interactions (FFD: `r brms_effect_summary(blmm_corpus_FFD_exp1_gaussian, "ctrzipf:Tracker1")`; SFD: `r brms_effect_summary(blmm_corpus_SFD_exp1_gaussian, "ctrzipf:Tracker1")`; GD: `r brms_effect_summary(blmm_corpus_GD_exp1_gaussian, "ctrzipf:Tracker1")`; TVT: `r brms_effect_summary(blmm_corpus_TVT_exp1_gaussian, "ctrzipf:Tracker1")`). To present the frequency slope within each device directly, we summarized the Zipf effect (slope) by tracker using `emtrends` from the `emmeans` package. We found consistent evidence for the frequency effect in all measures for the Eyelink and the Webcam in SFD (`r marginal_effects_string_exp1_corpus_SFD`), and GD (`r marginal_effects_string_exp1_corpus_GD`). In FFD (`r marginal_effects_string_exp1_corpus_FFD`), and TVT (`r marginal_effects_string_exp1_corpus_TVT`), the 95% CI for the Webcam data narrowly included 0. Overall, this demonstrates that, when there is sufficient data, the frequency effect can be detected even in the noisier Webcam data.
 
 ## Experiment 3
 
@@ -481,7 +481,7 @@ target_words_exp3_means_table %>%
 #| warning: false
 #| cache: true
 #| after-caption-space: 0pt
-#| tbl-cap: "Coefficient estimates and 95% credible intervals (in square brackets) from Bayesian linear mixed models fitted to first fixation duration (FFD), single fixation duration (SFD), gaze duration (GD), and total viewing time (TVT) on target words in Experiment 3 (Gaussian models)."
+#| tbl-cap: "Coefficient estimates and 95% credible intervals (in square brackets) from Bayesian linear mixed models fitted to first fixation duration (FFD), single fixation duration (SFD), gaze duration (GD), and total viewing time (TVT) on target words in Experiment 3."
 
 coef_map <- c("b_Intercept" = "Intercept",
               "b_Freq1" = "Frequency",
@@ -538,7 +538,7 @@ marginal_effects_string_exp3_corpus_TVT <- format_contrast_string(marginal_effec
 #| warning: false
 #| cache: false
 #| after-caption-space: 0pt
-#| tbl-cap: "Coefficient estimates and 95% credible intervals (in square brackets) from Bayesian linear mixed models fitted to first fixation duration (FFD), single fixation duration (SFD), gaze duration (GD), and total viewing time (TVT) on all words (except for the first and last in each sentence) in Experiment 3 (Gaussian models)."
+#| tbl-cap: "Coefficient estimates and 95% credible intervals (in square brackets) from Bayesian linear mixed models fitted to first fixation duration (FFD), single fixation duration (SFD), gaze duration (GD), and total viewing time (TVT) on all words (except for the first and last in each sentence) in Experiment 3."
 
 coef_map_corpus <- c("b_Intercept" = "Intercept",
               "b_ctrzipf" = "Zipf frequency",
