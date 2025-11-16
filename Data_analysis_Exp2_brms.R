@@ -14,7 +14,8 @@ target_words_exp2 <- read_csv("Prolific/data/target_word_frequency_dat.csv") %>%
          item = factor(item),
          sub = factor(sub))
 
-corpus_words_exp2 <- read_csv("Prolific/data/single_line_corpus_dat.csv") %>%
+# use full data from both sentences with target words and single-line sentences
+corpus_words_exp2 <- read_csv("Prolific/data/corpus_fixation_data.csv") %>%
   mutate(
          item = factor(item),
          sub = factor(sub))
