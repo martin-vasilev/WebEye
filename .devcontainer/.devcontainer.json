@@ -1,0 +1,36 @@
+{
+  "name": "Analysis-in-a-Box RStudio",
+  // 1. Specify your custom Docker Hub image
+  "image": "bangele1/analysis-in-a-box-rocker:latest",
+
+  // 2. Set the default user to 'rstudio'
+  //    This aligns the VS Code terminal permissions with the RStudio Server permissions.
+  "remoteUser": "rstudio",
+  
+  // 3. Forward the RStudio Server port
+  "forwardPorts": [8787],
+  "portsAttributes": {
+    "8787": {
+      "label": "RStudio Server",
+      "onAutoForward": "notify",
+      // Set to 'private' since RStudio Server requires login credentials
+      "visibility": "private" 
+    }
+  },
+
+  // 4. Configure VS Code extensions (optional but recommended for R)
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "REditorSupport.r",
+        "quarto.quarto",
+        "ms-vscode.live-server"
+      ]
+    }
+  },
+
+  // 5. Ensure the RStudio Server is running
+  //    The rocker image usually starts RStudio Server automatically, 
+  //    but this command confirms its status.
+  "postAttachCommand": "echo 'RStudio image is ready! Access it via the Ports tab.'"
+}
