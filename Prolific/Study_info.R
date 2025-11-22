@@ -22,6 +22,7 @@ for(i in 1:length(folders)){ # for each subject folder
   
   # info:
   info<- read_csv(paste(folder_dir, '/sessions.csv', sep=''))
+  trials<- read_csv(paste(folder_dir, '/trials.csv', sep=''))
   
   #info$Crowdsourcing_SubjId<- NULL
   info$Crowdsourcing_Code<- NULL
@@ -41,18 +42,24 @@ for(i in 1:length(folders)){ # for each subject folder
   info$Distance_To_Screen_In_CM<- NULL
   info$Pixel_Density_PerMM<- NULL
   
-  # if(!'Distance_To_Screen_In_CM'%in% colnames(info)){
-  #   info$Distance_To_Screen_In_CM<- NA
-  # }
+  if(!'Distance_To_Screen_In_CM'%in% colnames(info)){
+    info$Distance_To_Screen_In_CM<- NA
+  }
   # 
-  # if(!'Pixel_Density_PerMM'%in% colnames(info)){
-  #   info$Pixel_Density_PerMM<- NA
-  # }
+  if(!'Pixel_Density_PerMM'%in% colnames(info)){
+    info$Pixel_Density_PerMM<- NA
+  }
   
   # Sort columns alphabetically
   info <- info[, order(names(info))]
   
   info$list= list
+  
+  # info$screen_distance<- trials$screen_dist[which(!is.na(trials$screen_dist))]
+  # 
+  # if(!'screen_distance'%in% colnames(info)){
+  #   info$screen_distance<- NULL
+  # }
   
   dat<- rbind(dat, info)
   
@@ -100,5 +107,15 @@ P_resolution<- dat %>%
 
 
 
+# combine the two plots:
+library(ggpubr)
 
 
+figure1 <- ggarrange(P_browser, P_system,
+                         ncol = 1, nrow = 2) #widths = c(1.8, 1))
+
+figure2 <- ggarrange(P_resolution, figure1,
+                     ncol = 2, nrow = 1)
+
+ggsave(filename = 'Prolific/Plots/computer_setup.png',
+       plot = figure2, height = 8, width = 4,units = 'in')
