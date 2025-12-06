@@ -13,3 +13,5 @@ table(sub$Sex)
 
 # Ethnicity:
 table(sub$`Ethnicity simplified`)/ nrow(sub)*100
+
+
