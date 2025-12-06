@@ -230,6 +230,24 @@ eye_data<- eye_data %>%
 (1- nrow(eye_data)/n_full)*100 - perc_blinks
 
 
+## calculate effective sampling rate:
+hz= eye_data %>%
+  filter(!is.na(time_diff))%>%
+  mutate(valid_diffs= time_diff/1000)%>%
+  mutate(hz= 1/valid_diffs)
+
+# subject level sampling rate:
+sub<- hz%>%
+  group_by(subject)%>%
+  summarise(M= mean(hz), 
+            SD= sd(hz))
+
+mean(sub$M)
+sd(sub$M)
+range(sub$M)
+
+
+
 #### Parse samples into saccades:
 library(saccades)
 

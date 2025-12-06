@@ -146,7 +146,7 @@ ggsave(plot = P1_cor, filename = 'LAB/Plots/correlations.pdf', width = 10,
 
 load('LAB-SPAIN/Plots/correlations.Rda')
 
-P1<- P1+ ggtitle('Experiment 3')+theme(plot.title = element_text(hjust = 0.5))
+P1<- P1+ ggtitle('Experiment 2')+theme(plot.title = element_text(hjust = 0.5))
 P1_cor<- P1_cor+ ggtitle('Experiment 1')+theme(plot.title = element_text(hjust = 0.5))
 
 # combine the two plots:
@@ -346,7 +346,7 @@ figure_e1 <- ggarrange(text_grob("Experiment 1", size = 30),
                        figure_e1,
                                ncol = 1, heights = c(0.1, 1))
 
-figure_e3 <- ggarrange(text_grob("Experiment 3", size = 30),
+figure_e3 <- ggarrange(text_grob("Experiment 2", size = 30),
                        figure_e3,
                        ncol = 1, heights = c(0.1, 1))
 
@@ -363,8 +363,6 @@ ggsave(filename = 'LAB/Plots/BA_combined.pdf', plot = figure_f,
 
 
 # Subject-level accuracy --------------------------------------------------
-
-
 webcam$diff_x<- (webcam$x-webcam$el_x)*0.0187
 
 webcam$diff_y<- (webcam$y- webcam$el_y)*0.0192
@@ -391,6 +389,7 @@ P_density_E1=sub %>%
   geom_rug(aes(color = Dimension), sides = "b", alpha = 0.6) +
   facet_wrap(~Dimension)+
   theme_minimal(18)+
+  xlim(-10, 10)+
   theme(
     panel.spacing = unit(2, "lines") # increase spacing between facets
   )+ geom_vline(xintercept = 0,linetype = 2)+
@@ -542,7 +541,6 @@ ggsave(filename = 'LAB/Plots/error_magnitude.png', plot = figure3,
 
 ggsave(filename = 'LAB/Plots/error_magnitude.pdf', plot = figure3,
        width = 16, height = 14, units = 'in', device = cairo_pdf)
-
 
 
 
