@@ -417,25 +417,10 @@ library(readr)
 library(dplyr)
 library(tidyr)
 library(data.table)
-library(lme4)
 library(lmerTest)
 library(ggplot2)
 library(emmeans)
-library(ggpubr)
-
-# # --- 1. Load the dataset ---
-# df <- read_csv("webcam_data.csv")
-# 
-# # --- 2. Create trial index per participant ---
-# df <- df %>%
-#   group_by(sub, Task_Name, Trial_Nr, Trial_Id) %>%  # 加 Trial_Id
-#   summarise(dummy = 1, .groups = "drop") %>%
-#   group_by(sub) %>%
-#   mutate(Trial = row_number()) %>%
-#   select(-dummy) %>%
-#   right_join(df, by = c("sub", "Task_Name", "Trial_Nr", "Trial_Id")) %>%  # join 时也加 Trial_Id
-#   arrange(sub, Trial_Id, Trial_Nr)
-
+library(patchwork)
 
 # --- 1. Define 9 screen sections (3x3 grid, numbered 1-9 left to right, top to bottom) ---
 df <- webcam %>%
@@ -458,72 +443,138 @@ df <- webcam %>%
   )
 
 
-# --- 2. Compute mean x/y error per section ---
-# Pixel error and visual angle error (°) are both calculated
+# --- 5. Compute signed x/y error per section ---
 section_xy <- df %>%
   drop_na(x, y, el_x, el_y, Section) %>%
   mutate(
-    x_error_px = (x - el_x),         # Horizontal error in px
-    y_error_px = (y - el_y),         # Vertical error in px
-    x_error    = x_error_px * 0.0187,  # Horizontal error in visual degrees
-    y_error    = y_error_px * 0.0192   # Vertical error in visual degrees
+    x_error_px = x - el_x,
+    y_error_px = el_y - y,
+    x_error_deg = x_error_px * 0.0187,
+    y_error_deg = y_error_px * 0.0192
   ) %>%
   group_by(Section) %>%
   summarise(
-    mean_x_px = mean(x_error_px, na.rm = TRUE),
-    mean_y_px = mean(y_error_px, na.rm = TRUE),
-    mean_x    = mean(x_error, na.rm = TRUE),
-    mean_y    = mean(y_error, na.rm = TRUE),
-    se_x      = sd(x_error, na.rm = TRUE) / sqrt(n()),
-    se_y      = sd(y_error, na.rm = TRUE) / sqrt(n()),
-    mag       = sqrt(mean_x^2 + mean_y^2),  # Magnitude of error vector (°)
+    mean_x_px  = mean(x_error_px, na.rm = TRUE),
+    mean_y_px  = mean(y_error_px, na.rm = TRUE),
+    mean_x_deg = mean(x_error_deg, na.rm = TRUE),
+    mean_y_deg = mean(y_error_deg, na.rm = TRUE),
     .groups = "drop"
   )
 
-# --- 3. Map sections to grid coordinates (col=1:3, row=3:1) ---
+# --- 6. Map sections to grid coordinates ---
 grid_xy <- section_xy %>%
   mutate(
-    Section = as.integer(as.character(Section)),
-    col = ((Section - 1) %% 3) + 1,         # 1=Left, 2=Center, 3=Right
-    row = 3 - ((Section - 1) %/% 3)         # 3=Top, 2=Middle, 1=Bottom
+    Section = as.integer(Section),
+    col = ((Section - 1) %% 3) + 1,
+    row = 3 - ((Section - 1) %/% 3)
   )
 
-# --- 7. Scale arrow length based on maximum magnitude ---
-max_mag <- max(grid_xy$mag, na.rm = TRUE)
-arrow_scale <- ifelse(max_mag > 0, 0.35 / max_mag, 0.35)
-
-grid_xy <- grid_xy %>%
+# --- 7. Build separate plotting data for X and Y ---
+plot_x <- grid_xy %>%
   mutate(
-    xend = col + arrow_scale * mean_x,
-    yend = row - arrow_scale * mean_y
+    abs_error_deg = abs(mean_x_deg),
+    signed_error_deg = mean_x_deg,
+    signed_error_px  = mean_x_px,
+    label = sprintf("%+.1f px\n(%+.2f°)", signed_error_px, signed_error_deg)
   )
 
-# --- 8. Plot heatmap + arrows + labels ---
-Pscreen_E3<- ggplot(grid_xy, aes(x = col, y = row)) +
-  geom_tile(aes(fill = mag), color = "white") +
-  
-  geom_segment(aes(xend = xend, yend = yend),
-               arrow = arrow(length = unit(0.12, "cm")),
-               linewidth = 1.2) +
-  
-  geom_text(aes(label = sprintf("x: %.1fpx (%.2f°)\ny: %.1fpx (%.2f°)",
-                                mean_x_px, mean_x, mean_y_px, mean_y),
-                y = row + 0.35),
-            lineheight = 0.95, size = 5) +
-  
-  scale_fill_gradient(low = "white", high = "steelblue") +
-  scale_x_continuous(breaks = 1:3, labels = c("Left","Center","Right"), expand = c(0,0)) +
-  scale_y_continuous(breaks = 1:3, labels = c("Bottom","Middle","Top"), expand = c(0,0)) +
-  
-  coord_fixed(ratio = 1080/1920) +
-  labs(x = NULL, y = NULL, fill = "Magnitude (°)",
-       #title = "b) Mean directional error per screen section- Experiment 3",
-       title = "b) Experiment 2",
-       subtitle = "Arrows = direction of error; tile colour = combined error magnitude (°) across x and y;\n labels = mean x/y error (°)") +
-  theme_minimal(18) +
-  theme(panel.grid = element_blank(),
-        plot.title.position = "plot",
-        plot.title = element_text(hjust = 0.5))
+plot_y <- grid_xy %>%
+  mutate(
+    abs_error_deg = abs(mean_y_deg),
+    signed_error_deg = mean_y_deg,
+    signed_error_px  = mean_y_px,
+    label = sprintf("%+.1f px\n(%+.2f°)", signed_error_px, signed_error_deg)
+  )
+
+# Optional: use the same fill range across panels for direct comparison
+# global_max_abs <- max(
+#   c(plot_x$abs_error_deg, plot_y$abs_error_deg),
+#   na.rm = TRUE
+# )
+
+# use same limits as Exp1:
+global_max_abs<-  6.583217
+
+# --- 8. Create X plot (white -> blue) ---
+p_x <- ggplot(plot_x, aes(x = col, y = row, fill = abs_error_deg)) +
+  geom_tile(color = "white", linewidth = 0.9) +
+  geom_text(aes(label = label), size = 4.3, lineheight = 0.95) +
+  scale_fill_gradient(
+    low = "white",
+    high = "steelblue",
+    limits = c(0, global_max_abs),
+    name = "|X error| (°)"
+  ) +
+  scale_x_continuous(
+    breaks = 1:3,
+    labels = c("Left", "Center", "Right"),
+    expand = c(0, 0)
+  ) +
+  scale_y_continuous(
+    breaks = 1:3,
+    labels = c("Bottom", "Middle", "Top"),
+    expand = c(0, 0)
+  ) +
+  coord_fixed(ratio = 1080 / 1920) +
+  labs(
+    x = NULL,
+    y = NULL,
+    title = "X error"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    panel.grid = element_blank(),
+    plot.title.position = "plot",
+    legend.title = element_text(size = 11),
+    legend.text = element_text(size = 10),
+    plot.title = element_text(hjust = 0.5)
+  )
+
+# --- 9. Create Y plot (white -> red) ---
+p_y <- ggplot(plot_y, aes(x = col, y = row, fill = abs_error_deg)) +
+  geom_tile(color = "white", linewidth = 0.9) +
+  geom_text(aes(label = label), size = 4.3, lineheight = 0.95) +
+  scale_fill_gradient(
+    low = "white",
+    high = "firebrick",
+    limits = c(0, global_max_abs),
+    name = "|Y error| (°)"
+  ) +
+  scale_x_continuous(
+    breaks = 1:3,
+    labels = c("Left", "Center", "Right"),
+    expand = c(0, 0)
+  ) +
+  scale_y_continuous(
+    breaks = 1:3,
+    labels = c("Bottom", "Middle", "Top"),
+    expand = c(0, 0)
+  ) +
+  coord_fixed(ratio = 1080 / 1920) +
+  labs(
+    x = NULL,
+    y = NULL,
+    title = "Y error"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    panel.grid = element_blank(),
+    plot.title.position = "plot",
+    legend.title = element_text(size = 11),
+    legend.text = element_text(size = 10),
+    plot.title = element_text(hjust = 0.5)
+  )
+
+# --- 10. Combine plots ---
+Pscreen_E3 <- p_x + p_y +
+  plot_annotation(
+    title = "b) Experiment 2",
+    theme = theme(
+      plot.title = element_text(hjust = 0.5,
+                                face = "bold", size = 16)
+    )
+  )
+
 
 Pscreen_E3
 
