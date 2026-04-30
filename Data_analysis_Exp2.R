@@ -507,7 +507,7 @@ p_x <- ggplot(plot_x, aes(x = col, y = row, fill = abs_error_deg)) +
   ) +
   scale_x_continuous(
     breaks = 1:3,
-    labels = c("Left", "Center", "Right"),
+    labels = c("Left", "Centre", "Right"),
     expand = c(0, 0)
   ) +
   scale_y_continuous(
@@ -542,7 +542,7 @@ p_y <- ggplot(plot_y, aes(x = col, y = row, fill = abs_error_deg)) +
   ) +
   scale_x_continuous(
     breaks = 1:3,
-    labels = c("Left", "Center", "Right"),
+    labels = c("Left", "Centre", "Right"),
     expand = c(0, 0)
   ) +
   scale_y_continuous(
@@ -566,32 +566,32 @@ p_y <- ggplot(plot_y, aes(x = col, y = row, fill = abs_error_deg)) +
   )
 
 # --- 10. Combine plots ---
-Pscreen_E3 <- p_x + p_y +
-  plot_annotation(
-    title = "b) Experiment 2",
-    theme = theme(
-      plot.title = element_text(hjust = 0.5,
-                                face = "bold", size = 16)
-    )
-  )
+Pscreen_E3 <- p_x/ p_y #p_x + p_y +
+#  plot_annotation(
+#    title = "b) Experiment 2",
+#    theme = theme(
+#      plot.title = element_text(hjust = 0.5,
+#                                face = "bold", size = 16)
+#    )
+#  )
 
 
 Pscreen_E3
 
 save(Pscreen_E3, file= 'LAB-SPAIN/Plots/screen_error.Rda')
 
-figure2 <- ggarrange(P_density_E3, Pscreen_E3,
-                    ncol = 1, nrow = 2)
-
-ggsave(filename = 'LAB-SPAIN/Plots/error_magnitude.png', plot = figure2,
-       width = 12, height = 14, units = 'in')
-
-ggsave(filename = 'LAB-SPAIN/Plots/error_magnitude.pdf', plot = figure2,
-       width = 12, height = 14, units = 'in', device = cairo_pdf)
-
-
-save(figure2, file = 'LAB-SPAIN/Plots/error_magnitude.Rda')
-
+# figure2 <- ggarrange(P_density_E3, Pscreen_E3,
+#                     ncol = 1, nrow = 2)
+# 
+# ggsave(filename = 'LAB-SPAIN/Plots/error_magnitude.png', plot = figure2,
+#        width = 12, height = 14, units = 'in')
+# 
+# ggsave(filename = 'LAB-SPAIN/Plots/error_magnitude.pdf', plot = figure2,
+#        width = 12, height = 14, units = 'in', device = cairo_pdf)
+# 
+# 
+# save(figure2, file = 'LAB-SPAIN/Plots/error_magnitude.Rda')
+# 
 
 # Target word lexical frequency analysis ----------------------------------
 

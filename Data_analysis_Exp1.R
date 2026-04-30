@@ -430,6 +430,9 @@ library(lmerTest)
 library(ggplot2)
 library(emmeans)
 library(patchwork)
+library(magick)
+library(ggplotify)
+library(ggpubr)
 
 # --- 1. Define 9 screen sections (3x3 grid, numbered 1-9 left to right, top to bottom) ---
 df <- webcam %>%
@@ -515,7 +518,7 @@ p_x <- ggplot(plot_x, aes(x = col, y = row, fill = abs_error_deg)) +
   ) +
   scale_x_continuous(
     breaks = 1:3,
-    labels = c("Left", "Center", "Right"),
+    labels = c("Left", "Centre", "Right"),
     expand = c(0, 0)
   ) +
   scale_y_continuous(
@@ -550,7 +553,7 @@ p_y <- ggplot(plot_y, aes(x = col, y = row, fill = abs_error_deg)) +
   ) +
   scale_x_continuous(
     breaks = 1:3,
-    labels = c("Left", "Center", "Right"),
+    labels = c("Left", "Centre", "Right"),
     expand = c(0, 0)
   ) +
   scale_y_continuous(
@@ -574,32 +577,62 @@ p_y <- ggplot(plot_y, aes(x = col, y = row, fill = abs_error_deg)) +
   )
 
 # --- 10. Combine plots ---
-Pscreen_E1 <- p_x + p_y +
-  plot_annotation(
-    title = "a) Experiment 1",
-    theme = theme(
-      plot.title = element_text(hjust = 0.5,
-                                face = "bold", size = 16)
-    )
-  )
+Pscreen_E1 <- p_x/ p_y #+
+  # plot_annotation(
+  #   title = "a) Experiment 1",
+  #   theme = theme(
+  #     plot.title = element_text(hjust = 0.5,
+  #                               face = "bold", size = 16)
+  #   )
+  # )
 
 
 
 
 load('LAB-SPAIN/Plots/screen_error.Rda')
 
-library(ggpubr)
-figure3 <- ggarrange(Pscreen_E1, Pscreen_E3,
-                    ncol = 1, nrow = 2)
+# library(ggpubr)
+# figure3 <- ggarrange(Pscreen_E1, Pscreen_E3,
+#                     ncol = 1, nrow = 2)
+
+# Read Exp1 PDF schematic
+schematic1 <- image_read_pdf("LAB/monitor_schematic_version2.pdf",
+                             pages = 2, density = 600)|>
+  image_trim()
+s1<- as.ggplot(schematic1)+ggtitle("a) Experiment 1")+
+  theme(
+    plot.title = element_text(hjust = 0.5,
+                              face = "bold", size = 16)
+  )
+
+E1<- s1+ Pscreen_E1 +
+  plot_layout(ncol = 1, heights = c(0.75, 1.5))
+
+
+# Read Exp2 PDF schematic
+schematic2<- image_read_pdf("LAB/monitor_schematic_version2.pdf",
+                             pages = 1, density = 600)|>
+  image_trim()
+s2<- as.ggplot(schematic2)+ggtitle("b) Experiment 2")+
+  theme(
+    plot.title = element_text(hjust = 0.5,
+                              face = "bold", size = 16)
+  )
+
+E2<- s2+ Pscreen_E3 +
+  plot_layout(ncol = 1, heights = c(0.75, 1.5))
+
+figure3 <- (E1 | E2) #&
+#  theme(plot.margin = margin(10, 10, 10, 10))
 
 # figure3 <- Pscreen_E1 / Pscreen_E3 &
 #   theme(plot.margin = margin(10, 10, 10, 10))
 
 ggsave(filename = 'LAB/Plots/error_magnitude.png', plot = figure3,
-       width = 12, height = 8, units = 'in')
+       width = 12, height = 9, units = 'in')
 
 ggsave(filename = 'LAB/Plots/error_magnitude.pdf', plot = figure3,
-       width = 12, height = 8, units = 'in', device = cairo_pdf)
+       width = 12, height = 9, units = 'in', device = cairo_pdf)
 
 
 
@@ -673,6 +706,12 @@ for(i in 1:length(nsubs)){
   parsed_el<- rbind(parsed_el, ke.result)
   
 }
+
+## save raw fixations (before pre-processing) for visualisation:
+
+write.csv(x = parsed_el, file = 'LAB/data/preproc/EK_eyelink_freq.csv')
+write.csv(x = parsed_web, file = 'LAB/data/preproc/EK_webcam_freq.csv')
+
 
 ## re-map text coordinates to fixation data:
 
@@ -1467,6 +1506,13 @@ for(i in 1:length(nsubs)){
   parsed_c_el<- rbind(parsed_c_el, ke.result)
   
 }
+
+# save raw fixations for visualisation:
+write.csv(x = parsed_c_el, 
+          file = 'LAB/data/preproc/EK_eyelink_corpus.csv')
+
+write.csv(x = parsed_c_web, 
+          file = 'LAB/data/preproc/EK_webcam_corpus.csv')
 
 
 ## re-map text coordinates to fixation data:
