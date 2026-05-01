@@ -448,7 +448,7 @@ section_xy <- df %>%
   drop_na(x, y, el_x, el_y, Section) %>%
   mutate(
     x_error_px = x - el_x,
-    y_error_px = el_y - y,
+    y_error_px = y- el_y,
     x_error_deg = x_error_px * 0.0187,
     y_error_deg = y_error_px * 0.0192
   ) %>%
@@ -493,18 +493,20 @@ plot_y <- grid_xy %>%
 # )
 
 # use same limits as Exp1:
-global_max_abs<-  6.583217
+global_max_abs<-  c(-3.05, 6.583217)
 
 # --- 8. Create X plot (white -> blue) ---
-p_x <- ggplot(plot_x, aes(x = col, y = row, fill = abs_error_deg)) +
+p_x <- ggplot(plot_x, aes(x = col, y = row, fill = mean_x_deg)) +
   geom_tile(color = "white", linewidth = 0.9) +
   geom_text(aes(label = label), size = 4.3, lineheight = 0.95) +
-  scale_fill_gradient(
-    low = "white",
-    high = "steelblue",
-    limits = c(0, global_max_abs),
-    name = "|X error| (°)"
-  ) +
+  scale_fill_gradient2(
+    low = "firebrick",     # negative values
+    mid = "white",         # zero
+    high = "steelblue",    # positive values
+    midpoint = 0,
+    limits = global_max_abs,
+    name = "X error (°)"
+  )+
   scale_x_continuous(
     breaks = 1:3,
     labels = c("Left", "Centre", "Right"),
@@ -519,7 +521,7 @@ p_x <- ggplot(plot_x, aes(x = col, y = row, fill = abs_error_deg)) +
   labs(
     x = NULL,
     y = NULL,
-    title = "X error"
+    title = "X error (Webcam - Eyelink)"
   ) +
   theme_minimal(base_size = 13) +
   theme(
@@ -531,15 +533,17 @@ p_x <- ggplot(plot_x, aes(x = col, y = row, fill = abs_error_deg)) +
   )
 
 # --- 9. Create Y plot (white -> red) ---
-p_y <- ggplot(plot_y, aes(x = col, y = row, fill = abs_error_deg)) +
+p_y <- ggplot(plot_y, aes(x = col, y = row, fill = mean_y_deg)) +
   geom_tile(color = "white", linewidth = 0.9) +
   geom_text(aes(label = label), size = 4.3, lineheight = 0.95) +
-  scale_fill_gradient(
-    low = "white",
-    high = "firebrick",
-    limits = c(0, global_max_abs),
-    name = "|Y error| (°)"
-  ) +
+  scale_fill_gradient2(
+    low = "firebrick",     # negative values
+    mid = "white",         # zero
+    high = "steelblue",    # positive values
+    midpoint = 0,
+    limits = global_max_abs,
+    name = "Y error (°)"
+  )+
   scale_x_continuous(
     breaks = 1:3,
     labels = c("Left", "Centre", "Right"),
@@ -554,7 +558,7 @@ p_y <- ggplot(plot_y, aes(x = col, y = row, fill = abs_error_deg)) +
   labs(
     x = NULL,
     y = NULL,
-    title = "Y error"
+    title = "Y error (Webcam - Eyelink)"
   ) +
   theme_minimal(base_size = 13) +
   theme(
