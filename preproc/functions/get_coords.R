@@ -1,5 +1,5 @@
 
-get_coords<- function(string, revert= F, SL= F){
+get_coords<- function(sent, revert= F, SL= F){
   
   if(revert==T){
     x_offset<- 120
@@ -16,7 +16,7 @@ get_coords<- function(string, revert= F, SL= F){
   }
 
   
-  lines<- unlist(strsplit(string, '@'))
+  lines<- unlist(strsplit(sent, '@'))
   
   coords<- NULL
   
@@ -106,10 +106,18 @@ get_coords<- function(string, revert= F, SL= F){
     
     empty_spaces<- c(which(t$char== ' '), nrow(t))
     
+    
     for(j in 1:length(empty_spaces)){
       if(j==1){
-        t[1:(empty_spaces[j]-1), 'wordID']<- paste(t[1:(empty_spaces[j]-1), 'char'], collapse = '')
-        t[1:(empty_spaces[j]-1), 'char_num']<- 1:(empty_spaces[j]-1)
+        
+        if(length(which(t$char== ' '))==0){
+          t[1:(empty_spaces[j]), 'wordID']<- paste(t[1:(empty_spaces[j]), 'char'], collapse = '')
+          t[1:(empty_spaces[j]), 'char_num']<- 1:(empty_spaces[j])
+        }else{
+          t[1:(empty_spaces[j]-1), 'wordID']<- paste(t[1:(empty_spaces[j]-1), 'char'], collapse = '')
+          t[1:(empty_spaces[j]-1), 'char_num']<- 1:(empty_spaces[j]-1)
+        }
+        
       }else{
         
         t[empty_spaces[j-1] : empty_spaces[j], 'wordID']<- paste(t[empty_spaces[j-1] : empty_spaces[j], 'char'], collapse='')
@@ -117,6 +125,11 @@ get_coords<- function(string, revert= F, SL= F){
         
         
       }
+    }
+    
+    if(is.na(t$char_num[nrow(t)])){
+      t$char_num[nrow(t)]<- t$char_num[nrow(t)-1]+1
+      t$wordID[nrow(t)]<- t$wordID[nrow(t)-1]
     }
     
     new_coords<- rbind(new_coords, t)

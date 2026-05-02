@@ -640,7 +640,6 @@ ggsave(filename = 'LAB/Plots/error_magnitude.pdf', plot = figure3,
        width = 12, height = 9, units = 'in', device = cairo_pdf)
 
 
-
 # Target word lexical frequency analysis ----------------------------------
 
 
@@ -791,7 +790,6 @@ for(k in 1:length(nsubs)){ # for each subject...
 
 
 # Parse trial data to compute fixation duration metrics:
-
 nsubs<- unique(web_fix$sub)
 
 dat<- NULL
@@ -946,6 +944,7 @@ dat<- dat[-out,]
 
 
 words_web<- NULL
+words<- NULL
 nsubs<- sort(unique(dat$sub))
 
 #web_fix<- web_fix %>%filter(dur>80 & dur<1000)
@@ -953,7 +952,7 @@ nsubs<- sort(unique(dat$sub))
 for(i in 1:length(nsubs)){
   a<- subset(dat, sub== nsubs[i])
   
-  nitmes<- sort(unique(a$trial))
+  nitems<- sort(unique(a$trial))
   
   for(j in 1:length(nitems)){
     b<- subset(a, trial== nitems[j])
@@ -962,6 +961,52 @@ for(i in 1:length(nsubs)){
     
     if(length(nwords)==0){
       next
+    }
+    
+    # get fixated words
+    fixated_words<- unique(b$word_num)
+    fixated_words<- fixated_words[which(!is.na(fixated_words))]
+    
+    ## find non-fixated words in the sentence:
+    freq<- ifelse(b$Freq[1]== 'low', 'LF', 'HF')
+    sent<- Corpus_fq$line_breaks[which(Corpus_fq$Study_ID== b$trial[1] & Corpus_fq$`Frequency type`== freq)[1]]
+    words <- unlist(strsplit(gsub("@", " ", sent), "\\s+"))
+    words[fixated_words]<- NA
+    
+    if(length(which(!is.na(words)))==0){
+      # all words were fixated, skip non-fixated loop:
+      words<- NULL
+    }else{
+      
+      # set-up data frame for non-fixated words:
+      words<- as.data.frame(words)
+      colnames(words)<- 'wordID'
+      words$word_num<- 1:nrow(words)
+      words$sub<- b$sub[1]
+      words$item<- b$trial[1]
+      words$Freq<- b$Freq[1]
+      words<- words[,c(3, 4, 5, 2, 1)]
+      words<- words%>% drop_na # remove fixated words
+      
+      # find target word and add to data frame:
+      target<- Corpus_fq$`Target (N)`[which(Corpus_fq$Study_ID== b$trial[1] & Corpus_fq$`Frequency type`== freq)[1]]
+      
+      is_target<- which(words$wordID==target)
+      words$target<- "No"
+      
+      if(length(is_target)>0){
+        words$target[is_target]<- 'Yes'
+      }
+      
+      # Add dependent measures to data frame:
+      words$FFD<- NA
+      words$SFD<- NA
+      words$GD<- NA
+      words$TVT<- NA
+      words$nfixAll<- 0
+      words$nfix1<- 0
+      words$nfix2<- 0
+      
     }
     
     for(k in 1:length(nwords)){
@@ -991,12 +1036,24 @@ for(i in 1:length(nsubs)){
       t<- data.frame('sub'= b$sub[1], 'item'= b$trial[1], 'Freq'= b$Freq[1],
                      'word_num'= nwords[k], 'wordID'= c$wordID[1],
                      'target'= c$target_word[1], 'FFD'= FFD,
-                     'SFD'= SFD, 'GD'= GD, 'TVT'= TVT)
+                     'SFD'= SFD, 'GD'= GD, 'TVT'= TVT,
+                     nfixAll= nrow(c), nfix1= nrow(p1),
+                     nfix2= nrow(p2))
       
       
-      words_web<- rbind(words_web, t)
+      words<- rbind(words, t)
       
-    }
+    }# end of loop with fixated words
+    
+    words <- words[order(words$word_num), ]
+    words$skip_first_pass<- ifelse(words$nfix1==0, 1, 0)
+    words$skip_total<- ifelse(words$nfixAll==0, 1, 0)
+    
+    
+    # save data for this trial:
+    words_web<- rbind(words_web, words)
+    
+    
   }
   
   
@@ -1016,7 +1073,8 @@ words_web_t %>%  group_by(Freq)%>%
   summarise(FFD= mean(FFD, na.rm=T),
             SFD= mean(SFD, na.rm=T),
             GD= mean(GD, na.rm=T),
-            TVT= mean(TVT, na.rm=T))
+            TVT= mean(TVT, na.rm=T),
+            skip= mean(skip_first_pass, na.rm=T))
 
 words_web_t %>%
        group_by(Freq) %>%
@@ -1254,7 +1312,7 @@ nsubs<- sort(unique(el_fix$sub))
 for(i in 1:length(nsubs)){
   a<- subset(dat, sub== nsubs[i])
   
-  nitmes<- sort(unique(a$trial))
+  nitems<- sort(unique(a$trial))
   
   for(j in 1:length(nitems)){
     b<- subset(a, trial== nitems[j])
@@ -1263,6 +1321,52 @@ for(i in 1:length(nsubs)){
     
     if(length(nwords)==0){
       next
+    }
+    
+    # get fixated words
+    fixated_words<- unique(b$word_num)
+    fixated_words<- fixated_words[which(!is.na(fixated_words))]
+    
+    ## find non-fixated words in the sentence:
+    freq<- ifelse(b$Freq[1]== 'low', 'LF', 'HF')
+    sent<- Corpus_fq$line_breaks[which(Corpus_fq$Study_ID== b$trial[1] & Corpus_fq$`Frequency type`== freq)[1]]
+    words <- unlist(strsplit(gsub("@", " ", sent), "\\s+"))
+    words[fixated_words]<- NA
+    
+    if(length(which(!is.na(words)))==0){
+      # all words were fixated, skip non-fixated loop:
+      words<- NULL
+    }else{
+      
+      # set-up data frame for non-fixated words:
+      words<- as.data.frame(words)
+      colnames(words)<- 'wordID'
+      words$word_num<- 1:nrow(words)
+      words$sub<- b$sub[1]
+      words$item<- b$trial[1]
+      words$Freq<- b$Freq[1]
+      words<- words[,c(3, 4, 5, 2, 1)]
+      words<- words%>% drop_na # remove fixated words
+      
+      # find target word and add to data frame:
+      target<- Corpus_fq$`Target (N)`[which(Corpus_fq$Study_ID== b$trial[1] & Corpus_fq$`Frequency type`== freq)[1]]
+      
+      is_target<- which(words$wordID==target)
+      words$target<- "No"
+      
+      if(length(is_target)>0){
+        words$target[is_target]<- 'Yes'
+      }
+      
+      # Add dependent measures to data frame:
+      words$FFD<- NA
+      words$SFD<- NA
+      words$GD<- NA
+      words$TVT<- NA
+      words$nfixAll<- 0
+      words$nfix1<- 0
+      words$nfix2<- 0
+      
     }
     
     for(k in 1:length(nwords)){
@@ -1292,13 +1396,26 @@ for(i in 1:length(nsubs)){
       t<- data.frame('sub'= b$sub[1], 'item'= b$trial[1], 'Freq'= b$Freq[1],
                      'word_num'= nwords[k], 'wordID'= c$wordID[1],
                      'target'= c$target_word[1], 'FFD'= FFD,
-                     'SFD'= SFD, 'GD'= GD, 'TVT'= TVT)
+                     'SFD'= SFD, 'GD'= GD, 'TVT'= TVT,
+                     nfixAll= nrow(c), nfix1= nrow(p1),
+                     nfix2= nrow(p2))
       
       
-      words_el<- rbind(words_el, t)
+      words<- rbind(words, t)
       
-    }
+    }# end of loop with fixated words
+    
+    words <- words[order(words$word_num), ]
+    words$skip_first_pass<- ifelse(words$nfix1==0, 1, 0)
+    words$skip_total<- ifelse(words$nfixAll==0, 1, 0)
+    
+    
+    # save data for this trial:
+    words_el<- rbind(words_el, words)
+    
+    
   }
+  
   
   
 }
@@ -1316,14 +1433,16 @@ words_el_t %>%  group_by(Freq)%>%
   summarise(FFD= mean(FFD, na.rm=T),
             SFD= mean(SFD, na.rm=T),
             GD= mean(GD, na.rm=T),
-            TVT= mean(TVT, na.rm=T))
+            TVT= mean(TVT, na.rm=T),
+            skip= mean(skip_first_pass, na.rm=T))
 
 words_el_t %>%
   group_by(Freq) %>%
   summarise(FFD_sd = sd(FFD, na.rm = TRUE),
             SFD_sd = sd(SFD, na.rm = TRUE),
             GD_sd = sd(GD, na.rm = TRUE),
-            TVT_sd = sd(TVT, na.rm = TRUE))
+            TVT_sd = sd(TVT, na.rm = TRUE),
+            skip_sd= mean(skip_first_pass, na.rm=T))
 
 
 # combine two target word data frames:
