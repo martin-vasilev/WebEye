@@ -1,5 +1,5 @@
 
-# Martin R. Vasilev, 2025
+# Martin R. Vasilev, 2025-2026
 
 rm(list= ls())
 
@@ -712,7 +712,6 @@ for(i in 1:length(nsubs)){
 }
 
 ## save raw fixations (before pre-processing) for visualisation:
-
 write.csv(x = parsed_el, file = 'LAB/data/preproc/EK_eyelink_freq.csv')
 write.csv(x = parsed_web, file = 'LAB/data/preproc/EK_webcam_freq.csv')
 
@@ -852,7 +851,6 @@ for(i in 1:length(nsubs)){
   
 
 ### merge adjacent fixations under 80 ms that are next to each other (1 char)
-
 dat_new<- NULL
 
 nsubs<- unique(dat$sub)
@@ -1081,7 +1079,8 @@ words_web_t %>%
        summarise(FFD_sd = sd(FFD, na.rm = TRUE),
                  SFD_sd = sd(SFD, na.rm = TRUE),
                  GD_sd = sd(GD, na.rm = TRUE),
-                 TVT_sd = sd(TVT, na.rm = TRUE))
+                 TVT_sd = sd(TVT, na.rm = TRUE),
+                 Skip_sd= sd(skip_first_pass, na.rm=TRUE))
 
 #summary(M2<- lmer(log(GD) ~ Freq +(Freq|sub) +(Freq|item), data= words_web_t))
 
@@ -1465,7 +1464,7 @@ corpus_freq<- Frequency(corpus_freq)
 corpus_freq$word_length<- nchar(corpus_freq$wordID)
 
 colnames(corpus_freq)
-corpus_freq<- corpus_freq[,c(1:10,13,14,15,11,12)]
+#corpus_freq<- corpus_freq[,c(1:10,13,14,15,11,12)]
 
 all<- which(corpus_freq$FFD>1000|corpus_freq$SFD>1000 | corpus_freq$GD>2000 | corpus_freq$TVT> 3000)
 
@@ -1475,110 +1474,110 @@ corpus_freq<- corpus_freq[-all,]
 
 
 
-# generate descriptive statistics:
-library(gtsummary)
-library(dplyr)
-
-words_dat %>%
-  mutate(Freq_tracker = interaction(Freq,Tracker)) %>%   # combine into one
-  select(Freq_tracker, FFD, SFD, GD, TVT) %>%
-  tbl_summary(by = Freq_tracker,
-              statistic = list(all_continuous() ~ "{mean} ({sd})"))
-
-
-# fit lmer models:
-words_dat$Tracker<- as.factor(words_dat$Tracker)
-contrasts(words_dat$Tracker)<- c(-1, 1)
-
-words_dat$Freq<- as.factor(words_dat$Freq)
-contrasts(words_dat$Freq)<- c(-1, 1)
-
-library(lmerTest)
-
-## Models:
-
-summary(M1<- lmerTest::lmer(log(FFD)~ Freq*Tracker +(Tracker|sub)+(Freq+Tracker|item), data= words_dat))
-
-summary(M2<- lmerTest::lmer(log(SFD)~ Freq*Tracker +(Freq+Tracker|sub)+(Freq+Tracker|item), data= words_dat))
-
-summary(M3<- lmerTest::lmer(log(GD)~ Freq*Tracker +(Freq+Tracker|sub)+(Freq|item), data= words_dat))
-
-summary(M4<- lmerTest::lmer(log(TVT)~ Freq*Tracker +(Freq|sub)+(Freq|item), data= words_dat))
-
-
-library(sjPlot)
-
-tab_model(M1,M2, show.stat = T,show.se = T,file="LAB/TW_models1.html", digits = 3,
-          digits.p = 3, digits.rsq = 3, digits.re = 3, show.est = T,
-          transform = NULL, string.est = "Estimate", show.ci = F)
-
-tab_model(M3,M4, show.stat = T,show.se = T,file="LAB/TW_models2.html", digits = 3,
-          digits.p = 3, digits.rsq = 3, digits.re = 3, show.est = T,
-          transform = NULL, string.est = "Estimate", show.ci = F)
-
-## emeans post-hoc tests:
-library(emmeans)
-# FFD
-PH1= pairs(emmeans(M1, ~ Freq | Tracker), adjust = "holm")
-PH1
-
-#SFD
-PH2= pairs(emmeans(M2, ~ Freq | Tracker), adjust = "holm")
-PH2
-
-#GD
-PH3= pairs(emmeans(M3, ~ Freq | Tracker), adjust = "holm")
-PH3
-
-# TVT
-PH4= pairs(emmeans(M4, ~ Freq | Tracker), adjust = "holm")
-PH4
-
-library(ggeffects)
-library(ggplot2)
-library(dplyr)
-
-# Step 1: Create a list of models
-models <- list(M1 = M1, M2 = M2, M3 = M3, M4 = M4)
-
-# Step 2: Generate predicted values for Tracker × Freq interaction
-pred_list <- lapply(names(models), function(name) {
-  pred <- ggpredict(models[[name]], terms = c("Tracker", "Freq"))
-  pred$model <- name  # add model name for faceting
-  pred
-})
-
-# Step 3: Combine predictions into one data frame
-pred_all <- bind_rows(pred_list)
-pred_all$model[which(pred_all$model=="M1")]<- "FFD"
-pred_all$model[which(pred_all$model=="M2")]<- "SFD"
-pred_all$model[which(pred_all$model=="M3")]<- "GD"
-pred_all$model[which(pred_all$model=="M4")]<- "TVT"
-
-
-
-M_plot<- pred_all %>% ggplot(aes(x= group, y= predicted, color= x, fill= x, group= x))+
-  geom_line(size = 1) +
-  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.2, color = NA) +
-  scale_color_manual(values=pallete1[1:2])+
-  scale_fill_manual(values=pallete1[1:2])+
-  facet_wrap(~model, ncol = 2,scales = "free_y" )+
-  labs(x = "Frequency",
-       y = "Predicted duration (log ms)",
-       color = "Tracker",
-       fill = "Tracker")+
-  theme_classic(18)+
-  theme(
-    legend.position = "bottom",
-    strip.text = element_text(face = "bold", size = 12),
-    strip.background = element_blank() 
-  )
-
-ggsave(filename = 'LAB/Plots/Model_interaction.pdf', plot = M_plot,
-       width = 8, height = 7)
-ggsave(filename = 'LAB/Plots/Model_interaction.png', plot = M_plot,
-       width = 8, height = 7)
-
+# # generate descriptive statistics:
+# library(gtsummary)
+# library(dplyr)
+# 
+# words_dat %>%
+#   mutate(Freq_tracker = interaction(Freq,Tracker)) %>%   # combine into one
+#   select(Freq_tracker, FFD, SFD, GD, TVT) %>%
+#   tbl_summary(by = Freq_tracker,
+#               statistic = list(all_continuous() ~ "{mean} ({sd})"))
+# 
+# 
+# # fit lmer models:
+# words_dat$Tracker<- as.factor(words_dat$Tracker)
+# contrasts(words_dat$Tracker)<- c(-1, 1)
+# 
+# words_dat$Freq<- as.factor(words_dat$Freq)
+# contrasts(words_dat$Freq)<- c(-1, 1)
+# 
+# library(lmerTest)
+# 
+# ## Models:
+# 
+# summary(M1<- lmerTest::lmer(log(FFD)~ Freq*Tracker +(Tracker|sub)+(Freq+Tracker|item), data= words_dat))
+# 
+# summary(M2<- lmerTest::lmer(log(SFD)~ Freq*Tracker +(Freq+Tracker|sub)+(Freq+Tracker|item), data= words_dat))
+# 
+# summary(M3<- lmerTest::lmer(log(GD)~ Freq*Tracker +(Freq+Tracker|sub)+(Freq|item), data= words_dat))
+# 
+# summary(M4<- lmerTest::lmer(log(TVT)~ Freq*Tracker +(Freq|sub)+(Freq|item), data= words_dat))
+# 
+# 
+# library(sjPlot)
+# 
+# tab_model(M1,M2, show.stat = T,show.se = T,file="LAB/TW_models1.html", digits = 3,
+#           digits.p = 3, digits.rsq = 3, digits.re = 3, show.est = T,
+#           transform = NULL, string.est = "Estimate", show.ci = F)
+# 
+# tab_model(M3,M4, show.stat = T,show.se = T,file="LAB/TW_models2.html", digits = 3,
+#           digits.p = 3, digits.rsq = 3, digits.re = 3, show.est = T,
+#           transform = NULL, string.est = "Estimate", show.ci = F)
+# 
+# ## emeans post-hoc tests:
+# library(emmeans)
+# # FFD
+# PH1= pairs(emmeans(M1, ~ Freq | Tracker), adjust = "holm")
+# PH1
+# 
+# #SFD
+# PH2= pairs(emmeans(M2, ~ Freq | Tracker), adjust = "holm")
+# PH2
+# 
+# #GD
+# PH3= pairs(emmeans(M3, ~ Freq | Tracker), adjust = "holm")
+# PH3
+# 
+# # TVT
+# PH4= pairs(emmeans(M4, ~ Freq | Tracker), adjust = "holm")
+# PH4
+# 
+# library(ggeffects)
+# library(ggplot2)
+# library(dplyr)
+# 
+# # Step 1: Create a list of models
+# models <- list(M1 = M1, M2 = M2, M3 = M3, M4 = M4)
+# 
+# # Step 2: Generate predicted values for Tracker × Freq interaction
+# pred_list <- lapply(names(models), function(name) {
+#   pred <- ggpredict(models[[name]], terms = c("Tracker", "Freq"))
+#   pred$model <- name  # add model name for faceting
+#   pred
+# })
+# 
+# # Step 3: Combine predictions into one data frame
+# pred_all <- bind_rows(pred_list)
+# pred_all$model[which(pred_all$model=="M1")]<- "FFD"
+# pred_all$model[which(pred_all$model=="M2")]<- "SFD"
+# pred_all$model[which(pred_all$model=="M3")]<- "GD"
+# pred_all$model[which(pred_all$model=="M4")]<- "TVT"
+# 
+# 
+# 
+# M_plot<- pred_all %>% ggplot(aes(x= group, y= predicted, color= x, fill= x, group= x))+
+#   geom_line(size = 1) +
+#   geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.2, color = NA) +
+#   scale_color_manual(values=pallete1[1:2])+
+#   scale_fill_manual(values=pallete1[1:2])+
+#   facet_wrap(~model, ncol = 2,scales = "free_y" )+
+#   labs(x = "Frequency",
+#        y = "Predicted duration (log ms)",
+#        color = "Tracker",
+#        fill = "Tracker")+
+#   theme_classic(18)+
+#   theme(
+#     legend.position = "bottom",
+#     strip.text = element_text(face = "bold", size = 12),
+#     strip.background = element_blank() 
+#   )
+# 
+# ggsave(filename = 'LAB/Plots/Model_interaction.pdf', plot = M_plot,
+#        width = 8, height = 7)
+# ggsave(filename = 'LAB/Plots/Model_interaction.png', plot = M_plot,
+#        width = 8, height = 7)
+# 
 
 
 # Corpus frequency- Single sentences --------------------------------------
@@ -1866,8 +1865,7 @@ nsubs<- sort(unique(dat_c$sub))
 
 for(i in 1:length(nsubs)){
   a<- subset(dat_c, sub== nsubs[i])
-  
-  nitmes<- sort(unique(a$trial))
+  nitems<- sort(unique(a$trial))
   
   for(j in 1:length(nitems)){
     b<- subset(a, trial== nitems[j])
@@ -1876,6 +1874,52 @@ for(i in 1:length(nsubs)){
     
     if(length(nwords)==0){
       next
+    }
+    
+    # get fixated words
+    fixated_words<- unique(b$word_num)
+    fixated_words<- fixated_words[which(!is.na(fixated_words))]
+    
+    ## find non-fixated words in the sentence:
+    freq<- ifelse(b$Freq[1]== 'low', 'LF', 'HF')
+    sent<- Corpus_sent$Sentence[which(Corpus_sent$Study_ID== b$trial[1])[1]]
+    words <- unlist(strsplit(gsub("@", " ", sent), "\\s+"))
+    words[fixated_words]<- NA
+    
+    if(length(which(!is.na(words)))==0){
+      # all words were fixated, skip non-fixated loop:
+      words<- NULL
+    }else{
+      
+      # set-up data frame for non-fixated words:
+      words<- as.data.frame(words)
+      colnames(words)<- 'wordID'
+      words$word_num<- 1:nrow(words)
+      words$sub<- b$sub[1]
+      words$item<- b$trial[1]
+     # words$Freq<- b$Freq[1]
+      words<- words[,c(3, 4, 2, 1)]
+      words<- words%>% drop_na # remove fixated words
+      
+      # # find target word and add to data frame:
+      # target<- Corpus_fq$`Target (N)`[which(Corpus_fq$Study_ID== b$trial[1] & Corpus_fq$`Frequency type`== freq)[1]]
+      # 
+      # is_target<- which(words$wordID==target)
+      # words$target<- "No"
+      # 
+      # if(length(is_target)>0){
+      #   words$target[is_target]<- 'Yes'
+      # }
+      
+      # Add dependent measures to data frame:
+      words$FFD<- NA
+       words$SFD<- NA
+      words$GD<- NA
+      words$TVT<- NA
+      words$nfixAll<- 0
+      words$nfix1<- 0
+      words$nfix2<- 0
+      
     }
     
     for(k in 1:length(nwords)){
@@ -1903,13 +1947,25 @@ for(i in 1:length(nsubs)){
       }
       
       t<- data.frame('sub'= b$sub[1], 'item'= b$trial[1],
-                     'word_num'= nwords[k], 'wordID'= c$wordID[1], 'FFD'= FFD,
-                     'SFD'= SFD, 'GD'= GD, 'TVT'= TVT)
+                     'word_num'= nwords[k], 'wordID'= c$wordID[1],
+                      'FFD'= FFD, 'SFD'= SFD, 'GD'= GD, 'TVT'= TVT,
+                     nfixAll= nrow(c), nfix1= nrow(p1),
+                     nfix2= nrow(p2))
       
       
-      words_c_web<- rbind(words_c_web, t)
+      words<- rbind(words, t)
       
-    }
+    }# end of loop with fixated words
+    
+    words <- words[order(words$word_num), ]
+    words$skip_first_pass<- ifelse(words$nfix1==0, 1, 0)
+    words$skip_total<- ifelse(words$nfixAll==0, 1, 0)
+    
+    
+    # save data for this trial:
+    words_c_web<- rbind(words_c_web, words)
+    
+    
   }
   
   
@@ -1930,9 +1986,9 @@ words_c_web<- words_c_web[-outall,]
 
 
 
-summary(M5<- lmer(log(SFD) ~ scale(zipf)*scale(word_length) +(1|sub) +(1|item), 
-                  data= words_c_web))
-
+# summary(M5<- lmer(log(SFD) ~ scale(zipf)*scale(word_length) +(1|sub) +(1|item), 
+#                   data= words_c_web))
+# 
 
 ######### Eyelink data:
 
@@ -2154,8 +2210,7 @@ nsubs<- sort(unique(dat$sub))
 
 for(i in 1:length(nsubs)){
   a<- subset(dat, sub== nsubs[i])
-  
-  nitmes<- sort(unique(a$trial))
+  nitems<- sort(unique(a$trial))
   
   for(j in 1:length(nitems)){
     b<- subset(a, trial== nitems[j])
@@ -2164,6 +2219,52 @@ for(i in 1:length(nsubs)){
     
     if(length(nwords)==0){
       next
+    }
+    
+    # get fixated words
+    fixated_words<- unique(b$word_num)
+    fixated_words<- fixated_words[which(!is.na(fixated_words))]
+    
+    ## find non-fixated words in the sentence:
+    freq<- ifelse(b$Freq[1]== 'low', 'LF', 'HF')
+    sent<- Corpus_sent$Sentence[which(Corpus_sent$Study_ID== b$trial[1])[1]]
+    words <- unlist(strsplit(gsub("@", " ", sent), "\\s+"))
+    words[fixated_words]<- NA
+    
+    if(length(which(!is.na(words)))==0){
+      # all words were fixated, skip non-fixated loop:
+      words<- NULL
+    }else{
+      
+      # set-up data frame for non-fixated words:
+      words<- as.data.frame(words)
+      colnames(words)<- 'wordID'
+      words$word_num<- 1:nrow(words)
+      words$sub<- b$sub[1]
+      words$item<- b$trial[1]
+      # words$Freq<- b$Freq[1]
+      words<- words[,c(3, 4, 2, 1)]
+      words<- words%>% drop_na # remove fixated words
+      
+      # # find target word and add to data frame:
+      # target<- Corpus_fq$`Target (N)`[which(Corpus_fq$Study_ID== b$trial[1] & Corpus_fq$`Frequency type`== freq)[1]]
+      # 
+      # is_target<- which(words$wordID==target)
+      # words$target<- "No"
+      # 
+      # if(length(is_target)>0){
+      #   words$target[is_target]<- 'Yes'
+      # }
+      
+      # Add dependent measures to data frame:
+      words$FFD<- NA
+      words$SFD<- NA
+      words$GD<- NA
+      words$TVT<- NA
+      words$nfixAll<- 0
+      words$nfix1<- 0
+      words$nfix2<- 0
+      
     }
     
     for(k in 1:length(nwords)){
@@ -2192,18 +2293,28 @@ for(i in 1:length(nsubs)){
       
       t<- data.frame('sub'= b$sub[1], 'item'= b$trial[1],
                      'word_num'= nwords[k], 'wordID'= c$wordID[1],
-                     'FFD'= FFD,
-                     'SFD'= SFD, 'GD'= GD, 'TVT'= TVT)
+                     'FFD'= FFD, 'SFD'= SFD, 'GD'= GD, 'TVT'= TVT,
+                     nfixAll= nrow(c), nfix1= nrow(p1),
+                     nfix2= nrow(p2))
       
       
-      words_c_el<- rbind(words_c_el, t)
+      words<- rbind(words, t)
       
-    }
+    }# end of loop with fixated words
+    
+    words <- words[order(words$word_num), ]
+    words$skip_first_pass<- ifelse(words$nfix1==0, 1, 0)
+    words$skip_total<- ifelse(words$nfixAll==0, 1, 0)
+    
+    
+    # save data for this trial:
+    words_c_el<- rbind(words_c_el, words)
+    
+    
   }
   
   
 }
-
 
 words_c_el<- Frequency(words_c_el)
 words_c_el$word_length<- nchar(words_c_el$wordID)
@@ -2229,6 +2340,16 @@ words_corpus$item<- words_corpus$item+100
 
 corpus_freq$target<- NULL
 corpus_freq$Freq<- NULL
+
+corpus_freq<- Frequency(corpus_freq)
+corpus_freq$word_length<- nchar(corpus_freq$wordID)
+
+corpus_freq<- corpus_freq[,c("sub","item", "word_num",       
+              "wordID", "FFD", "SFD", "GD", "TVT", "nfixAll",        
+              "nfix1", "nfix2", "skip_first_pass",
+              "skip_total", "freq", "zipf",           
+              "word_length", "Tracker", "corpus")]
+
 
 corpus_final<- rbind(corpus_freq, words_corpus)
 
