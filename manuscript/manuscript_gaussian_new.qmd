@@ -332,6 +332,8 @@ blmm_corpus_FFD_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_cor
 blmm_corpus_SFD_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_corpus_SFD_exp1_gaussian.qs"))
 blmm_corpus_GD_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_corpus_GD_exp1_gaussian.qs"))
 blmm_corpus_TVT_exp1_gaussian <- qs_read(here("LAB", "models", "brms", "blmm_corpus_TVT_exp1_gaussian.qs"))
+blmm_corpus_skip_exp1 <- qs_read(here("LAB", "models", "brms", "blmm_corpus_skip_exp1.qs"))
+
 
 # emtrends for frequency slopes by tracker (Zipf slope within device)
 marginal_effects_exp1_corpus_FFD <- emtrends(blmm_corpus_FFD_exp1_gaussian, "Tracker", "zipf") %>% gather_emmeans_draws() %>% mean_qi(.width = .95)
@@ -339,10 +341,15 @@ marginal_effects_exp1_corpus_GD <- emtrends(blmm_corpus_GD_exp1_gaussian, "Track
 marginal_effects_exp1_corpus_SFD <- emtrends(blmm_corpus_SFD_exp1_gaussian, "Tracker", "zipf") %>% gather_emmeans_draws() %>% mean_qi(.width = .95)
 marginal_effects_exp1_corpus_TVT <- emtrends(blmm_corpus_TVT_exp1_gaussian, "Tracker", "zipf") %>% gather_emmeans_draws() %>% mean_qi(.width = .95)
 
+marginal_effects_exp1_corpus_skip <- emtrends(blmm_corpus_skip_exp1, "Tracker", "zipf") %>% gather_emmeans_draws() %>% mean_qi(.width = .95)
+
+
 marginal_effects_string_exp1_corpus_FFD <- format_contrast_string(marginal_effects_exp1_corpus_FFD)
 marginal_effects_string_exp1_corpus_GD <- format_contrast_string(marginal_effects_exp1_corpus_GD)
 marginal_effects_string_exp1_corpus_SFD <- format_contrast_string(marginal_effects_exp1_corpus_SFD)
 marginal_effects_string_exp1_corpus_TVT <- format_contrast_string(marginal_effects_exp1_corpus_TVT)
+
+marginal_effects_string_exp1_corpus_skip <- format_contrast_string(marginal_effects_exp1_corpus_skip)
 ```
 
 ```{r}
@@ -352,7 +359,7 @@ marginal_effects_string_exp1_corpus_TVT <- format_contrast_string(marginal_effec
 #| warning: false
 #| cache: true
 #| after-caption-space: 0pt
-#| tbl-cap: "Coefficient estimates and 95% credible intervals (in square brackets) from Bayesian linear mixed models fitted to first fixation duration (FFD), single fixation duration (SFD), gaze duration (GD), and total viewing time (TVT) on all words (except for the first and last in each sentence) in Experiment 1."
+#| tbl-cap: "Coefficient estimates and 95% credible intervals (in square brackets) from Bayesian linear mixed models fitted to first fixation duration (FFD), single fixation duration (SFD), gaze duration (GD),  total viewing time (TVT), skipping probability on all words (except for the first and last in each sentence) in Experiment 1."
 
 coef_map_corpus <- c("b_Intercept" = "Intercept",
               "b_ctrzipf" = "Zipf frequency",
@@ -362,16 +369,17 @@ coef_map_corpus <- c("b_Intercept" = "Intercept",
 est_string <- "{ifelse(conf.low * conf.high > 0, '**', '')}{sprintf('%.3f', estimate)}{ifelse(conf.low * conf.high > 0, '**', '')}"
 stat_string <- "[{ifelse(conf.low * conf.high > 0, '**', '')}{sprintf('%.3f', conf.low)}, {sprintf('%.3f', conf.high)}{ifelse(conf.low * conf.high > 0, '**', '')}]"
 
-modelsummary(models = list(FFD = blmm_corpus_FFD_exp1_gaussian, SFD = blmm_corpus_SFD_exp1_gaussian, GD = blmm_corpus_GD_exp1_gaussian, TVT = blmm_corpus_TVT_exp1_gaussian),
+modelsummary(models = list(FFD = blmm_corpus_FFD_exp1_gaussian, SFD = blmm_corpus_SFD_exp1_gaussian, GD = blmm_corpus_GD_exp1_gaussian, TVT = blmm_corpus_TVT_exp1_gaussian,
+                           Skip = blmm_corpus_skip_exp1),
              estimate = est_string,
              fmt = NULL,
              statistic = stat_string,
              coef_map = coef_map_corpus,
              gof_map = NA,
-             output = "gt") |>  gt::fmt_markdown(columns = c("FFD", "SFD", "GD", "TVT"))
+             output = "gt") |>  gt::fmt_markdown(columns = c("FFD", "SFD", "GD", "TVT", "Skip"))
 ```
 
-As expected we observed a frequency effect in that a higher Zipf frequency (i.e., more frequent words) was associated with shorter fixation times across all measures (FFD: `r brms_effect_summary(blmm_corpus_FFD_exp1_gaussian, "ctrzipf")`; SFD: `r brms_effect_summary(blmm_corpus_SFD_exp1_gaussian, "ctrzipf")`; GD: `r brms_effect_summary(blmm_corpus_GD_exp1_gaussian, "ctrzipf")`; TVT: `r brms_effect_summary(blmm_corpus_TVT_exp1_gaussian, "ctrzipf")`). We again observed longer mean fixation times with the Webcam than with the Eyelink (FFD: `r brms_effect_summary(blmm_corpus_FFD_exp1_gaussian, "Tracker1")`; SFD: `r brms_effect_summary(blmm_corpus_SFD_exp1_gaussian, "Tracker1")`; GD: `r brms_effect_summary(blmm_corpus_GD_exp1_gaussian, "Tracker1")`; TVT: `r brms_effect_summary(blmm_corpus_TVT_exp1_gaussian, "Tracker1")`). There were small, but credible Frequency × Tracker interactions in FFD (`r brms_effect_summary(blmm_corpus_FFD_exp1_gaussian, "ctrzipf:Tracker1")`), SFD (`r brms_effect_summary(blmm_corpus_SFD_exp1_gaussian, "ctrzipf:Tracker1")`), GD (`r brms_effect_summary(blmm_corpus_GD_exp1_gaussian, "ctrzipf:Tracker1")`), and TVT (`r brms_effect_summary(blmm_corpus_TVT_exp1_gaussian, "ctrzipf:Tracker1")`), indicating that the frequency effect was stronger in the Eyelink data compared to the Webcam data. In order to show the marginal effect of zipf frequency within each device directly, we summarized the slope of the zipf effect using `emtrends` from the `emmeans` package. We found consistent evidence for the frequency effect in all measures for both the Eyelink and the Webcam (FFD: `r marginal_effects_string_exp1_corpus_FFD`, SFD: `r marginal_effects_string_exp1_corpus_SFD`, GD: `r marginal_effects_string_exp1_corpus_GD`, TVT: `r marginal_effects_string_exp1_corpus_TVT`).
+As expected we observed a frequency effect in that a higher Zipf frequency (i.e., more frequent words) was associated with shorter fixation times and higher skipping probability across all measures (FFD: `r brms_effect_summary(blmm_corpus_FFD_exp1_gaussian, "ctrzipf")`; SFD: `r brms_effect_summary(blmm_corpus_SFD_exp1_gaussian, "ctrzipf")`; GD: `r brms_effect_summary(blmm_corpus_GD_exp1_gaussian, "ctrzipf")`; TVT: `r brms_effect_summary(blmm_corpus_TVT_exp1_gaussian, "ctrzipf")`; Skipping: `r brms_effect_summary(blmm_corpus_skip_exp1, "ctrzipf")`). We again observed longer mean fixation times and higher skipping probability with the Webcam than with the Eyelink (FFD: `r brms_effect_summary(blmm_corpus_FFD_exp1_gaussian, "Tracker1")`; SFD: `r brms_effect_summary(blmm_corpus_SFD_exp1_gaussian, "Tracker1")`; GD: `r brms_effect_summary(blmm_corpus_GD_exp1_gaussian, "Tracker1")`; TVT: `r brms_effect_summary(blmm_corpus_TVT_exp1_gaussian, "Tracker1")`; Skipping: `r brms_effect_summary(blmm_corpus_skip_exp1, "Tracker1")`). There were small, but credible Frequency × Tracker interactions in FFD (`r brms_effect_summary(blmm_corpus_FFD_exp1_gaussian, "ctrzipf:Tracker1")`), SFD (`r brms_effect_summary(blmm_corpus_SFD_exp1_gaussian, "ctrzipf:Tracker1")`), GD (`r brms_effect_summary(blmm_corpus_GD_exp1_gaussian, "ctrzipf:Tracker1")`), TVT (`r brms_effect_summary(blmm_corpus_TVT_exp1_gaussian, "ctrzipf:Tracker1")`), and Skipping (`r brms_effect_summary(blmm_corpus_skip_exp1, "ctrzipf:Tracker1")`) indicating that the frequency effect was stronger in the Eyelink data compared to the Webcam data. In order to show the marginal effect of zipf frequency within each device directly, we summarized the slope of the zipf effect using `emtrends` from the `emmeans` package. We found consistent evidence for the frequency effect in all measures for both the Eyelink and the Webcam (FFD: `r marginal_effects_string_exp1_corpus_FFD`, SFD: `r marginal_effects_string_exp1_corpus_SFD`, GD: `r marginal_effects_string_exp1_corpus_GD`, TVT: `r marginal_effects_string_exp1_corpus_TVT`, and Skipping: `r marginal_effects_string_exp1_corpus_skip`).
 Overall, this demonstrates that, when there is sufficient data, the frequency effect can be detected even in the noisier Webcam data.
 
 ## Experiment 2
