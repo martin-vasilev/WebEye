@@ -45,29 +45,9 @@ lmm_target_words_FFD <- lmer(FFD ~ Freq * Tracker + (Tracker  | sub) + (Freq | i
                          data = target_words_exp2)
 
 summary(lmm_target_words_FFD)
+
+## FFD:
 # brms
-
-blmm_target_FFD_exp2_exgaussian <-
-  brm(
-    data = target_words_exp2,
-    formula = bf(
-      FFD ~ Freq * Tracker  + (Freq * Tracker | sub) + (Freq * Tracker | item),
-      beta ~ Freq * Tracker  + (Freq * Tracker | sub) + (Freq * Tracker | item)),
-    warmup = 1000,
-    iter = 5000,
-    chains = 4,
-    prior = priors_beta,
-    sample_prior = "yes",
-    family = exgaussian(),
-    init = "0",
-    control = list(adapt_delta = 0.8),#, max_treedepth = 15),
-    cores = 4,
-    backend = "cmdstanr",
-    threads = threading(2),
-    silent = 0
-  )
-
-qs_save(blmm_target_FFD_exp2_exgaussian, "LAB-SPAIN/models/brms/blmm_target_FFD_exp2_exgaussian.qs")
 
 blmm_target_FFD_exp2_gaussian <-
   brm(
@@ -91,29 +71,6 @@ blmm_target_FFD_exp2_gaussian <-
 qs_save(blmm_target_FFD_exp2_gaussian, "LAB-SPAIN/models/brms/blmm_target_FFD_exp2_gaussian.qs")
 
 ## GD
-
-blmm_target_GD_exp2_exgaussian <-
-  brm(
-    data = target_words_exp2,
-    formula = bf(
-      GD ~ Freq * Tracker  + (Freq * Tracker | sub) + (Freq * Tracker | item),
-      beta ~ Freq * Tracker  + (Freq * Tracker | sub) + (Freq * Tracker | item)),
-    warmup = 1000,
-    iter = 5000,
-    chains = 4,
-    prior = priors_beta,
-    sample_prior = "yes",
-    family = exgaussian(),
-    init = "0",
-    control = list(adapt_delta = 0.8),#, max_treedepth = 15),
-    cores = 4,
-    backend = "cmdstanr",
-    threads = threading(2),
-    silent = 0
-  )
-
-qs_save(blmm_target_GD_exp2_exgaussian, "LAB-SPAIN/models/brms/blmm_target_GD_exp2_exgaussian.qs")
-
 blmm_target_GD_exp2_gaussian <-
   brm(
     data = target_words_exp2,
@@ -135,27 +92,6 @@ blmm_target_GD_exp2_gaussian <-
 
 qs_save(blmm_target_GD_exp2_gaussian, "LAB-SPAIN/models/brms/blmm_target_GD_exp2_gaussian.qs")
 
-blmm_target_SFD_exp2_exgaussian <-
-  brm(
-    data = target_words_exp2,
-    formula = bf(
-      SFD ~ Freq * Tracker  + (Freq * Tracker | sub) + (Freq * Tracker | item),
-      beta ~ Freq * Tracker  + (Freq * Tracker | sub) + (Freq * Tracker | item)),
-    warmup = 1000,
-    iter = 5000,
-    chains = 4,
-    prior = priors_beta,
-    sample_prior = "yes",
-    family = exgaussian(),
-    init = "0",
-    control = list(adapt_delta = 0.8),#, max_treedepth = 15),
-    cores = 4,
-    backend = "cmdstanr",
-    threads = threading(2),
-    silent = 0
-  )
-
-qs_save(blmm_target_SFD_exp2_exgaussian, "LAB-SPAIN/models/brms/blmm_target_SFD_exp2_exgaussian.qs")
 
 blmm_target_SFD_exp2_gaussian <-
   brm(
@@ -178,27 +114,6 @@ blmm_target_SFD_exp2_gaussian <-
 
 qs_save(blmm_target_SFD_exp2_gaussian, "LAB-SPAIN/models/brms/blmm_target_SFD_exp2_gaussian.qs")
 
-blmm_target_TVT_exp2_exgaussian <-
-  brm(
-    data = target_words_exp2,
-    formula = bf(
-      TVT ~ Freq * Tracker  + (Freq * Tracker | sub) + (Freq * Tracker | item),
-      beta ~ Freq * Tracker  + (Freq * Tracker | sub) + (Freq * Tracker | item)),
-    warmup = 1000,
-    iter = 5000,
-    chains = 4,
-    prior = priors_beta,
-    sample_prior = "yes",
-    family = exgaussian(),
-    init = "0",
-    control = list(adapt_delta = 0.8),#, max_treedepth = 15),
-    cores = 4,
-    backend = "cmdstanr",
-    threads = threading(2),
-    silent = 0
-  )
-
-qs_save(blmm_target_TVT_exp2_exgaussian, "LAB-SPAIN/models/brms/blmm_target_TVT_exp2_exgaussian.qs")
 
 blmm_target_TVT_exp2_gaussian <-
   brm(
@@ -220,6 +135,31 @@ blmm_target_TVT_exp2_gaussian <-
   )
 
 qs_save(blmm_target_TVT_exp2_gaussian, "LAB-SPAIN/models/brms/blmm_target_TVT_exp2_gaussian.qs")
+
+
+blmm_target_skip_exp2 <-
+  brm(
+    data = target_words_exp2,
+    formula = bf(
+      skip_first_pass ~ Freq * Tracker  + (Freq * Tracker | sub) + (Freq * Tracker | item)),
+    warmup = 1000,
+    iter = 5000,
+    chains = 4,
+    prior = priors_gaussian,
+    sample_prior = "yes",
+    family = bernoulli(),
+    #init = "0",
+    control = list(adapt_delta = 0.8),#, max_treedepth = 15),
+    cores = 4,
+    backend = "cmdstanr",
+    threads = threading(2),
+    silent = 0
+  )
+
+qs_save(blmm_target_skip_exp2, "LAB-SPAIN/models/brms/blmm_target_skip_exp2.qs")
+
+
+
 
 # Load all qs models in folder
 #model_files <- list.files("LAB-SPAIN/models/brms/", pattern = "*.qs", full.names = TRUE)
@@ -628,3 +568,27 @@ blmm_corpus_TVT_exp2_gaussian_len <-
 
 qs_save(blmm_corpus_TVT_exp2_gaussian_len, "LAB-SPAIN/models/brms/blmm_corpus_TVT_exp2_gaussian_len.qs")
 
+
+####### Report results for paper:
+
+target_words_exp2_means_table <- target_words_exp2 %>%
+  #filter(FFD > 80 & FFD < 1500) %>%
+  group_by(Tracker, Freq) %>%
+  summarise(
+    mean_FFD = mean(FFD, na.rm = TRUE),
+    sd_FFD = sd(FFD, na.rm = TRUE),
+    mean_SFD = mean(SFD, na.rm = TRUE),
+    sd_SFD = sd(SFD, na.rm = TRUE),
+    mean_GD = mean(GD, na.rm = TRUE),
+    sd_GD = sd(GD, na.rm = TRUE),
+    mean_TVT = mean(TVT, na.rm = TRUE),
+    sd_TVT = sd(TVT, na.rm = TRUE),
+    mean_skip= mean(skip_first_pass, na.rm=T),
+    sd_skip= sd(skip_first_pass, na.rm=T)
+    #N = n() # N here is the number of correct trials within the RT filter
+  ) %>%
+  ungroup()
+
+
+target_words_exp2_means_table[,3:10]<- round(target_words_exp2_means_table[,3:10])
+target_words_exp2_means_table[,11:12]<- round(target_words_exp2_means_table[,11:12],2)

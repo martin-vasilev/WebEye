@@ -216,6 +216,34 @@ blmm_target_TVT_exp3_gaussian <-
 qs_save(blmm_target_TVT_exp3_gaussian, "Prolific/models/brms/blmm_target_TVT_exp3_gaussian.qs")
 
 
+
+
+## Skipping:
+blmm_target_skip_exp3 <-
+  brm(
+    data = target_words_exp3,
+    formula = bf(
+      skip_first_pass ~ Freq + (Freq | sub) + (Freq | item)),
+    warmup = 1000,
+    iter = 5000,
+    chains = 4,
+    prior = priors_gaussian,
+    sample_prior = "yes",
+    family = bernoulli(),
+    #init = "0",
+    control = list(adapt_delta = 0.8),#, max_treedepth = 15),
+    cores = 4,
+    backend = "cmdstanr",
+    threads = threading(2),
+    silent = 0
+  )
+
+summary(blmm_target_skip_exp3)
+
+qs_save(blmm_target_skip_exp3, "Prolific/models/brms/blmm_target_skip_exp3.qs")
+
+
+
 ## corpus analysis
 
 # add column indicating which word (from column word_num) is the final word in the sentence (contains a ".")
@@ -233,34 +261,8 @@ lmm_corpus_words_FFD <- lmer(FFD ~ ctr(zipf) + (zipf | sub) + (1 | word_code),
                              data = corpus_words_exp3 %>% dplyr::filter(position != "first" & position != "last")) #& FFD > 80 & FFD < 800))
 summary(lmm_corpus_words_FFD)
 
-
-# brms model for FFD
-# 
-# blmm_corpus_FFD_exp3_exgaussian <-
-#   brm(
-#     # exclu
-#     data = corpus_words_exp3 %>% filter(position != "first" & position != "last"),
-#     formula = bf(
-#       FFD ~ ctr(zipf) * Tracker  + (ctr(zipf) * Tracker | sub) + (Tracker | item),
-#       beta ~ ctr(zipf) * Tracker  + (ctr(zipf) * Tracker | sub) + (Tracker | item)),
-#     warmup = 1000,
-#     iter = 5000,
-#     chains = 4,
-#     prior = priors_beta,
-#     sample_prior = "yes",
-#     family = exgaussian(),
-#     init = "0",
-#     control = list(adapt_delta = 0.8),#, max_treedepth = 15),
-#     cores = 4,
-#     backend = "cmdstanr",
-#     threads = threading(2),
-#     silent = 0
-#   )
-# 
-# qs_save(blmm_corpus_FFD_exp3_exgaussian, "Prolific/models/brms/blmm_corpus_FFD_exp3_exgaussian.qs")
-
-# gaussian brms
-
+# FFD:
+# gaussian
 blmm_corpus_FFD_exp3_gaussian <- 
   brm(
     data = corpus_words_exp3 %>% filter(position != "first" & position != "last"),
@@ -282,31 +284,6 @@ blmm_corpus_FFD_exp3_gaussian <-
 qs_save(blmm_corpus_FFD_exp3_gaussian, "Prolific/models/brms/blmm_corpus_FFD_exp3_gaussian.qs") 
 
 # GD
-# 
-# blmm_corpus_GD_exp3_exgaussian <-
-#   brm(
-#     data = corpus_words_exp3,
-#     formula = bf(
-#       GD ~ ctr(zipf) * Tracker  + (ctr(zipf) * Tracker | sub) + (1 | item),
-#       beta ~ ctr(zipf) * Tracker  + (ctr(zipf) * Tracker | sub) + (1 | item)),
-#     warmup = 1000,
-#     iter = 5000,
-#     chains = 4,
-#     prior = priors_beta,
-#     sample_prior = "yes",
-#     family = exgaussian(),
-#     init = "0",
-#     control = list(adapt_delta = 0.8),#, max_treedepth = 15),
-#     cores = 4,
-#     backend = "cmdstanr",
-#     threads = threading(2),
-#     silent = 0
-#   )
-# 
-# 
-# 
-# qs_save(blmm_corpus_GD_exp3_exgaussian, "Prolific/models/brms/blmm_corpus_GD_exp3_exgaussian.qs")
-
 # gaussian
 
 blmm_corpus_GD_exp3_gaussian <- 
@@ -330,32 +307,7 @@ blmm_corpus_GD_exp3_gaussian <-
 
 qs_save(blmm_corpus_GD_exp3_gaussian, "Prolific/models/brms/blmm_corpus_GD_exp3_gaussian.qs")
 
-# SFD
-# 
-# blmm_corpus_SFD_exp3_exgaussian <-
-#   brm(
-#     data = corpus_words_exp3 %>% filter(position != "first" & position != "last"),
-#     formula = bf(
-#       SFD ~ ctr(zipf) * Tracker  + (ctr(zipf) * Tracker | sub) + (1 | item),
-#       beta ~ ctr(zipf) * Tracker  + (ctr(zipf) * Tracker | sub) + (1 | item)),
-#     warmup = 1000,
-#     iter = 5000,
-#     chains = 4,
-#     prior = priors_beta,
-#     sample_prior = "yes",
-#     family = exgaussian(),
-#     init = "0",
-#     control = list(adapt_delta = 0.8),#, max_treedepth = 15),
-#     cores = 4,
-#     backend = "cmdstanr",
-#     threads = threading(2),
-#     silent = 0
-#   )
-# 
-
-
-# qs_save(blmm_corpus_SFD_exp3_exgaussian, "Prolific/models/brms/blmm_corpus_SFD_exp3_exgaussian.qs")
-
+# SFD:
 # gaussian
 
 blmm_corpus_SFD_exp3_gaussian <- 
@@ -379,30 +331,7 @@ blmm_corpus_SFD_exp3_gaussian <-
 
 qs_save(blmm_corpus_SFD_exp3_gaussian, "Prolific/models/brms/blmm_corpus_SFD_exp3_gaussian.qs")
 
-# TVT
-# 
-# blmm_corpus_TVT_exp3_exgaussian <-
-#   brm(
-#     data = corpus_words_exp3 %>% filter(position != "first" & position != "last"),
-#     formula = bf(
-#       TVT ~ ctr(zipf)  + (ctr(zipf) | sub) + (1 | item),
-#       beta ~ ctr(zipf) + (ctr(zipf) Tracker | sub) + (1 | item)),
-#     warmup = 1000,
-#     iter = 5000,
-#     chains = 4,
-#     prior = priors_beta,
-#     sample_prior = "yes",
-#     family = exgaussian(),
-#     init = "0",
-#     control = list(adapt_delta = 0.8),#, max_treedepth = 15),
-#     cores = 4,
-#     backend = "cmdstanr",
-#     threads = threading(2),
-#     silent = 0
-#   )
-# 
-# qs_save(blmm_corpus_TVT_exp3_exgaussian, "Prolific/models/brms/blmm_corpus_TVT_exp3_exgaussian.qs")
-
+# TVT:
 # gaussian
 
 blmm_corpus_TVT_exp3_gaussian <- 
@@ -425,6 +354,32 @@ blmm_corpus_TVT_exp3_gaussian <-
   )
 
 qs_save(blmm_corpus_TVT_exp3_gaussian, "Prolific/models/brms/blmm_corpus_TVT_exp3_gaussian.qs")
+
+
+# Skipping:
+blmm_corpus_skip_exp3 <- 
+  brm(
+    data = corpus_words_exp3 %>% filter(position != "first" & position != "last"),
+    formula = bf(
+      skip_first_pass ~ ctr(zipf) + (ctr(zipf)  | sub) + (1 | word_code)),
+    warmup = 1000,
+    iter = 5000,
+    chains = 4,
+    prior = priors_gaussian,
+    sample_prior = "yes",
+    family = bernoulli(),
+    #init = "0",
+    control = list(adapt_delta = 0.8),#, max_treedepth = 15),
+    cores = 4,
+    backend = "cmdstanr",
+    threads = threading(2),
+    silent = 0
+  )
+
+qs_save(blmm_corpus_skip_exp3,
+        "Prolific/models/brms/blmm_corpus_skip_exp3.qs")
+
+
 
 # # same models, but with word length (len) plus interaction with zipf and tracker
 # 
@@ -625,9 +580,15 @@ target_words_exp3_means_table <- target_words_exp3 %>%
     sd_GD = sd(GD, na.rm = TRUE),
     mean_TVT = mean(TVT, na.rm = TRUE),
     sd_TVT = sd(TVT, na.rm = TRUE),
+    mean_skip= mean(skip_first_pass, na.rm=T),
+    sd_skip= sd(skip_first_pass, na.rm=T)
     #N = n() # N here is the number of correct trials within the RT filter
   ) %>%
   ungroup()
+
+
+target_words_exp3_means_table[,2:9]<- round(target_words_exp3_means_table[,2:9])
+target_words_exp3_means_table[,10:11]<- round(target_words_exp3_means_table[,10:11],2)
 
 
 # load the model results

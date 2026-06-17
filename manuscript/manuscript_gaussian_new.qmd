@@ -434,6 +434,8 @@ blmm_target_FFD_exp2_gaussian <- qs_read(here("LAB-SPAIN", "models", "brms", "bl
 blmm_target_SFD_exp2_gaussian <- qs_read(here("LAB-SPAIN", "models", "brms", "blmm_target_SFD_exp2_gaussian.qs"))
 blmm_target_GD_exp2_gaussian <- qs_read(here("LAB-SPAIN", "models", "brms", "blmm_target_GD_exp2_gaussian.qs"))
 blmm_target_TVT_exp2_gaussian <- qs_read(here("LAB-SPAIN", "models", "brms", "blmm_target_TVT_exp2_gaussian.qs"))
+blmm_target_skip_exp2 <- qs_read(here("LAB-SPAIN", "models", "brms", "blmm_target_skip_exp2.qs"))
+
 
 # prepare effect summaries (μ component only)
 blmm_target_FFD_exp2_gaussian_mu_Freq1_effect <- brms_effect_summary(blmm_target_FFD_exp2_gaussian, "Freq1")
@@ -452,16 +454,25 @@ blmm_target_TVT_exp2_gaussian_mu_Freq1_effect <- brms_effect_summary(blmm_target
 blmm_target_TVT_exp2_gaussian_mu_Tracker1_effect <- brms_effect_summary(blmm_target_TVT_exp2_gaussian, "Tracker1")
 blmm_target_TVT_exp2_gaussian_mu_interaction_effect <- brms_effect_summary(blmm_target_TVT_exp2_gaussian, "Freq1:Tracker1")
 
+blmm_target_skip_exp2_mu_Freq1_effect <- brms_effect_summary(blmm_target_skip_exp2, "Freq1")
+blmm_target_skip_exp2_mu_Tracker1_effect <- brms_effect_summary(blmm_target_skip_exp2, "Tracker1")
+blmm_target_skip_exp2_mu_interaction_effect <- brms_effect_summary(blmm_target_skip_exp2, "Freq1:Tracker1")
+
+
+
 # estimated marginal means: low - high within each tracker
 marginal_effects_exp2_target_FFD <- emmeans(blmm_target_FFD_exp2_gaussian, ~ Freq | Tracker) %>% pairs() %>% gather_emmeans_draws() %>% mean_qi(.width = .95)
 marginal_effects_exp2_target_GD <- emmeans(blmm_target_GD_exp2_gaussian, ~ Freq | Tracker) %>% pairs() %>% gather_emmeans_draws() %>% mean_qi(.width = .95)
 marginal_effects_exp2_target_SFD <- emmeans(blmm_target_SFD_exp2_gaussian, ~ Freq | Tracker) %>% pairs() %>% gather_emmeans_draws() %>% mean_qi(.width = .95)
 marginal_effects_exp2_target_TVT <- emmeans(blmm_target_TVT_exp2_gaussian, ~ Freq | Tracker) %>% pairs() %>% gather_emmeans_draws() %>% mean_qi(.width = .95)
+marginal_effects_exp2_target_skip <- emmeans(blmm_target_skip_exp2, ~ Freq | Tracker) %>% pairs() %>% gather_emmeans_draws() %>% mean_qi(.width = .95)
+
 
 marginal_effects_string_exp2_target_FFD <- format_contrast_string(marginal_effects_exp2_target_FFD)
 marginal_effects_string_exp2_target_SFD <- format_contrast_string(marginal_effects_exp2_target_SFD)
 marginal_effects_string_exp2_target_GD <- format_contrast_string(marginal_effects_exp2_target_GD)
 marginal_effects_string_exp2_target_TVT <- format_contrast_string(marginal_effects_exp2_target_TVT)
+marginal_effects_string_exp2_target_skip <- format_contrast_string(marginal_effects_exp2_target_skip)
 ```
 
 ```{r}
@@ -483,11 +494,13 @@ target_words_exp2_means_table <- target_words_exp2 %>%
     sd_GD = sd(GD, na.rm = TRUE),
     mean_TVT = mean(TVT, na.rm = TRUE),
     sd_TVT = sd(TVT, na.rm = TRUE),
+    mean_skip = mean(skip_first_pass, na.rm = TRUE),
+    sd_skip = sd(skip_first_pass, na.rm = TRUE),
   ) %>%
   ungroup()
 
 target_words_exp2_means_table %>%
-  gt(rowname_col = "Tracker") %>%
+    gt(rowname_col = "Tracker") %>%
   cols_label(
    starts_with("mean") ~ "Mean",
    starts_with("sd") ~ "SD",
@@ -497,9 +510,21 @@ target_words_exp2_means_table %>%
   tab_spanner(label = "SFD", columns = ends_with("SFD")) %>%
   tab_spanner(label = "GD", columns = ends_with("GD")) %>%
   tab_spanner(label = "TVT", columns = ends_with("TVT")) %>%
-  fmt_number(columns = everything(), decimals = 0) %>%
+  tab_spanner(label = "Skip", columns = ends_with("skip")) %>%
+  # All non-skip columns → 0 decimals
+  fmt_number(
+    columns = -ends_with("skip"),
+    decimals = 0
+  ) %>%
+  
+  # Skip columns → 2 decimals
+  fmt_number(
+    columns = ends_with("skip"),
+    decimals = 2
+  ) %>%
   tab_stubhead(label = "Tracker") %>%
   tab_source_note(source_note = md("Note: *FFD* = first fixation duration; *SFD* = single fixation duration; *GD* = gaze duration; *TVT* = total viewing time; SD = standard deviation. All means and standard deviations are reported in milliseconds (ms)."))
+
 ```
 
 #### Target word analysis
@@ -634,6 +659,9 @@ blmm_target_SFD_exp3_gaussian <- qs_read(here("Prolific", "models", "brms", "blm
 blmm_target_GD_exp3_gaussian <- qs_read(here("Prolific", "models", "brms", "blmm_target_GD_exp3_gaussian.qs"))
 blmm_target_TVT_exp3_gaussian <- qs_read(here("Prolific", "models", "brms", "blmm_target_TVT_exp3_gaussian.qs"))
 
+blmm_target_skip_exp3 <- qs_read(here("Prolific", "models", "brms", "blmm_target_skip_exp3.qs"))
+
+
 # prepare effect summaries 
 blmm_target_FFD_exp3_gaussian_mu_Freq1_effect <- brms_effect_summary(blmm_target_FFD_exp3_gaussian, "Freq1")
 
@@ -643,6 +671,8 @@ blmm_target_GD_exp3_gaussian_mu_Freq1_effect <- brms_effect_summary(blmm_target_
 blmm_target_SFD_exp3_gaussian_mu_Freq1_effect <- brms_effect_summary(blmm_target_SFD_exp3_gaussian, "Freq1")
 
 blmm_target_TVT_exp3_gaussian_mu_Freq1_effect <- brms_effect_summary(blmm_target_TVT_exp3_gaussian, "Freq1")
+
+blmm_target_skip_exp3_mu_Freq1_effect <- brms_effect_summary(blmm_target_skip_exp3, "Freq1")
 
 
 # estimated marginal means: low - high within each tracker
@@ -681,6 +711,8 @@ target_words_exp3_means_table <- target_words_exp3 %>%
     sd_GD = sd(GD, na.rm = TRUE),
     mean_TVT = mean(TVT, na.rm = TRUE),
     sd_TVT = sd(TVT, na.rm = TRUE),
+    mean_skip = mean(skip_first_pass, na.rm = TRUE),
+    sd_skip = sd(skip_first_pass, na.rm = TRUE),
   ) %>%
   ungroup()
 
@@ -695,7 +727,18 @@ target_words_exp3_means_table %>%
   tab_spanner(label = "SFD", columns = ends_with("SFD")) %>%
   tab_spanner(label = "GD", columns = ends_with("GD")) %>%
   tab_spanner(label = "TVT", columns = ends_with("TVT")) %>%
-  fmt_number(columns = everything(), decimals = 0) %>%
+  tab_spanner(label = "Skip", columns = ends_with("skip")) %>%
+  # All non-skip columns → 0 decimals
+  fmt_number(
+    columns = -ends_with("skip"),
+    decimals = 0
+  ) %>%
+  
+  # Skip columns → 2 decimals
+  fmt_number(
+    columns = ends_with("skip"),
+    decimals = 2
+  ) %>%
   tab_stubhead(label = "Tracker") %>%
   tab_source_note(source_note = md("Note: *FFD* = first fixation duration; *SFD* = single fixation duration; *GD* = gaze duration; *TVT* = total viewing time; SD = standard deviation. All means and standard deviations are reported in milliseconds (ms)."))
 ```
@@ -720,16 +763,17 @@ coef_map <- c("b_Intercept" = "Intercept",
 est_string <- "{ifelse(conf.low * conf.high > 0, '**', '')}{sprintf('%.3f', estimate)}{ifelse(conf.low * conf.high > 0, '**', '')}"
 stat_string <- "[{ifelse(conf.low * conf.high > 0, '**', '')}{sprintf('%.3f', conf.low)}, {sprintf('%.3f', conf.high)}{ifelse(conf.low * conf.high > 0, '**', '')}]"
 
-modelsummary(models = list(FFD = blmm_target_FFD_exp3_gaussian, SFD = blmm_target_SFD_exp3_gaussian, GD = blmm_target_GD_exp3_gaussian, TVT = blmm_target_TVT_exp3_gaussian),
+modelsummary(models = list(FFD = blmm_target_FFD_exp3_gaussian, SFD = blmm_target_SFD_exp3_gaussian, GD = blmm_target_GD_exp3_gaussian, TVT = blmm_target_TVT_exp3_gaussian, Skip= 
+blmm_target_skip_exp3),
              estimate = est_string,
              fmt = NULL,
              statistic = stat_string,
              coef_map = coef_map,
              gof_map = NA,
-             output = "gt") |>  gt::fmt_markdown(columns = c("FFD", "SFD", "GD", "TVT"))
+             output = "gt") |>  gt::fmt_markdown(columns = c("FFD", "SFD", "GD", "TVT", "Skip"))
 ```
 
-In Experiment 3, low-frequency target words elicited longer fixation times than high-frequency target words in SFD (`r blmm_target_SFD_exp3_gaussian_mu_Freq1_effect`), GD (`r blmm_target_GD_exp3_gaussian_mu_Freq1_effect`), and TVT (`r blmm_target_TVT_exp3_gaussian_mu_Freq1_effect`). In FFD, the CI narrowly included 0 (`r blmm_target_FFD_exp3_gaussian_mu_Freq1_effect`). Overall, this demonstrates that, despite the much lower control we had over devices and experimental setup in the online study, reliable word frequency effects could be found.
+In Experiment 3, low-frequency target words elicited longer fixation times than high-frequency target words in FFD (`r blmm_target_FFD_exp3_gaussian_mu_Freq1_effect`), SFD (`r blmm_target_SFD_exp3_gaussian_mu_Freq1_effect`), GD (`r blmm_target_GD_exp3_gaussian_mu_Freq1_effect`), and TVT (`r blmm_target_TVT_exp3_gaussian_mu_Freq1_effect`). For Skipping probability, the CI included 0, although the effect was numerically in the expected direction (`r blmm_target_skip_exp3_mu_Freq1_effect`). Overall, this demonstrates that, despite the much lower control we had over devices and experimental setup in the online study, reliable word frequency effects could be found.
 
 #### Corpus-style analysis
 
@@ -750,6 +794,8 @@ blmm_corpus_FFD_exp3_gaussian <- qs_read(here("Prolific", "models", "brms", "blm
 blmm_corpus_SFD_exp3_gaussian <- qs_read(here("Prolific", "models", "brms", "blmm_corpus_SFD_exp3_gaussian.qs"))
 blmm_corpus_GD_exp3_gaussian <- qs_read(here("Prolific", "models", "brms", "blmm_corpus_GD_exp3_gaussian.qs"))
 blmm_corpus_TVT_exp3_gaussian <- qs_read(here("Prolific", "models", "brms", "blmm_corpus_TVT_exp3_gaussian.qs"))
+
+blmm_corpus_skip_exp3 <- qs_read(here("Prolific", "models", "brms", "blmm_corpus_skip_exp3.qs"))
 ```
 
 ```{r}
@@ -767,16 +813,17 @@ coef_map_corpus <- c("b_Intercept" = "Intercept",
 est_string <- "{ifelse(conf.low * conf.high > 0, '**', '')}{sprintf('%.3f', estimate)}{ifelse(conf.low * conf.high > 0, '**', '')}"
 stat_string <- "[{ifelse(conf.low * conf.high > 0, '**', '')}{sprintf('%.3f', conf.low)}, {sprintf('%.3f', conf.high)}{ifelse(conf.low * conf.high > 0, '**', '')}]"
 
-modelsummary(models = list(FFD = blmm_corpus_FFD_exp3_gaussian, SFD = blmm_corpus_SFD_exp3_gaussian, GD = blmm_corpus_GD_exp3_gaussian, TVT = blmm_corpus_TVT_exp3_gaussian),
+modelsummary(models = list(FFD = blmm_corpus_FFD_exp3_gaussian, SFD = blmm_corpus_SFD_exp3_gaussian, GD = blmm_corpus_GD_exp3_gaussian, TVT = blmm_corpus_TVT_exp3_gaussian,
+                           Skip= blmm_corpus_skip_exp3),
              estimate = est_string,
              fmt = NULL,
              statistic = stat_string,
              coef_map = coef_map_corpus,
              gof_map = NA,
-             output = "gt") |>  gt::fmt_markdown(columns = c("FFD", "SFD", "GD", "TVT"))
+             output = "gt") |>  gt::fmt_markdown(columns = c("FFD", "SFD", "GD", "TVT", 'Skip'))
 ```
 
-In Experiment 3, we observed a consistent effect of zipf frequency on all measures (FFD: `r brms_effect_summary(blmm_corpus_FFD_exp3_gaussian, "ctrzipf")`; SFD: `r brms_effect_summary(blmm_corpus_SFD_exp3_gaussian, "ctrzipf")`; GD: `r brms_effect_summary(blmm_corpus_GD_exp3_gaussian, "ctrzipf")`; TVT: `r brms_effect_summary(blmm_corpus_TVT_exp3_gaussian, "ctrzipf")`). This again demonstrates that, when there is a sufficiently high number of observations, the frequency effect can be detected  using online Webcam eye tracking where we do not have direct control over the experimental setup.
+In Experiment 3, we observed a consistent effect of zipf frequency on all measures (FFD: `r brms_effect_summary(blmm_corpus_FFD_exp3_gaussian, "ctrzipf")`; SFD: `r brms_effect_summary(blmm_corpus_SFD_exp3_gaussian, "ctrzipf")`; GD: `r brms_effect_summary(blmm_corpus_GD_exp3_gaussian, "ctrzipf")`; TVT: `r brms_effect_summary(blmm_corpus_TVT_exp3_gaussian, "ctrzipf")`; Skipping: `r brms_effect_summary(blmm_corpus_skip_exp3, "ctrzipf")`). This again demonstrates that, when there is a sufficiently high number of observations, the frequency effect can be detected  using online Webcam eye tracking where we do not have direct control over the experimental setup.
 
 # Discussion
 

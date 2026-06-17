@@ -302,9 +302,19 @@ blmm_corpus_skip_exp1 <-
     silent = 0
   )
 
+summary(blmm_corpus_skip_exp1)
 qs_save(blmm_corpus_skip_exp1, "LAB/models/brms/blmm_corpus_skip_exp1.qs")
 
+library(ggeffects)
 
+p <- ggpredict(
+  blmm_corpus_skip_exp1,
+  terms = c("zipf", "Tracker"),
+  type = "fixed",
+  bias_correction = TRUE
+)
+
+plot(p)
 
 # # same models, but with word length (len) plus interaction with zipf and tracker
 # 
