@@ -148,11 +148,11 @@ P1_cor<- ggplot(sub_correlations, aes(x = Dimension, y = corr,
   stat_summary(fun.data = fun_mean, geom="text", vjust=-1.15,
                hjust= 0.75, colour="black", size= 7);P1_cor
 
-ggsave(plot = P1_cor, filename = 'LAB/Plots/correlations.pdf', width = 10,
+ggsave(plot = P1_cor, filename = 'LAB/Plots/correlations_30Hz.pdf', width = 10,
        height = 8, units = 'in')
 
 
-load('LAB-SPAIN/Plots/correlations.Rda')
+load('LAB-SPAIN/Plots/correlations_30Hz.Rda')
 
 P1<- P1+ ggtitle('Experiment 2')+theme(plot.title = element_text(hjust = 0.5))
 P1_cor<- P1_cor+ ggtitle('Experiment 1')+theme(plot.title = element_text(hjust = 0.5))
@@ -162,10 +162,10 @@ library(ggpubr)
 figure_corr <- ggarrange(P1_cor, P1,
                     ncol = 2, nrow = 1, widths = c(1.8, 1))
 
-ggsave(filename = 'LAB/Plots/correlations_combined.png', plot = figure_corr,
+ggsave(filename = 'LAB/Plots/correlations_combined_30Hz.png', plot = figure_corr,
        width = 16, height = 10, units = 'in')
 
-ggsave(filename = 'LAB/Plots/correlations_combined.pdf', plot = figure_corr,
+ggsave(filename = 'LAB/Plots/correlations_combined_Hz.pdf', plot = figure_corr,
        width = 16, height = 10, units = 'in', device = cairo_pdf)
 
 

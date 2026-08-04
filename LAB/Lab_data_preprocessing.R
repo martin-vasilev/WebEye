@@ -225,7 +225,7 @@ sacc_samples$lag<- NULL
   
   ntasks<- unique(ts$Task_Name)
   
-  for(t in 1:length(ntasks)){
+  for(t in 1:length(ntasks)){ # for each task
     
     n<- subset(trials, Task_Name==ntasks[t])
     
@@ -391,8 +391,14 @@ sacc_samples$lag<- NULL
         next;
       }
       
-      trial_file_el<- dataF[which(grepl(as.character(start_time_el), dataF)):which(grepl(as.character(end_time_el), dataF))]
+      start_idx <- which(grepl(paste0("^", start_time_el, "\\b"), dataF))[1]
+      end_idx   <- tail(which(grepl(paste0("^", end_time_el, "\\b"), dataF)), 1)
       
+      if(!is.na(start_idx) && !is.na(end_idx) && end_idx > start_idx){
+        trial_file_el <- dataF[start_idx:end_idx]
+      } else {
+        next
+      }
       
       ## get all fixation stamps for extraction and processing:
       # get position of fixation stamps:
@@ -458,8 +464,8 @@ sacc_samples$lag<- NULL
       }
       
       
-      fix<- data.frame(sub= sub , item= trials$Trial_Id[j], cond= trials$Frequency[j],
-                       task= trials$Task_Name[j], s_time, e_time, fixDur, saccDur, x, y,
+      fix<- data.frame(sub= sub , item= n$Trial_Id[j], cond= n$Frequency[j],
+                       task= n$Task_Name[j], s_time, e_time, fixDur, saccDur, x, y,
                        blink_before = NA,blink_after = NA,fix_num = NA) #blink, prev_blink, after_blink)
       
       

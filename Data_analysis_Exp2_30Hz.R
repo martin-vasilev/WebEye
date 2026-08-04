@@ -183,7 +183,7 @@ P1<- ggplot(sub_correlations, aes(x = Dimension, y = corr,
 ggsave(filename = 'LAB-SPAIN/Plots/correlations.pdf', width = 10,
        height = 8, units = 'in')
 
-save(P1, file =  'LAB-SPAIN/Plots/correlations.Rda')
+save(P1, file =  'LAB-SPAIN/Plots/correlations_30Hz.Rda')
 
 # Bland-Altman plot -------------------------------------------------------
 

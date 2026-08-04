@@ -1,0 +1,101 @@
+﻿index,frecA,sentence1A,char1,sentence2A,char2,questionA,answerA,has_question,word_high,word_low
+1,low,Se podía ver que el humo,24,se había disipado.,19,¿La vista estaba más clara?,SI,1,país,humo
+2,low,Es importante usar el,21,tono de voz adecuado.,21,,,0,tipo,tono
+3,low,No me ha gustado el sofá,24,de la tienda.,14,,,0,modo,sofá
+4,low,Esta mañana el lago está,24,lleno de patos y peces.,23,,,0,hijo,lago
+5,low,No confíes en que el lujo,25,lo es todo.,12,,,0,amor,lujo
+6,low,Cuando llegue el momento,24,la nave irá muy lejos.,22,¿Seguirá el mismo camino?,NO,1,vida,nave
+7,low,Estamos preparando la,21,sopa para los invitados.,24,,,0,casa,sopa
+8,low,No se ha elegido dónde,22,hacer la caza todavía.,22,,,0,obra,caza
+9,low,Espero que la miel esté,23,lista para ser recogida.,24,,,0,zona,miel
+10,low,No puede dejar de,17,buscar fama y riqueza.,22,,,0,hora,fama
+11,low,Cuando llegamos el primo,24,nos saludó.,12,¿El primo fue de descortés?,NO,1,señor,primo
+12,low,Para recorrer el patio,22,necesitarás ayuda.,18,,,0,mundo,patio
+13,low,Cuando veas el trozo,20,que queda te sorprenderá.,25,,,0,lugar,trozo
+14,low,Quiero ir al grano y,20,tratar el asunto contigo.,25,,,0,grupo,grano
+15,low,No por tener más motor,22,irás más rápido.,16,,,0,poder,motor
+16,low,"Estando en la ciudad,",21,la magia se nota menos.,23,¿Es igual de mágico?,NO,1,mujer,magia
+17,low,Tengo ganas de que caiga,24,la nieve por fin.,18,,,0,noche,nieve
+18,low,No sé cómo terminar la,22,frase esta vez.,15,,,0,serie,frase
+19,low,Es fácil trabajar con la,24,arena de playa.,15,,,0,gente,arena
+20,low,Para la cena la plata,21,debe estar limpia.,18,¿Se están haciendo preparativos para la cena?,SI,1,madre,plata
+21,low,Tengo frío en los oídos,23,sin mis orejeras.,17,¿Tiene calor?,NO,1,meses,oídos
+22,low,Si te fijas en los,18,kilos verás que faltan.,23,,,0,datos,kilos
+23,low,Cuando se den estos,19,daños hay que reaccionar.,25,,,0,casos,daños
+24,low,Desde aquí se oyen,18,peces chapoteando.,18,¿Se escucha algo?,SI,1,pasos,peces
+25,low,Entre amigos se ven,19,otros actos de cariño.,22,,,0,tipos,actos
+26,low,Llegaremos lejos con,20,estas metas de proyecto.,25,,,0,ideas,metas
+27,low,Están preparando las,20,cajas para la mudanza.,23,¿Preparan la comida?,NO,1,leyes,cajas
+28,low,Entre todas las bolas,21,mi favorita es la azul.,23,¿La bola favorita es roja?,NO,1,islas,bolas
+29,low,Hay que preparar las,20,citas de la semana.,20,,,0,obras,citas
+30,low,He mirado bien las botas,24,antes de la ruta.,18,,,0,zonas,botas
+31,low,No tenemos el chiste,20,preparado todavía.,18,¿Lo tienen preparado?,NO,1,tiempo,chiste
+32,low,No me acuerdo del helado,24,que me pedí ayer.,18,,,0,nombre,helado
+33,low,El movimiento del hombro,24,debe ser circular.,19,,,0,hombre,hombro
+34,low,El profesor dibujó un,21,objeto en la pizarra.,21,,,0,número,objeto
+35,low,Mi padre dice que el,20,sótano no es peligroso.,24,,,0,estado,sótano
+36,low,Después del partido la,22,pelota desapareció.,19,¿Encontraron la pelota?,NO,1,ciudad,pelota
+37,low,Me duele la muñeca,18,del entrenamiento.,18,,,0,manera,muñeca
+38,low,En mi pueblo la parada,22,de autobús está lejos.,22,¿Está muy alejada?,SI,1,tierra,parada
+39,low,Esta mañana la alarma,21,no paraba de sonar.,19,,,0,cabeza,alarma
+40,low,Al final del juego la,21,cuerda quedó destrozada.,24,,,0,verdad,cuerda
+41,low,Cuantos más viajes,18,haces más aprendes.,19,,,0,puntos,viajes
+42,low,Cuantos más fondos,18,recaudemos mejor.,17,,,0,metros,platos
+43,low,Seguro que tus platos,21,están muy ricos.,16,,,0,amigos,fondos
+44,low,Me han devuelto unos,20,gastos que no esperaba.,23,¿Se ha recuperado dinero?,SI,1,libros,gastos
+45,low,Hacen falta unos grados,23,menos de temperatura.,21,¿Hace calor?,SI,1,padres,grados
+46,low,Al empezar el partido,21,las marcas aún se veían.,24,,,0,líneas,marcas
+47,low,Me cansan las bromas de,23,tu amigo.,9,¿Es cansado?,SI,1,calles,bromas
+48,low,Tengo que revisar estas,23,ruedas para la carrera.,23,,,0,clases,ruedas
+49,low,Son preciosas estas,19,piezas de arte.,16,¿Me parecen feas?,NO,1,flores,piezas
+50,low,Si pones tantas pistas,22,será muy fácil.,15,,,0,reglas,pistas
+51,high,En la empresa el nuevo,22,sistema ayudó mucho.,20,¿Fue útil la nueva incorporación?,SI,1,sistema,experto
+52,high,No esperabamos que,18,el partido durara tanto.,24,,,0,partido,pescado
+53,high,Esta mañana fui derecho,23,a trabajar.,11,¿Se paró por el camino?,NO,1,derecho,enfermo
+54,high,Todo equipo debe tener un,25,sentido y un objetivo.,22,,,0,sentido,jugador
+55,high,Vamos a sacar el informe,24,para la reunión.,17,,,0,informe,cristal
+56,high,El niño miraba cómo la,22,familia paseaba.,16,,,0,familia,revista
+57,high,En la subasta la mayoría,24,se vendió rápidamente.,22,¿Se vendió poco?,NO,1,mayoría,pintura
+58,high,Hay una persona que,19,te está buscando.,17,,,0,persona,sección
+59,high,Estoy a una palabra de,22,terminar el crucigrama.,23,¿Le queda poco?,SI,1,palabra,partida
+60,high,Tener buena opinión es,22,fundamental.,12,,,0,opinión,calidad
+61,high,Nadie se esperaba los,21,enlaces de este año.,20,,,0,enlaces,regalos
+62,high,Me encanta observar los,23,árboles cuando paseo.,21,¿Está admirando las flores?,NO,1,dólares,colores
+63,high,En la sala de espera,20,los minutos pasan lento.,24,¿Se hace largo?,SI,1,minutos,rumores
+64,high,Si colaboran todos los,22,pueblos podremos avanzar.,25,,,0,pueblos,equipos
+65,high,En esta comunidad los,21,vecinos se ayudan mucho.,24,,,0,efectos,efectos
+66,high,Confiamos en las fuerzas,24,del estado competentes.,23,,,0,fuerzas,visitas
+67,high,Mientras las semanas,20,pasan se acerca el otoño.,25,,,0,semanas,maletas
+68,high,Hay minerales valiosos,22,en las tierras del sur.,24,,,0,tierras,piedras
+69,high,Con el calor las plantas,24,están secándose.,17,¿Es malo para las plantas?,SI,1,plantas,tierras
+70,high,Esta tarde las puertas de,25,la fábrica abrirán antes.,25,,,0,puertas,tiendas
+71,high,Mañana el ambiente estará,25,fresco.,8,,,0,ambiente,amanecer
+72,high,Tengo que vigilar al,20,objetivo atentamente.,22,,,0,objetivo,fantasma
+73,high,Durante la lectura el,21,escritor parecía animado.,25,¿Carecía de emoción?,NO,1,escritor,tribunal
+74,high,Aunque el artículo era,22,"sencillo, contaba mucho.",24,,,0,artículo,universo
+75,high,Hay que cuidar el,17,carácter cada día.,18,,,0,carácter,lenguaje
+76,high,Cuando la historia iba,22,bien surgía algo nuevo.,23,¿Habrá cambios?,SI,1,historia,criatura
+77,high,Creo que podemos mejorar,24,esta relación hablando.,23,,,0,relación,escalera
+78,high,Se trata de un reflejo de,25,la sociedad decadente.,22,,,0,sociedad,pantalla
+79,high,Podemos alejarnos de la,23,realidad con la fantasía.,25,,,0,realidad,frontera
+80,high,No será libertad hasta,22,que sea de todos.,17,,,0,libertad,molestia
+81,high,Todos los recursos están,24,siendo utilizados ahora.,24,,,0,recursos,abogados
+82,high,Se sospecha que los,19,partidos sean corruptos.,25,,,0,partidos,informes
+83,high,Los diferentes estudios,23,han sido concluyentes.,22,,,0,estudios,sistemas
+84,high,Me gustan los animales,22,muchísimo.,10,¿Le encantan los gatos?,SI,1,animales,consejos
+85,high,Sorprendentemente los,21,hermanos se llevan bien.,24,,,0,hermanos,doctores
+86,high,Esperamos que estas,19,empresas se recuperen.,23,,,0,empresas,ventanas
+87,high,Mientras las acciones,21,"sean buenas, saldrá bien.",25,,,0,acciones,montañas
+88,high,Se pueden ver regiones,22,del norte desde aquí.,22,,,0,regiones,imágenes
+89,high,Hay tantas especies de,22,rana que se desconocen.,23,¿Aún hay ranas por descubrir?,SI,1,especies,tarjetas
+90,high,No podremos terminar,20,las reformas esta semana.,25,¿Van cortos de tiempo?,SI,1,imágenes,galletas
+91,high,Hay suficientes alimentos,25,para todos.,11,,,0,alimentos,corazones
+92,high,Son demasiados los,18,jugadores de este equipo.,25,,,0,jugadores,empleados
+93,high,Este año los servicios,22,se han reducido mucho.,22,,,0,objetivos,impuestos
+94,high,Al parecer no todos los,23,políticos son afables.,22,,,0,políticos,intereses
+95,high,Algunos de los productos,24,salieron defectuosos.,21,¿Salieron todos bien?,NO,1,productos,teléfonos
+96,high,Deja que las canciones,22,suenen un rato más.,19,,,0,canciones,canciones
+97,high,En el libro aparecen las,24,fronteras de cada país.,23,,,0,fronteras,criaturas
+98,high,Podremos ver diferentes,23,funciones esta semana.,22,,,0,funciones,ocasiones
+99,high,El niño fue a por,17,películas al videoclub.,23,¿Fue a por dulces?,NO,1,películas,pastillas
+100,high,Esta semana tengo muchas,24,preguntas en la cabeza.,23,,,0,preguntas,reuniones

@@ -1,18 +1,18 @@
 library(tidyverse)
-library(lme4)
+#library(lme4)
 library(lmerTest)
 library(cmdstanr)
 library(brms)
 library(qs2)
 
 
-target_words_exp2 <- read_csv("LAB-SPAIN/data/target_word_fixation_data.csv") %>%
+target_words_exp2 <- read_csv("LAB-SPAIN/data/target_word_fixation_data_30Hz.csv") %>%
   mutate(Freq = factor(Freq, levels = c("low", "high")),
          Tracker = factor(Tracker, levels = c("Webcam", "Eyelink")),
          item = factor(item),
          sub = factor(sub))
 
-corpus_words_exp2 <- read_csv("LAB-SPAIN/data/all_words_fixation_data.csv") %>%
+corpus_words_exp2 <- read_csv("LAB-SPAIN/data/all_words_fixation_data_30Hz.csv") %>%
   mutate(Tracker = factor(Tracker, levels = c("Eyelink", "Webcam")),
          item = factor(item),
          sub = factor(sub))
@@ -41,7 +41,7 @@ priors_gaussian <- c(set_prior("normal(0,1)", class = "b"))
 priors_beta <- c(set_prior("normal(0,250)", class = "b"),
                  set_prior("normal(0,1)", class = "b", dpar = "beta"))
 
-lmm_target_words_FFD <- lmer(FFD ~ Freq * Tracker + (Tracker  | sub) + (Freq | item),
+lmm_target_words_FFD <- lme4::lmer(FFD ~ Freq * Tracker + (Tracker  | sub) + (Freq | item),
                          data = target_words_exp2)
 
 summary(lmm_target_words_FFD)
@@ -68,7 +68,7 @@ blmm_target_FFD_exp2_gaussian <-
     silent = 0
   )
 
-qs_save(blmm_target_FFD_exp2_gaussian, "LAB-SPAIN/models/brms/blmm_target_FFD_exp2_gaussian.qs")
+qs_save(blmm_target_FFD_exp2_gaussian, "LAB-SPAIN/models/brms/blmm_target_FFD_exp2_gaussian_30Hz.qs")
 
 ## GD
 blmm_target_GD_exp2_gaussian <-
@@ -90,7 +90,7 @@ blmm_target_GD_exp2_gaussian <-
     silent = 0
   )
 
-qs_save(blmm_target_GD_exp2_gaussian, "LAB-SPAIN/models/brms/blmm_target_GD_exp2_gaussian.qs")
+qs_save(blmm_target_GD_exp2_gaussian, "LAB-SPAIN/models/brms/blmm_target_GD_exp2_gaussian_30Hz.qs")
 
 
 blmm_target_SFD_exp2_gaussian <-
@@ -112,7 +112,7 @@ blmm_target_SFD_exp2_gaussian <-
     silent = 0
   )
 
-qs_save(blmm_target_SFD_exp2_gaussian, "LAB-SPAIN/models/brms/blmm_target_SFD_exp2_gaussian.qs")
+qs_save(blmm_target_SFD_exp2_gaussian, "LAB-SPAIN/models/brms/blmm_target_SFD_exp2_gaussian_30Hz.qs")
 
 
 blmm_target_TVT_exp2_gaussian <-
@@ -134,7 +134,7 @@ blmm_target_TVT_exp2_gaussian <-
     silent = 0
   )
 
-qs_save(blmm_target_TVT_exp2_gaussian, "LAB-SPAIN/models/brms/blmm_target_TVT_exp2_gaussian.qs")
+qs_save(blmm_target_TVT_exp2_gaussian, "LAB-SPAIN/models/brms/blmm_target_TVT_exp2_gaussian_30Hz.qs")
 
 
 blmm_target_skip_exp2 <-
@@ -156,7 +156,7 @@ blmm_target_skip_exp2 <-
     silent = 0
   )
 
-qs_save(blmm_target_skip_exp2, "LAB-SPAIN/models/brms/blmm_target_skip_exp2.qs")
+qs_save(blmm_target_skip_exp2, "LAB-SPAIN/models/brms/blmm_target_skip_exp2_30Hz.qs")
 
 
 
@@ -185,7 +185,7 @@ corpus_words_exp2 <- corpus_words_exp2 %>%
 contrasts(corpus_words_exp2$Tracker) <- c(-.5,.5)
 ctr <- function(x) scale(x, scale = FALSE)
 
-lmm_corpus_words_FFD <- lmer(FFD ~ ctr(zipf) * ctr(len) * Tracker + (1 | sub) + (1 | word_code),
+lmm_corpus_words_FFD <- lme4::lmer(FFD ~ ctr(zipf) *  Tracker + (1 | sub) + (1 | word_code),
                              # exclude first and last word in a sentence and fixations < 80 ms and >800 ms
                              data = corpus_words_exp2 %>% filter(position != "first" & position != "last")) #& FFD > 80 & FFD < 800))
 summary(lmm_corpus_words_FFD)
@@ -212,7 +212,9 @@ blmm_corpus_FFD_exp2_gaussian <-
     threads = threading(2),
     silent = 0
   )
-qs_save(blmm_corpus_FFD_exp2_gaussian, "LAB-SPAIN/models/brms/blmm_corpus_FFD_exp2_gaussian.qs") 
+
+qs_save(blmm_corpus_FFD_exp2_gaussian, "LAB-SPAIN/models/brms/blmm_corpus_FFD_exp2_gaussian_30Hz.qs") 
+summary(blmm_corpus_FFD_exp2_gaussian)
 
 # GD
 # gaussian
@@ -236,7 +238,7 @@ blmm_corpus_GD_exp2_gaussian <-
     silent = 0
   )
 
-qs_save(blmm_corpus_GD_exp2_gaussian, "LAB-SPAIN/models/brms/blmm_corpus_GD_exp2_gaussian.qs")
+qs_save(blmm_corpus_GD_exp2_gaussian, "LAB-SPAIN/models/brms/blmm_corpus_GD_exp2_gaussian_30Hz.qs")
 
 # SFD
 # gaussian
@@ -260,7 +262,7 @@ blmm_corpus_SFD_exp2_gaussian <-
     silent = 0
   )
 
-qs_save(blmm_corpus_SFD_exp2_gaussian, "LAB-SPAIN/models/brms/blmm_corpus_SFD_exp2_gaussian.qs")
+qs_save(blmm_corpus_SFD_exp2_gaussian, "LAB-SPAIN/models/brms/blmm_corpus_SFD_exp2_gaussian_30Hz.qs")
 
 # TVT
 # gaussian
@@ -284,7 +286,7 @@ blmm_corpus_TVT_exp2_gaussian <-
     silent = 0
   )
 
-qs_save(blmm_corpus_TVT_exp2_gaussian, "LAB-SPAIN/models/brms/blmm_corpus_TVT_exp2_gaussian.qs")
+qs_save(blmm_corpus_TVT_exp2_gaussian, "LAB-SPAIN/models/brms/blmm_corpus_TVT_exp2_gaussian_30Hz.qs")
 
 
 # Skip:
@@ -307,7 +309,28 @@ blmm_corpus_skip_exp2 <-
     silent = 0
   )
 
-qs_save(blmm_corpus_skip_exp2, "LAB-SPAIN/models/brms/blmm_corpus_skip_exp2.qs")
+qs_save(blmm_corpus_skip_exp2, "LAB-SPAIN/models/brms/blmm_corpus_skip_exp2_30Hz.qs")
+
+
+library(tidyverse)
+compare <- Hz60 %>%
+  select(sub, item, word_num, Tracker,
+         FFD60 = FFD,
+         GD60 = GD,
+         skip60 = skip_first_pass) %>%
+  inner_join(
+    Hz30 %>%
+      select(sub, item, word_num, Tracker,
+             FFD30 = FFD,
+             GD30 = GD,
+             skip30 = skip_first_pass),
+    by = c("sub", "item", "word_num", "Tracker")
+  ) %>%
+  mutate(
+    deltaFFD = FFD30 - FFD60,
+    deltaGD = GD30 - GD60
+  )
+
 
 
 # # same models, but with word length (len) plus interaction with zipf and tracker
