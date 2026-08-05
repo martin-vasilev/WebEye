@@ -60,8 +60,8 @@ power<- NULL
 ##### Simulations:
 
 NSim= 100 # number of simulations per cell 
-nsub = seq(20, 130, 10)  # number of subjects
-nitems = seq(20, 130, 10) 
+nsub = seq(10, 150, 10)  # number of subjects
+nitems = seq(10, 150, 10) 
 data_loss<- 0.1 # percentage of data points to randomly remove
 
 
