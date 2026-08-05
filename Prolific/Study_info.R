@@ -50,6 +50,22 @@ for(i in 1:length(folders)){ # for each subject folder
     info$Pixel_Density_PerMM<- NA
   }
   
+  dist<- which(!is.na(trials$screen_dist))
+  
+  if(length(dist)>0){
+    info$screen_dist<- trials$screen_dist[dist]
+  }else{
+    info$screen_dist<- NA
+  }
+  
+  pixel_density<- which(!is.na(trials$pixel_density))
+  if(length(dist)>0){
+    info$pixel_density<- trials$pixel_density[pixel_density]
+  }else{
+    info$pixel_density<- NA
+  }
+  
+  
   # Sort columns alphabetically
   info <- info[, order(names(info))]
   
@@ -65,7 +81,34 @@ for(i in 1:length(folders)){ # for each subject folder
   
 }
 
+### add visual angle:
+PixelsToAngle <- function(
+    pixel_distance,
+    pixel_density,      # pixels per mm
+    viewing_distance_cm = 60
+){
+  
+  viewing_distance_mm <- viewing_distance_cm * 10
+  
+  angle_deg <- (
+    pixel_distance /
+      (pixel_density * viewing_distance_mm)
+  ) * 57.3
+  
+  return(angle_deg)
+}
+
+# pixels per letter (in Labvanced screen):
+ppl<- 33
+
+# We can get the true letter width by taking the ration of differences between screen size:
+dat$letter_width<- ppl*(dat$Window_Width_In_Pixels/800)
+
+dat$letter_deg<- PixelsToAngle(pixel_density = dat$pixel_density,
+                               pixel_distance = dat$letter_width, viewing_distance_cm = dat$screen_dist)
+
 write.csv(dat, 'Prolific/data/Study_info_data.csv')
+
 
 
 #dat_sorted <- dat[order(dat$Start_Time), ]
