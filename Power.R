@@ -394,3 +394,4 @@ power_plot <- power_plot_data %>%
   )
 
 power_plot
+
